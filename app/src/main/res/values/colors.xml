@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#26418f</color>
     <color name="colorPrimaryLight">#8e99f3</color>
     <color name="colorAccent">#fdd835</color>
+
+    <color name="fbButton">#3B5998</color>
+    <color name="loadingBackground">#CC263238</color>
+    <color name="divider">#FFFFFF</color>
 </resources>
