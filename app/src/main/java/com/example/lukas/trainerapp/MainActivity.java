@@ -6,12 +6,16 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
+import com.example.lukas.trainerapp.db.AppDatabase;
+import com.example.lukas.trainerapp.db.entity.LoginEntity;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -34,6 +38,7 @@ import com.squareup.picasso.Target;
 
 import java.util.Locale;
 
+import androidx.room.Room;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -55,13 +60,18 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.headerBackgroundImage)
     ImageView headerBackgroundImage;
 
+    public static AppDatabase appDatabase;
+    public static final String DB_NAME_LOGIN = "logindb";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, DB_NAME_LOGIN).allowMainThreadQueries().build();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -74,6 +84,11 @@ public class MainActivity extends AppCompatActivity
         if(com.facebook.AccessToken.getCurrentAccessToken() != null)
         {
             Profile currentProfile = Profile.getCurrentProfile();
+            LoginEntity loginEntity = new LoginEntity();
+            loginEntity.setUserId(currentProfile.getId());
+            loginEntity.setFirstName(currentProfile.getFirstName());
+            loginEntity.setLastName(currentProfile.getLastName());
+            appDatabase.loginDao().insert(loginEntity);
             if (currentProfile != null) {
                 displayProfileInfo(currentProfile);
             }
