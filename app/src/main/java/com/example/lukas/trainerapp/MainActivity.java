@@ -4,10 +4,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 
 import com.example.lukas.trainerapp.db.AppDatabase;
-import com.example.lukas.trainerapp.db.entity.LoginEntity;
+import com.example.lukas.trainerapp.db.entity.User;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -15,7 +14,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -84,11 +82,11 @@ public class MainActivity extends AppCompatActivity
         if(com.facebook.AccessToken.getCurrentAccessToken() != null)
         {
             Profile currentProfile = Profile.getCurrentProfile();
-            LoginEntity loginEntity = new LoginEntity();
-            loginEntity.setUserId(currentProfile.getId());
-            loginEntity.setFirstName(currentProfile.getFirstName());
-            loginEntity.setLastName(currentProfile.getLastName());
-            appDatabase.loginDao().insert(loginEntity);
+            User user = new User();
+            user.setUserId(currentProfile.getId());
+            user.setFirstName(currentProfile.getFirstName());
+            user.setLastName(currentProfile.getLastName());
+            appDatabase.userDao().insertUser(user);
             if (currentProfile != null) {
                 displayProfileInfo(currentProfile);
             }
@@ -205,7 +203,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

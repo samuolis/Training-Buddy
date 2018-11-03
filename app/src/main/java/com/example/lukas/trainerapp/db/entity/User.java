@@ -4,8 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "login_entity")
-public class LoginEntity {
+@Entity(tableName = "user")
+public class User {
 
     @PrimaryKey
     private int id;
@@ -18,6 +18,39 @@ public class LoginEntity {
 
     @ColumnInfo(name = "last_name")
     private String lastName;
+
+    @ColumnInfo(name = "access_token")
+    private String accessToken;
+
+    @ColumnInfo(name = "email")
+    private String email;
+
+    @ColumnInfo(name = "phone_number")
+    private String phoneNumber;
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
     public int getId() {
         return id;
