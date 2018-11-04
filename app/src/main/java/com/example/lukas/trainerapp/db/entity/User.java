@@ -1,23 +1,26 @@
 package com.example.lukas.trainerapp.db.entity;
 
+import com.example.lukas.trainerapp.db.DateConverter;
+
+import java.sql.Date;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 @Entity(tableName = "user")
+@TypeConverters(DateConverter.class)
 public class User {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
     @ColumnInfo(name = "user_id")
     private String userId;
 
-    @ColumnInfo(name = "first_name")
-    private String firstName;
-
-    @ColumnInfo(name = "last_name")
-    private String lastName;
+    @ColumnInfo(name = "full_name")
+    private String fullName;
 
     @ColumnInfo(name = "access_token")
     private String accessToken;
@@ -27,6 +30,17 @@ public class User {
 
     @ColumnInfo(name = "phone_number")
     private String phoneNumber;
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @ColumnInfo(name = "created_at")
+    private Date createdAt;
 
     public String getAccessToken() {
         return accessToken;
@@ -68,19 +82,11 @@ public class User {
         this.userId = userId;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

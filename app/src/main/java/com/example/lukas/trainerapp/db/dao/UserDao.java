@@ -20,9 +20,8 @@ public interface UserDao {
     @Query("SELECT * FROM User WHERE id IN (:userIds)")
     List<User> loadAllByIds(int[] userIds);
 
-    @Query("SELECT * FROM User WHERE first_name LIKE :first AND "
-            + "last_name LIKE :last LIMIT 1")
-    User findByName(String first, String last);
+    @Query("SELECT * FROM User WHERE full_name LIKE :fullName LIMIT 1")
+    User findByFullName(String fullName);
 
     @Query("SELECT * FROM User LIMIT 1")
     Flowable<User> getUserById();

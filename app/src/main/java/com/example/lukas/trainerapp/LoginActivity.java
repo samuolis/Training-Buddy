@@ -1,60 +1,78 @@
 package com.example.lukas.trainerapp;
 
-import android.content.Intent;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
+
+import android.view.MenuItem;
 import android.view.Window;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.example.lukas.trainerapp.db.AppDatabase;
+
+import com.example.lukas.trainerapp.fragments.LoginFragment;
+import com.example.lukas.trainerapp.fragments.RegisterFragment;
 import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.accountkit.AccessToken;
-import com.facebook.accountkit.AccountKit;
-import com.facebook.accountkit.AccountKitLoginResult;
-import com.facebook.accountkit.ui.AccountKitActivity;
-import com.facebook.accountkit.ui.AccountKitConfiguration;
-import com.facebook.accountkit.ui.LoginType;
-import com.facebook.login.LoginFragment;
-import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
-
-import java.util.Arrays;
 
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.room.Room;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity{
 
+    private CallbackManager callbackManager;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
-        getSupportActionBar().hide();
+        actionBar = getSupportActionBar();
+        actionBar.hide();
         setContentView(R.layout.activity_login);
+        LoginFragment loginFragment = new LoginFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         // Begin the transaction
         fragmentManager.beginTransaction()
-                .add(R.id.fragment_frame, new LoginFragment())
+                .add(R.id.fragment_frame, loginFragment)
                 .commit();
         // Replace the contents of the container with the new fragment
         //ft.replace(R.id.fragment_frame, new LoginFragment());
     }
 
+    public void GoToRegisterFragment(){
+        RegisterFragment registerFragment = new RegisterFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        actionBar.show();
+        actionBar.setTitle("Fill registration");
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        // Begin the transaction
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_frame, registerFragment)
+                .addToBackStack(null)
+                .commit();
+    }
 
+    public void GoToMainActivity(){
+        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(myIntent);
+        finish();
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                actionBar.hide();
+                getSupportFragmentManager().popBackStack();
+                return true;
+        }
+
+        return false;
+    }
 }
 

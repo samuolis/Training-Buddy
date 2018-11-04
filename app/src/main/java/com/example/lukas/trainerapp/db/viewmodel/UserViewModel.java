@@ -27,7 +27,7 @@ public class UserViewModel extends ViewModel {
                 // for every emission of the user, get the user name
                 .map(user -> {
                     mUser = user;
-                    return user.getFirstName();
+                    return user.getFullName();
                 });
 
     }

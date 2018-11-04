@@ -66,8 +66,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        appDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, DB_NAME_LOGIN).allowMainThreadQueries().build();
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -82,11 +80,6 @@ public class MainActivity extends AppCompatActivity
         if(com.facebook.AccessToken.getCurrentAccessToken() != null)
         {
             Profile currentProfile = Profile.getCurrentProfile();
-            User user = new User();
-            user.setUserId(currentProfile.getId());
-            user.setFirstName(currentProfile.getFirstName());
-            user.setLastName(currentProfile.getLastName());
-            appDatabase.userDao().insertUser(user);
             if (currentProfile != null) {
                 displayProfileInfo(currentProfile);
             }
