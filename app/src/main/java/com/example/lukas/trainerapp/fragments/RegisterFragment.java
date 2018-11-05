@@ -32,6 +32,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.lukas.trainerapp.AppExecutors;
 import com.example.lukas.trainerapp.LoginActivity;
 import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
@@ -47,15 +48,16 @@ import com.facebook.accountkit.PhoneNumber;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 
-public class RegisterFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class RegisterFragment extends Fragment{
 
-    private UserRegisterTask mAuthTask = null;
     private static final int REQUEST_READ_CONTACTS = 0;
 
     // UI references.
@@ -70,6 +72,8 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
     @BindView(R.id.login_progress)
     View mProgressView;
     @BindView(R.id.login_form) View mLoginFormView;
+
+    private AppDatabase mDb;
 
     public RegisterFragment() {
         // Required empty public constructor
@@ -92,6 +96,8 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
             attemptRegister();
         });
 
+        mDb = AppDatabase.getInstance(getContext());
+
         populateAutoComplete();
         fillInformation();
 
@@ -102,8 +108,6 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
         if (!mayRequestContacts()) {
             return;
         }
-
-        getLoaderManager().initLoader(0, null, this);
     }
 
     private void fillInformation(){
@@ -177,9 +181,6 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void attemptRegister() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -216,19 +217,19 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            User user = new User();
-            user.setEmail(email);
-            user.setFullName(fullName);
-            user.setPhoneNumber(phoneNumber);
             String accessToken = getAccessToken();
-            if (accessToken != null)
+            if (accessToken == null)
             {
-                user.setAccessToken(accessToken);
+                accessToken = "";
             }
+            Date currentTime = Calendar.getInstance().getTime();
+            final User user = new User(fullName, email, phoneNumber, accessToken, currentTime);
 
-            showProgress(true);
-            mAuthTask = new UserRegisterTask(user);
-            mAuthTask.execute((Void) null);
+            AppExecutors.getInstance().diskIO().execute(() -> {
+                mDb.userDao().insertUser(user);
+                ((LoginActivity)getActivity()).GoToMainActivity();
+            });
+
         }
     }
 
@@ -279,109 +280,6 @@ public class RegisterFragment extends Fragment implements LoaderManager.LoaderCa
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(getContext(),
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(getContext(),
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
-
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
-
-        private User mUser;
-
-        UserRegisterTask(User user) {
-            mUser = user;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            AppDatabase.getInstance(getContext()).userDao().insertUser(mUser);
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                ((LoginActivity)getActivity()).GoToMainActivity();
-            } else {
-
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
         }
     }
 

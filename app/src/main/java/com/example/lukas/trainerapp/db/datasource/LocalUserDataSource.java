@@ -4,6 +4,7 @@ import com.example.lukas.trainerapp.UserDataSource;
 import com.example.lukas.trainerapp.db.dao.UserDao;
 import com.example.lukas.trainerapp.db.entity.User;
 
+import androidx.lifecycle.LiveData;
 import io.reactivex.Flowable;
 
 public class LocalUserDataSource implements UserDataSource {
@@ -15,8 +16,8 @@ public class LocalUserDataSource implements UserDataSource {
     }
 
     @Override
-    public Flowable<User> getUser() {
-        return mUserDao.getUserById();
+    public LiveData<User> getUser() {
+        return mUserDao.getUser();
     }
 
     @Override

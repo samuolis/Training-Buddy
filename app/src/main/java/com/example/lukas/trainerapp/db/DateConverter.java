@@ -1,6 +1,6 @@
 package com.example.lukas.trainerapp.db;
 
-import java.sql.Date;
+import java.util.Date;
 
 import androidx.room.TypeConverter;
 

@@ -4,6 +4,7 @@ import com.example.lukas.trainerapp.db.entity.User;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -23,8 +24,8 @@ public interface UserDao {
     @Query("SELECT * FROM User WHERE full_name LIKE :fullName LIMIT 1")
     User findByFullName(String fullName);
 
-    @Query("SELECT * FROM User LIMIT 1")
-    Flowable<User> getUserById();
+    @Query("SELECT * FROM User ORDER BY created_at DESC LIMIT 1")
+    LiveData<User> getUser();
 
     @Insert
     void insertAll(User... users);

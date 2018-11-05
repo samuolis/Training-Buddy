@@ -2,10 +2,11 @@ package com.example.lukas.trainerapp.db.entity;
 
 import com.example.lukas.trainerapp.db.DateConverter;
 
-import java.sql.Date;
+import java.util.Date;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -31,6 +32,27 @@ public class User {
     @ColumnInfo(name = "phone_number")
     private String phoneNumber;
 
+    @ColumnInfo(name = "created_at")
+    private Date createdAt;
+
+    @Ignore
+    public User(String fullName, String email, String phoneNumber, String accessToken, Date createdAt) {
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.accessToken = accessToken;
+        this.createdAt = createdAt;
+    }
+
+    public User(int id, String fullName, String email, String phoneNumber, String accessToken, Date createdAt) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.accessToken = accessToken;
+        this.createdAt = createdAt;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -38,9 +60,6 @@ public class User {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-
-    @ColumnInfo(name = "created_at")
-    private Date createdAt;
 
     public String getAccessToken() {
         return accessToken;

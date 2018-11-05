@@ -14,6 +14,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -61,10 +62,15 @@ public class MainActivity extends AppCompatActivity
     public static AppDatabase appDatabase;
     public static final String DB_NAME_LOGIN = "logindb";
 
+    private boolean doubleBackToExitPressedOnce = false;
+
+    private AppDatabase mDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDb = AppDatabase.getInstance(getApplicationContext());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -155,7 +161,17 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (doubleBackToExitPressedOnce) {
+                moveTaskToBack(true);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(() -> doubleBackToExitPressedOnce=false, 2000);
         }
     }
 
@@ -181,9 +197,12 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_logout:
                 AccountKit.logOut();
                 LoginManager.getInstance().logOut();
-                Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(myIntent);
-                finish();
+                AppExecutors.getInstance().diskIO().execute(() -> {
+                    mDb.userDao().deleteAllUsers();
+                    Intent myIntent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(myIntent);
+                    finish();
+                });
         }
 
         return super.onOptionsItemSelected(item);

@@ -4,7 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +19,8 @@ import com.example.lukas.trainerapp.LoginActivity;
 import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
+import com.example.lukas.trainerapp.db.entity.User;
+import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -31,6 +37,10 @@ import com.facebook.login.widget.LoginButton;
 import java.util.Arrays;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.room.Room;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +56,8 @@ public class LoginFragment extends Fragment {
 
     private static final String EMAIL = "email";
 
+    private static final String TAG = LoginFragment.class.getSimpleName();
+
     @BindView(R.id.login_email)
     ConstraintLayout loginViaEmail;
     @BindView(R.id.login_phone) ConstraintLayout loginViaPhone;
@@ -55,6 +67,9 @@ public class LoginFragment extends Fragment {
     ProgressBar mProgressView;
     @BindView(R.id.progress_bar_background) View mProgressBarBackground;
     private CallbackManager callbackManager;
+
+    private UserViewModel userViewModel;
+    private AppDatabase mDb;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -91,17 +106,17 @@ public class LoginFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
+        userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+        mDb = AppDatabase.getInstance(getContext());
+        final LiveData<User> task = mDb.userDao().getUser();
+        task.observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(@Nullable User user) {
+                task.removeObserver(this);
+                launchMainActivity();
+            }
+        });
         ButterKnife.bind(this,rootView);
-        AppDatabase db = Room.databaseBuilder(getActivity(),
-                AppDatabase.class, "user")
-                .fallbackToDestructiveMigration()
-                .build();
-        AccessToken accessToken = AccountKit.getCurrentAccessToken();
-        com.facebook.AccessToken fbToken = com.facebook.AccessToken.getCurrentAccessToken();
-        if (accessToken != null || fbToken !=null){
-            launchMainActivity();
-        }
-
 
         loginViaEmail.setOnClickListener(new View.OnClickListener() {
             @Override

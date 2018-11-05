@@ -1,20 +1,32 @@
 package com.example.lukas.trainerapp.db.viewmodel;
 
+import android.app.Application;
+import android.util.Log;
+
 import com.example.lukas.trainerapp.UserDataSource;
+import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 
-public class UserViewModel extends ViewModel {
+public class UserViewModel extends AndroidViewModel {
 
-    private final UserDataSource mDataSource;
+    //private final UserDataSource mDataSource;
 
-    private User mUser;
+    private static final String TAG = UserViewModel.class.getSimpleName();
 
-    public UserViewModel(UserDataSource dataSource) {
-        mDataSource = dataSource;
+    private LiveData<User> mUser;
+
+    public UserViewModel(@NonNull Application application) {
+        super(application);
+        AppDatabase database = AppDatabase.getInstance(this.getApplication());
+        Log.i(TAG, "getting user in viewmodel");
+        mUser = database.userDao().getUser();
     }
 
     /**
@@ -22,16 +34,9 @@ public class UserViewModel extends ViewModel {
      *
      * @return a {@link Flowable} that will emit every time the user name has been updated.
      */
-    public Flowable<String> getUserName() {
-        return mDataSource.getUser()
-                // for every emission of the user, get the user name
-                .map(user -> {
-                    mUser = user;
-                    return user.getFullName();
-                });
-
+    public LiveData<User> getUser() {
+        return mUser;
     }
-
 
     /**
      * Update the user name.
@@ -39,16 +44,14 @@ public class UserViewModel extends ViewModel {
      * @param user the new user name
      * @return a {@link Completable} that completes when the user name is updated
      */
-    public Completable updateUserName(final User user) {
-        return Completable.fromAction(() -> {
-            // if there's no use, create a new user.
-            // if we already have a user, then, since the user object is immutable,
-            // create a new user, with the id of the previous user and the updated user name.
-            mUser = mUser == null
-                    ? user
-                    : new User();
-
-            mDataSource.insertOrUpdateUser(mUser);
-        });
-    }
+//    public Completable updateUserName(final User user) {
+//        return Completable.fromAction(() -> {
+//            // if there's no use, create a new user.
+//            // if we already have a user, then, since the user object is immutable,
+//            // create a new user, with the id of the previous user and the updated user name.
+//            mUser = user;
+//
+//            mDataSource.insertOrUpdateUser(mUser);
+//        });
+//    }
 }
