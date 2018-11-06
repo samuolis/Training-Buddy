@@ -27,6 +27,9 @@ public interface UserDao {
     @Query("SELECT * FROM User ORDER BY created_at DESC LIMIT 1")
     LiveData<User> getUser();
 
+    @Query("SELECT * FROM User ORDER BY created_at DESC LIMIT 1")
+    User getSimpleUser();
+
     @Insert
     void insertAll(User... users);
 

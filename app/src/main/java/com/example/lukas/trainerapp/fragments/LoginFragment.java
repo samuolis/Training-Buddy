@@ -1,11 +1,8 @@
 package com.example.lukas.trainerapp.fragments;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -15,17 +12,18 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.lukas.trainerapp.AppExecutors;
 import com.example.lukas.trainerapp.LoginActivity;
 import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
+import com.example.lukas.trainerapp.model.Authorization;
+import com.example.lukas.trainerapp.server.service.UserWebService;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.accountkit.AccessToken;
-import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
@@ -33,17 +31,20 @@ import com.facebook.accountkit.ui.LoginType;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.Arrays;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.room.Room;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class LoginFragment extends Fragment {
@@ -108,11 +109,9 @@ public class LoginFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
         userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
         mDb = AppDatabase.getInstance(getContext());
-        final LiveData<User> task = mDb.userDao().getUser();
-        task.observe(this, new Observer<User>() {
-            @Override
-            public void onChanged(@Nullable User user) {
-                task.removeObserver(this);
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            User user = mDb.userDao().getSimpleUser();
+            if (user != null){
                 launchMainActivity();
             }
         });
@@ -153,16 +152,21 @@ public class LoginFragment extends Fragment {
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == APP_REQUEST_CODE){
-            AccountKitLoginResult loginResult = data.getParcelableExtra(AccountKitLoginResult.RESULT_KEY);
+            AccountKitLoginResult loginResult = data.getParcelableExtra(
+                    AccountKitLoginResult.RESULT_KEY);
+            String toastMessage;
             if (loginResult.getError() != null){
-                String toastMessage = loginResult.getError().getErrorType().getMessage();
+                toastMessage= loginResult.getError().getErrorType().getMessage();
                 Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
-            }else if (loginResult.getAccessToken() != null){
-                launchRegisterFragment();
+            }else if (loginResult.wasCancelled()) {
+                toastMessage = "Login Canceled";
+                Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
+            }else {
+                String authCode = loginResult.getAuthorizationCode();
+                executeLogin(authCode);
             }
+
         }
         if (resultCode == 0) {
             hideProgressBar();
@@ -185,11 +189,49 @@ public class LoginFragment extends Fragment {
         AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
                 new AccountKitConfiguration.AccountKitConfigurationBuilder(
                         loginType,
-                        AccountKitActivity.ResponseType.TOKEN);
+                        AccountKitActivity.ResponseType.CODE);
         final AccountKitConfiguration configuration = configurationBuilder.build();
         intent.putExtra(AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION, configuration);
         startActivityForResult(intent,APP_REQUEST_CODE);
 
+    }
+
+    public void executeLogin(String authCode) {
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(userViewModel.getBaseUrl())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        Authorization authorization;
+
+        UserWebService userWebService = retrofit.create(UserWebService.class);
+        userWebService = retrofit.create(UserWebService.class);
+        userWebService.getUser(authCode).enqueue(new Callback<Authorization>() {
+            @Override
+            public void onResponse(Call<Authorization> call, Response<Authorization> response) {
+                userViewModel.setmAuthorization(response.body());
+                if(response.isSuccessful()) {
+                    if (response.body().accessToken != null) {
+                        launchRegisterFragment();
+                    }
+                } else{
+                    hideProgressBar();
+                    Log.i(TAG, "Error code : " + response.code());
+                    Log.i(TAG, "body : " +response.message());
+                    Toast.makeText(getActivity(),response.message(), Toast.LENGTH_LONG).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Authorization> call, Throwable t) {
+                hideProgressBar();
+                Toast.makeText(getActivity(),t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void onPhoneLogin(){

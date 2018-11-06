@@ -6,6 +6,10 @@ import android.util.Log;
 import com.example.lukas.trainerapp.UserDataSource;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
+import com.example.lukas.trainerapp.model.Authorization;
+import com.example.lukas.trainerapp.server.service.UserWebService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -13,6 +17,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserViewModel extends AndroidViewModel {
 
@@ -21,6 +30,11 @@ public class UserViewModel extends AndroidViewModel {
     private static final String TAG = UserViewModel.class.getSimpleName();
 
     private LiveData<User> mUser;
+
+    private Authorization mAuthorization;
+
+    private static final String BASE_URL = "https://trainingbuddy-221215.appspot.com/";
+
 
     public UserViewModel(@NonNull Application application) {
         super(application);
@@ -38,20 +52,15 @@ public class UserViewModel extends AndroidViewModel {
         return mUser;
     }
 
-    /**
-     * Update the user name.
-     *
-     * @param user the new user name
-     * @return a {@link Completable} that completes when the user name is updated
-     */
-//    public Completable updateUserName(final User user) {
-//        return Completable.fromAction(() -> {
-//            // if there's no use, create a new user.
-//            // if we already have a user, then, since the user object is immutable,
-//            // create a new user, with the id of the previous user and the updated user name.
-//            mUser = user;
-//
-//            mDataSource.insertOrUpdateUser(mUser);
-//        });
-//    }
+    public Authorization getmAuthorization() {
+        return mAuthorization;
+    }
+
+    public void setmAuthorization(Authorization mAuthorization) {
+        this.mAuthorization = mAuthorization;
+    }
+
+    public String getBaseUrl() {
+        return BASE_URL;
+    }
 }
