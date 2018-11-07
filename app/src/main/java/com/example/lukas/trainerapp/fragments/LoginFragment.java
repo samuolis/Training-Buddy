@@ -20,6 +20,7 @@ import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.Authorization;
+import com.example.lukas.trainerapp.model.UserData;
 import com.example.lukas.trainerapp.server.service.UserWebService;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -207,16 +208,13 @@ public class LoginFragment extends Fragment {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        Authorization authorization;
-
         UserWebService userWebService = retrofit.create(UserWebService.class);
-        userWebService = retrofit.create(UserWebService.class);
-        userWebService.getUser(authCode).enqueue(new Callback<Authorization>() {
+        userWebService.getUser(authCode).enqueue(new Callback<UserData>() {
             @Override
-            public void onResponse(Call<Authorization> call, Response<Authorization> response) {
-                userViewModel.setmAuthorization(response.body());
+            public void onResponse(Call<UserData> call, Response<UserData> response) {
+                userViewModel.setmUserData(response.body());
                 if(response.isSuccessful()) {
-                    if (response.body().accessToken != null) {
+                    if (response.body() != null) {
                         launchRegisterFragment();
                     }
                 } else{
@@ -227,7 +225,7 @@ public class LoginFragment extends Fragment {
                 }
             }
             @Override
-            public void onFailure(Call<Authorization> call, Throwable t) {
+            public void onFailure(Call<UserData> call, Throwable t) {
                 hideProgressBar();
                 Toast.makeText(getActivity(),t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             }

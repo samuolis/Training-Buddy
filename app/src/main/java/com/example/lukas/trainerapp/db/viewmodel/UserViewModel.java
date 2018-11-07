@@ -7,6 +7,7 @@ import com.example.lukas.trainerapp.UserDataSource;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.model.Authorization;
+import com.example.lukas.trainerapp.model.UserData;
 import com.example.lukas.trainerapp.server.service.UserWebService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +32,7 @@ public class UserViewModel extends AndroidViewModel {
 
     private LiveData<User> mUser;
 
-    private Authorization mAuthorization;
+    private UserData mUserData;
 
     private static final String BASE_URL = "https://trainingbuddy-221215.appspot.com/";
 
@@ -52,12 +53,12 @@ public class UserViewModel extends AndroidViewModel {
         return mUser;
     }
 
-    public Authorization getmAuthorization() {
-        return mAuthorization;
+    public UserData getmUserData() {
+        return mUserData;
     }
 
-    public void setmAuthorization(Authorization mAuthorization) {
-        this.mAuthorization = mAuthorization;
+    public void setmUserData(UserData mUserData) {
+        this.mUserData = mUserData;
     }
 
     public String getBaseUrl() {

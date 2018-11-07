@@ -2,6 +2,7 @@ package com.example.lukas.trainerapp.server.service;
 
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.model.Authorization;
+import com.example.lukas.trainerapp.model.UserData;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -14,5 +15,5 @@ public interface UserWebService {
      * replacement for the {user} placeholder in the @GET path
      */
     @GET("/user")
-    Call<Authorization> getUser(@Header("authorization-code") String authorizationCode);
+    Call<UserData> getUser(@Header("authorization-code") String authorizationCode);
 }
