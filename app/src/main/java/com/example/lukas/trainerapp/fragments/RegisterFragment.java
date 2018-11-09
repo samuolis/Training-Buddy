@@ -15,6 +15,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
@@ -38,6 +39,8 @@ import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
+import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
+import com.example.lukas.trainerapp.model.UserData;
 import com.facebook.Profile;
 import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.Account;
@@ -74,6 +77,7 @@ public class RegisterFragment extends Fragment{
     @BindView(R.id.login_form) View mLoginFormView;
 
     private AppDatabase mDb;
+    private UserViewModel userViewModel;
 
     public RegisterFragment() {
         // Required empty public constructor
@@ -91,7 +95,7 @@ public class RegisterFragment extends Fragment{
         // Inflate the layout for this fragment
         View rootView =  inflater.inflate(R.layout.fragment_register, container, false);
         ButterKnife.bind(this,rootView);
-
+        userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
         mRegisterButton.setOnClickListener((View v) -> {
             attemptRegister();
         });
@@ -120,28 +124,15 @@ public class RegisterFragment extends Fragment{
             }
         }
         else {
-            AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
-                @Override
-                public void onSuccess(final Account account) {
-
-                    PhoneNumber phoneNumber = account.getPhoneNumber();
-                    if (account.getPhoneNumber() != null) {
-                        mPhoneNumberEditText.setText(phoneNumber.toString());
-                    } else {
-                        // if the email address is available, display it
-                        String emailString = account.getEmail();
-                        mEmailView.setText(emailString);
-                    }
-
-                }
-
-                @Override
-                public void onError(final AccountKitError error) {
-                    // display error
-                    String toastMessage = error.getErrorType().getMessage();
-                    Toast.makeText(getContext(), toastMessage, Toast.LENGTH_LONG).show();
-                }
-            });
+            UserData userData = userViewModel.getmUserData();
+            if (userData.getPhone() != null) {
+                String phoneNumber = userViewModel.getmUserData().getPhone().getNumber();
+                mPhoneNumberEditText.setText(phoneNumber);
+            }
+            if (userData.getEmail() != null) {
+                String emailString = userViewModel.getmUserData().getEmail().getAddress();
+                mEmailView.setText(emailString);
+            }
         }
     }
 

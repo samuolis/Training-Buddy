@@ -2,7 +2,7 @@ package com.example.lukas.trainerapp.model;
 
 public class Email {
 
-    public String address;
+    private String address;
 
     public String getAddress() {
         return address;

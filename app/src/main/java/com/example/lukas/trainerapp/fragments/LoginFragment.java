@@ -108,7 +108,7 @@ public class LoginFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
-        userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+        userViewModel = ViewModelProviders.of(getActivity()).get(UserViewModel.class);
         mDb = AppDatabase.getInstance(getContext());
         AppExecutors.getInstance().diskIO().execute(() -> {
             User user = mDb.userDao().getSimpleUser();
@@ -209,6 +209,7 @@ public class LoginFragment extends Fragment {
                 .build();
 
         UserWebService userWebService = retrofit.create(UserWebService.class);
+        userViewModel.init();
         userWebService.getUser(authCode).enqueue(new Callback<UserData>() {
             @Override
             public void onResponse(Call<UserData> call, Response<UserData> response) {

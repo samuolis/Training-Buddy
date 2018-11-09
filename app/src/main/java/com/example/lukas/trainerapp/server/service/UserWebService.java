@@ -14,6 +14,6 @@ public interface UserWebService {
      * @Path("user") annotation on the userId parameter marks it as a
      * replacement for the {user} placeholder in the @GET path
      */
-    @GET("/user")
+    @GET("/users")
     Call<UserData> getUser(@Header("authorization-code") String authorizationCode);
 }

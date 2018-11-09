@@ -10,11 +10,13 @@ import android.view.MenuItem;
 import android.view.Window;
 
 
+import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.fragments.LoginFragment;
 import com.example.lukas.trainerapp.fragments.RegisterFragment;
 import com.facebook.CallbackManager;
 
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProviders;
 
 /**
  * A login screen that offers login via email/password.
@@ -23,6 +25,7 @@ public class LoginActivity extends AppCompatActivity{
 
     private CallbackManager callbackManager;
     private ActionBar actionBar;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class LoginActivity extends AppCompatActivity{
         actionBar = getSupportActionBar();
         actionBar.hide();
         setContentView(R.layout.activity_login);
+        userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
+        userViewModel.init();
         LoginFragment loginFragment = new LoginFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         // Begin the transaction

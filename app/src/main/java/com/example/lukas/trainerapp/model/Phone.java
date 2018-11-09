@@ -4,12 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 public class Phone {
 
-    public String number;
+    private String number;
 
-    public String prefix;
+    private String prefix;
 
     @SerializedName("national_name")
-    public String nationalNumber;
+    private String nationalNumber;
 
     public String getNumber() {
         return number;

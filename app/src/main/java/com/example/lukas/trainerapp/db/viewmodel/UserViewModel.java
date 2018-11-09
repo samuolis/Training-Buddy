@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -26,13 +27,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserViewModel extends AndroidViewModel {
 
-    //private final UserDataSource mDataSource;
 
     private static final String TAG = UserViewModel.class.getSimpleName();
 
     private LiveData<User> mUser;
 
-    private UserData mUserData;
+    private MutableLiveData<UserData> mUserData;
 
     private static final String BASE_URL = "https://trainingbuddy-221215.appspot.com/";
 
@@ -54,14 +54,18 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     public UserData getmUserData() {
-        return mUserData;
+        return mUserData.getValue();
     }
 
     public void setmUserData(UserData mUserData) {
-        this.mUserData = mUserData;
+        this.mUserData.setValue(mUserData);
     }
 
     public String getBaseUrl() {
         return BASE_URL;
+    }
+
+    public void init() {
+        mUserData = new MutableLiveData<UserData>();
     }
 }
