@@ -1,1 +1,1 @@
-# trainerApp
+# Training buddy
