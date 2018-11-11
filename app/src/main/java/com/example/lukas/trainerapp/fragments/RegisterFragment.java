@@ -3,12 +3,7 @@ package com.example.lukas.trainerapp.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,18 +11,18 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.CursorLoader;
-import androidx.loader.content.Loader;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,25 +30,21 @@ import android.widget.Toast;
 
 import com.example.lukas.trainerapp.AppExecutors;
 import com.example.lukas.trainerapp.LoginActivity;
-import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
+import com.example.lukas.trainerapp.server.service.UserWebService;
 import com.facebook.Profile;
 import com.facebook.accountkit.AccessToken;
-import com.facebook.accountkit.Account;
 import com.facebook.accountkit.AccountKit;
-import com.facebook.accountkit.AccountKitCallback;
-import com.facebook.accountkit.AccountKitError;
-import com.facebook.accountkit.PhoneNumber;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
@@ -179,7 +170,7 @@ public class RegisterFragment extends Fragment{
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String phoneNumber = mPhoneNumberEditText.getText().toString();
-        String fullName = mPhoneNumberEditText.getText().toString();
+        String fullName = mFullNameEditText.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -214,11 +205,33 @@ public class RegisterFragment extends Fragment{
                 accessToken = "";
             }
             Date currentTime = Calendar.getInstance().getTime();
-            final User user = new User(fullName, email, phoneNumber, accessToken, currentTime);
+            Long userId = userViewModel.getmUserData().getId();
+            final User user = new User(userId.toString(), fullName, email, phoneNumber, currentTime);
 
-            AppExecutors.getInstance().diskIO().execute(() -> {
-                mDb.userDao().insertUser(user);
-                ((LoginActivity)getActivity()).GoToMainActivity();
+            Gson gson = new GsonBuilder()
+                    .setLenient()
+                    .create();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(userViewModel.getBaseUrl())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
+
+            UserWebService userWebService = retrofit.create(UserWebService.class);
+
+            userWebService.postUser(user).enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    AppExecutors.getInstance().diskIO().execute(() -> {
+                        mDb.userDao().insertUser(response.body());
+                        ((LoginActivity)getActivity()).GoToNavigationActivity();
+                    });
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    Toast.makeText(getActivity(),t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
             });
 
         }
@@ -231,7 +244,7 @@ public class RegisterFragment extends Fragment{
             return accessToken.toString();
         } else if (fbToken != null){
             return fbToken.toString();
-        }else {
+        } else {
             return null;
         }
     }

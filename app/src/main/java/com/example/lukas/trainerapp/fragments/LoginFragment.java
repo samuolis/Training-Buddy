@@ -14,12 +14,10 @@ import android.widget.Toast;
 
 import com.example.lukas.trainerapp.AppExecutors;
 import com.example.lukas.trainerapp.LoginActivity;
-import com.example.lukas.trainerapp.MainActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
-import com.example.lukas.trainerapp.model.Authorization;
 import com.example.lukas.trainerapp.model.UserData;
 import com.example.lukas.trainerapp.server.service.UserWebService;
 import com.facebook.CallbackManager;
@@ -31,11 +29,8 @@ import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import java.util.Arrays;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProviders;
@@ -63,8 +58,8 @@ public class LoginFragment extends Fragment {
     @BindView(R.id.login_email)
     ConstraintLayout loginViaEmail;
     @BindView(R.id.login_phone) ConstraintLayout loginViaPhone;
-    @BindView(R.id.facebook_login_button)
-    LoginButton facebookLoginButton;
+//    @BindView(R.id.facebook_login_button)
+//    LoginButton facebookLoginButton;
     @BindView(R.id.login_progress)
     ProgressBar mProgressView;
     @BindView(R.id.progress_bar_background) View mProgressBarBackground;
@@ -72,6 +67,7 @@ public class LoginFragment extends Fragment {
 
     private UserViewModel userViewModel;
     private AppDatabase mDb;
+    private UserWebService userWebService;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -113,7 +109,7 @@ public class LoginFragment extends Fragment {
         AppExecutors.getInstance().diskIO().execute(() -> {
             User user = mDb.userDao().getSimpleUser();
             if (user != null){
-                launchMainActivity();
+                ((LoginActivity)getActivity()).GoToNavigationActivity();
             }
         });
         ButterKnife.bind(this,rootView);
@@ -134,16 +130,12 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        facebookLoginButton.setFragment(this);
-        facebookLoginButton.setReadPermissions(Arrays.asList(EMAIL));
-        // If you are using in a fragment, call loginButton.setFragment(this);
-
-        facebookLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mProgressBarBackground.setVisibility(View.VISIBLE);
-            }
-        });
+//        facebookLoginButton.setFragment(this);
+//        facebookLoginButton.setReadPermissions(Arrays.asList(EMAIL));
+//        // If you are using in a fragment, call loginButton.setFragment(this);
+//
+//        facebookLoginButton.setOnClickListener(view ->
+//                mProgressBarBackground.setVisibility(View.VISIBLE));
 
 
         return rootView;
@@ -152,31 +144,25 @@ public class LoginFragment extends Fragment {
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == APP_REQUEST_CODE){
+        if (requestCode == APP_REQUEST_CODE) {
             AccountKitLoginResult loginResult = data.getParcelableExtra(
                     AccountKitLoginResult.RESULT_KEY);
             String toastMessage;
-            if (loginResult.getError() != null){
-                toastMessage= loginResult.getError().getErrorType().getMessage();
+            if (loginResult.getError() != null) {
+                toastMessage = loginResult.getError().getErrorType().getMessage();
                 Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
-            }else if (loginResult.wasCancelled()) {
+            } else if (loginResult.wasCancelled()) {
                 toastMessage = "Login Canceled";
                 Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
-            }else {
+            } else {
                 String authCode = loginResult.getAuthorizationCode();
                 executeLogin(authCode);
             }
-
-        }
-        if (resultCode == 0) {
+        }else{
             hideProgressBar();
         }
-    }
-
-    private void launchMainActivity(){
-        Intent myIntent = new Intent(getActivity(), MainActivity.class);
-        startActivity(myIntent);
     }
 
     private void launchRegisterFragment(){
@@ -208,21 +194,26 @@ public class LoginFragment extends Fragment {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        UserWebService userWebService = retrofit.create(UserWebService.class);
+        userWebService = retrofit.create(UserWebService.class);
         userViewModel.init();
+        String userId;
         userWebService.getUser(authCode).enqueue(new Callback<UserData>() {
             @Override
             public void onResponse(Call<UserData> call, Response<UserData> response) {
-                userViewModel.setmUserData(response.body());
                 if(response.isSuccessful()) {
                     if (response.body() != null) {
-                        launchRegisterFragment();
+                        userViewModel.setmUserData(response.body());
+                        getUser(Long.toString(userViewModel.getmUserData().getId()));
+                    } else {
+                        hideProgressBar();
+                        return;
                     }
                 } else{
                     hideProgressBar();
                     Log.i(TAG, "Error code : " + response.code());
                     Log.i(TAG, "body : " +response.message());
                     Toast.makeText(getActivity(),response.message(), Toast.LENGTH_LONG).show();
+                    return;
                 }
             }
             @Override
@@ -233,6 +224,24 @@ public class LoginFragment extends Fragment {
         });
     }
 
+    public void getUser(String userId){
+        userWebService.getExistantUser(userId)
+                .enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, Response<User> response) {
+                        AppExecutors.getInstance().diskIO().execute(() -> {
+                            mDb.userDao().insertUser(response.body());
+                            ((LoginActivity)getActivity()).GoToNavigationActivity();
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        ((LoginActivity)getActivity()).GoToRegisterFragment();
+                    }
+                });
+    }
+
     public void onPhoneLogin(){
         onLogin(LoginType.PHONE);
     }
@@ -240,7 +249,6 @@ public class LoginFragment extends Fragment {
     public void onEmailLogin(){
         onLogin(LoginType.EMAIL);
     }
-
 
     private void showProgressBar()
     {

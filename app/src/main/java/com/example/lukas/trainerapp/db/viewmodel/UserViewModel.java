@@ -34,7 +34,7 @@ public class UserViewModel extends AndroidViewModel {
 
     private MutableLiveData<UserData> mUserData;
 
-    private static final String BASE_URL = "https://trainingbuddy-221215.appspot.com/";
+    private static final String BASE_URL = "https://training-222106.appspot.com/";
 
 
     public UserViewModel(@NonNull Application application) {
@@ -44,11 +44,6 @@ public class UserViewModel extends AndroidViewModel {
         mUser = database.userDao().getUser();
     }
 
-    /**
-     * Get the user name of the user.
-     *
-     * @return a {@link Flowable} that will emit every time the user name has been updated.
-     */
     public LiveData<User> getUser() {
         return mUser;
     }

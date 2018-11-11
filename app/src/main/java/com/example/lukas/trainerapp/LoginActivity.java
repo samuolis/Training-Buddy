@@ -14,6 +14,7 @@ import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.fragments.LoginFragment;
 import com.example.lukas.trainerapp.fragments.RegisterFragment;
 import com.facebook.CallbackManager;
+import com.facebook.login.LoginManager;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
@@ -32,7 +33,8 @@ public class LoginActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         actionBar = getSupportActionBar();
-        actionBar.hide();
+        actionBar.setTitle(R.string.app_name);
+//        actionBar.hide();
         setContentView(R.layout.activity_login);
         userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
         userViewModel.init();
@@ -59,21 +61,20 @@ public class LoginActivity extends AppCompatActivity{
                 .commit();
     }
 
-    public void GoToMainActivity(){
-        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+    public void GoToNavigationActivity(){
+        Intent myIntent = new Intent(LoginActivity.this, NavigationActivity.class);
         startActivity(myIntent);
         finish();
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                actionBar.hide();
+//                actionBar.hide();
                 getSupportFragmentManager().popBackStack();
+                LoginManager.getInstance().logOut();
                 return true;
         }
 

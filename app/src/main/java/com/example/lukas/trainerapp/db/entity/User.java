@@ -1,6 +1,7 @@
 package com.example.lukas.trainerapp.db.entity;
 
 import com.example.lukas.trainerapp.db.DateConverter;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
@@ -15,41 +16,42 @@ import androidx.room.TypeConverters;
 public class User {
 
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
 
-    @ColumnInfo(name = "user_id")
+    @SerializedName("userId")
+    @ColumnInfo(name = "userId")
     private String userId;
 
-    @ColumnInfo(name = "full_name")
+    @SerializedName("fullName")
+    @ColumnInfo(name = "fullName")
     private String fullName;
 
-    @ColumnInfo(name = "access_token")
-    private String accessToken;
-
+    @SerializedName("email")
     @ColumnInfo(name = "email")
     private String email;
 
-    @ColumnInfo(name = "phone_number")
+    @SerializedName("phoneNumber")
+    @ColumnInfo(name = "phoneNumber")
     private String phoneNumber;
 
-    @ColumnInfo(name = "created_at")
+    @SerializedName("createdOn")
+    @ColumnInfo(name = "createdAt")
     private Date createdAt;
 
     @Ignore
-    public User(String fullName, String email, String phoneNumber, String accessToken, Date createdAt) {
+    public User(String userId, String fullName, String email, String phoneNumber, Date createdAt) {
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.accessToken = accessToken;
+        this.userId = userId;
         this.createdAt = createdAt;
     }
 
-    public User(int id, String fullName, String email, String phoneNumber, String accessToken, Date createdAt) {
+    public User(long id, String fullName, String email, String phoneNumber, Date createdAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.accessToken = accessToken;
         this.createdAt = createdAt;
     }
 
@@ -59,14 +61,6 @@ public class User {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
     }
 
     public String getEmail() {
@@ -85,11 +79,11 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

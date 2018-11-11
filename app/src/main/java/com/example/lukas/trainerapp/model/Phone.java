@@ -8,7 +8,7 @@ public class Phone {
 
     private String prefix;
 
-    @SerializedName("national_name")
+    @SerializedName("nationalNumber")
     private String nationalNumber;
 
     public String getNumber() {

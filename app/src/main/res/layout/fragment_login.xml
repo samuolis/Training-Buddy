@@ -114,22 +114,22 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider" />
+        <!--<View-->
+            <!--android:id="@+id/divider2"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="1dp"-->
+            <!--android:background="@color/divider" />-->
 
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/facebook_login_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@color/fbButton"
-            android:paddingBottom="24dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="10dp"
-            android:paddingTop="24dp" />
+        <!--<com.facebook.login.widget.LoginButton-->
+            <!--android:id="@+id/facebook_login_button"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:background="@color/fbButton"-->
+            <!--android:paddingBottom="24dp"-->
+            <!--android:paddingLeft="12dp"-->
+            <!--android:paddingRight="10dp"-->
+            <!--android:paddingTop="24dp" />-->
     </LinearLayout>
 
     <View

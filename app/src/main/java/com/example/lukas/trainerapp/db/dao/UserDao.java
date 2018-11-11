@@ -18,16 +18,16 @@ public interface UserDao {
     @Query("SELECT * FROM User")
     List<User> getAll();
 
-    @Query("SELECT * FROM User WHERE id IN (:userIds)")
-    List<User> loadAllByIds(int[] userIds);
+    @Query("SELECT * FROM User WHERE userId IN (:userIds)")
+    List<User> loadAllByIds(long[] userIds);
 
-    @Query("SELECT * FROM User WHERE full_name LIKE :fullName LIMIT 1")
+    @Query("SELECT * FROM User WHERE fullName LIKE :fullName LIMIT 1")
     User findByFullName(String fullName);
 
-    @Query("SELECT * FROM User ORDER BY created_at DESC LIMIT 1")
+    @Query("SELECT * FROM User ORDER BY createdAt DESC LIMIT 1")
     LiveData<User> getUser();
 
-    @Query("SELECT * FROM User ORDER BY created_at DESC LIMIT 1")
+    @Query("SELECT * FROM User ORDER BY createdAt DESC LIMIT 1")
     User getSimpleUser();
 
     @Insert
