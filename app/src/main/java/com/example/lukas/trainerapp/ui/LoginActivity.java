@@ -1,4 +1,4 @@
-package com.example.lukas.trainerapp;
+package com.example.lukas.trainerapp.ui;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,11 +10,11 @@ import android.view.MenuItem;
 import android.view.Window;
 
 
+import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
-import com.example.lukas.trainerapp.fragments.LoginFragment;
-import com.example.lukas.trainerapp.fragments.RegisterFragment;
+import com.example.lukas.trainerapp.ui.fragments.LoginFragment;
+import com.example.lukas.trainerapp.ui.fragments.RegisterFragment;
 import com.facebook.CallbackManager;
-import com.facebook.login.LoginManager;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
@@ -34,7 +34,6 @@ public class LoginActivity extends AppCompatActivity{
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.app_name);
-//        actionBar.hide();
         setContentView(R.layout.activity_login);
         userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
         userViewModel.init();
@@ -72,9 +71,7 @@ public class LoginActivity extends AppCompatActivity{
 
         switch (item.getItemId()) {
             case android.R.id.home:
-//                actionBar.hide();
                 getSupportFragmentManager().popBackStack();
-                LoginManager.getInstance().logOut();
                 return true;
         }
 

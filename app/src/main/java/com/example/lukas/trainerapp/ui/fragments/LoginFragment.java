@@ -1,4 +1,4 @@
-package com.example.lukas.trainerapp.fragments;
+package com.example.lukas.trainerapp.ui.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.lukas.trainerapp.AppExecutors;
-import com.example.lukas.trainerapp.LoginActivity;
+import com.example.lukas.trainerapp.ui.LoginActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
@@ -152,9 +152,11 @@ public class LoginFragment extends Fragment {
             String toastMessage;
             if (loginResult.getError() != null) {
                 toastMessage = loginResult.getError().getErrorType().getMessage();
+                hideProgressBar();
                 Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
             } else if (loginResult.wasCancelled()) {
                 toastMessage = "Login Canceled";
+                hideProgressBar();
                 Toast.makeText(getActivity(), toastMessage, Toast.LENGTH_LONG).show();
             } else {
                 String authCode = loginResult.getAuthorizationCode();
@@ -229,10 +231,14 @@ public class LoginFragment extends Fragment {
                 .enqueue(new Callback<User>() {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
-                        AppExecutors.getInstance().diskIO().execute(() -> {
-                            mDb.userDao().insertUser(response.body());
-                            ((LoginActivity)getActivity()).GoToNavigationActivity();
-                        });
+                        if(response.isSuccessful()) {
+                            AppExecutors.getInstance().diskIO().execute(() -> {
+                                mDb.userDao().insertUser(response.body());
+                                ((LoginActivity)getActivity()).GoToNavigationActivity();
+                            });
+                        } else {
+                            ((LoginActivity)getActivity()).GoToRegisterFragment();
+                        }
                     }
 
                     @Override

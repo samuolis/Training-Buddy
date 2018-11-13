@@ -1,4 +1,4 @@
-package com.example.lukas.trainerapp.fragments;
+package com.example.lukas.trainerapp.ui.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -29,7 +29,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.lukas.trainerapp.AppExecutors;
-import com.example.lukas.trainerapp.LoginActivity;
+import com.example.lukas.trainerapp.ui.LoginActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;

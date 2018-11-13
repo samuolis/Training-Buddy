@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Training buddy</string>
+    <string name="app_name">Training Buddy</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -42,5 +42,6 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_profile">Profile</string>
 
 </resources>
