@@ -13,8 +13,8 @@ import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.utils.DrawableUtils
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 
@@ -29,6 +29,7 @@ class ProfileFragment : Fragment() {
     lateinit var bitmap : Bitmap
     private val r = Rect()
     lateinit var userViewModel : UserViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,25 +50,23 @@ class ProfileFragment : Fragment() {
 
     private fun setupInfo(){
         userViewModel.user.observe(this, Observer { user: User ->
-            if (user.imageArray == null){
+            if (user.profilePictureIndex == null){
                 DrawableUtils.setupInitials(initials_image_view, user)
             } else{
-                var imageArray = user.imageArray
-                var gotBitmap = DrawableUtils.convertByteToBitmap(imageArray)
-                initials_image_view.setImageBitmap(gotBitmap)
+                initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
             }
             user_full_name_text_view.text = user.fullName
             user_email_text_view.text = user.email
             user_phone_number_text_view.text = user.phoneNumber
         })
         user_full_name_text_view.setOnClickListener({
-            (activity as NavigationActivity).showDialog()
+            (activity as NavigationActivity).showAccountEditDialogFragment()
         })
         user_email_text_view.setOnClickListener({
-            (activity as NavigationActivity).showDialog()
+            (activity as NavigationActivity).showAccountEditDialogFragment()
         })
         user_phone_number_text_view.setOnClickListener({
-            (activity as NavigationActivity).showDialog()
+            (activity as NavigationActivity).showAccountEditDialogFragment()
         })
 
     }

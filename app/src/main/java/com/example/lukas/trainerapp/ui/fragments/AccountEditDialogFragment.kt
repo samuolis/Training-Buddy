@@ -24,6 +24,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.db.AppDatabase
+import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.server.service.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.utils.DrawableUtils
@@ -47,6 +48,8 @@ class AccountEditDialogFragment : DialogFragment() {
     val PICK_IMAGE = 1
     var bArray: ByteArray? = null
     val maxSize: Double = 300000.0
+    var bitmap: Bitmap? = null
+    var profileInt: Int? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -58,13 +61,14 @@ class AccountEditDialogFragment : DialogFragment() {
         rootView.post({
             userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
             userViewModel.user.observe(this, Observer { user: User ->
-                if (user.imageArray == null) {
+                userViewModel.mProfilePicture?.observe(this, Observer {
+                    profileInt = it
+                    initials_image_view_fragment_edit.setImageResource(ProfilePicture.values()[it].drawableId)
+                })
+                if (profileInt == null) {
                     DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
-                } else{
-                    bArray = user.imageArray
-                    var gotBitmap = DrawableUtils.convertByteToBitmap(bArray)
-                    initials_image_view_fragment_edit.setImageBitmap(gotBitmap)
                 }
+
                 name_edit_text.text = SpannableStringBuilder(user.fullName)
                 phone_edit_text.text = SpannableStringBuilder(user.phoneNumber)
                 email_edit_text.text = SpannableStringBuilder(user.email)
@@ -73,32 +77,12 @@ class AccountEditDialogFragment : DialogFragment() {
                 edit_profile_submit_text_view.setOnClickListener {
                     submitEdit()
                 }
+                initials_image_view_fragment_edit.setOnClickListener {
+                    (activity as NavigationActivity).showProfilePictureDialogFragment()
+                }
             })
-            initials_image_view_fragment_edit.setOnClickListener {
-                var intent = Intent()
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
-            }
         })
         return rootView
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            uriToImage = data?.data
-            var bitmap = MediaStore.Images.Media.getBitmap(activity?.contentResolver, uriToImage)
-            var newBitmap = bitmap
-            var sizeBeforeResize = bitmap.byteCount
-            if (sizeBeforeResize > maxSize) {
-                var divideBy : Double = sizeBeforeResize.div(maxSize)
-                newBitmap = DrawableUtils.resizeBitmapByScale(bitmap, divideBy)
-            }
-            var sizeAfterResize = newBitmap.byteCount
-            bArray = DrawableUtils.convertBitmapToByte(newBitmap)
-            initials_image_view_fragment_edit.setImageBitmap(newBitmap)
-        }
     }
 
     /** The system calls this only when creating the layout in a dialog. */
@@ -161,7 +145,7 @@ class AccountEditDialogFragment : DialogFragment() {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             val currentTime = Calendar.getInstance().time
-            val user = User(databaseId, userId, fullName, email, phoneNumber, currentTime, uriToImage, bArray)
+            val user = User(databaseId, userId, fullName, email, phoneNumber, currentTime, profileInt)
 
             val gson = GsonBuilder()
                     .setLenient()

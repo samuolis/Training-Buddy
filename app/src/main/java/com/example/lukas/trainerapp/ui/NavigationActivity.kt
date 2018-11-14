@@ -18,6 +18,7 @@ import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.ui.fragments.AccountEditDialogFragment
 import com.example.lukas.trainerapp.ui.fragments.ProfileFragment
+import com.example.lukas.trainerapp.ui.fragments.ProfilePictureDialogFragment
 import kotlinx.android.synthetic.main.activity_navigation.*
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
@@ -149,9 +150,24 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         finish()
     }
 
-    fun showDialog() {
+    fun showAccountEditDialogFragment() {
         val fragmentManager = supportFragmentManager
         val newFragment = AccountEditDialogFragment()
+        // The device is smaller, so show the fragment fullscreen
+        val transaction = fragmentManager.beginTransaction()
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction
+                .add(android.R.id.content, newFragment)
+                .addToBackStack(null)
+                .commit()
+    }
+
+    fun showProfilePictureDialogFragment() {
+        val fragmentManager = supportFragmentManager
+        val newFragment = ProfilePictureDialogFragment()
         // The device is smaller, so show the fragment fullscreen
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation

@@ -41,31 +41,26 @@ class User {
     @ColumnInfo(name = "createdAt")
     var createdAt: Date? = null
 
-    var profilePhotoUri: Uri? = null
-
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var imageArray: ByteArray? = null
+    var profilePictureIndex: Int? = null
 
     @Ignore
     constructor(userId: String?, fullName: String?, email: String?, phoneNumber: String?,
-                createdAt: Date?, profilePhotoUri: Uri?) {
+                createdAt: Date?) {
         this.fullName = fullName
         this.email = email
         this.phoneNumber = phoneNumber
         this.userId = userId
         this.createdAt = createdAt
-        this.profilePhotoUri = profilePhotoUri
     }
 
     constructor(id: Long, userId: String?, fullName: String?, email: String?, phoneNumber: String?,
-                createdAt: Date?, profilePhotoUri: Uri?, imageArray: ByteArray?) {
+                createdAt: Date?, profilePictureIndex: Int?) {
         this.id = id
-        this.profilePhotoUri = profilePhotoUri
         this.fullName = fullName
         this.email = email
         this.userId = userId
-        this.imageArray = imageArray
         this.phoneNumber = phoneNumber
         this.createdAt = createdAt
+        this.profilePictureIndex = profilePictureIndex
     }
 }
