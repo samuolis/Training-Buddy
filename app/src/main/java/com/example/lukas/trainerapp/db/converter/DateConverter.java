@@ -1,4 +1,4 @@
-package com.example.lukas.trainerapp.db;
+package com.example.lukas.trainerapp.db.converter;
 
 import java.util.Date;
 

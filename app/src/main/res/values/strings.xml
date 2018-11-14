@@ -44,4 +44,8 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_profile">Profile</string>
 
+    <string name="full_name_edit_text_hint">Enter your full name</string>
+    <string name="email_edit_text_hint">Enter your email</string>
+    <string name="phone_number_edit_text_hint">Enter your phone number</string>
+
 </resources>

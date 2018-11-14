@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
 import com.example.lukas.trainerapp.AppExecutors
@@ -19,7 +20,7 @@ import com.example.lukas.trainerapp.ui.fragments.AccountEditDialogFragment
 import com.example.lukas.trainerapp.ui.fragments.ProfileFragment
 import kotlinx.android.synthetic.main.activity_navigation.*
 
-class NavigationActivity : AppCompatActivity() {
+class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
 
     var profileFragment = ProfileFragment()
 
@@ -56,18 +57,47 @@ class NavigationActivity : AppCompatActivity() {
     private var doubleBackToExitPressedOnce = false
     lateinit var userViewModel : UserViewModel
     lateinit var logoutIntent : Intent
+    var fragmentAdded : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
         supportActionBar?.title = getString(R.string.app_name)
+        //Listen for changes in the back stack
+        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        //Handle when activity is recreated like on orientation Change
+        shouldDisplayHomeUp();
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
+    override fun onBackStackChanged() {
+        fragmentAdded = supportFragmentManager.backStackEntryCount > 0
+        shouldDisplayHomeUp()
+        invalidateOptionsMenu()
+    }
+
+    fun shouldDisplayHomeUp() {
+        //Enable Up button only  if there are entries in the back stack
+        supportActionBar!!.setDisplayHomeAsUpEnabled(fragmentAdded)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        //This method is called when the up button is pressed. Just the pop back stack.
+        supportFragmentManager.popBackStack()
+        return true
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main, menu)
+        if (!fragmentAdded) {
+            menuInflater.inflate(R.menu.main, menu)
+        }
         return true;
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        return super.onPrepareOptionsMenu(menu)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
@@ -132,5 +162,9 @@ class NavigationActivity : AppCompatActivity() {
                 .add(android.R.id.content, newFragment)
                 .addToBackStack(null)
                 .commit()
+    }
+
+    fun backOnStack(){
+        supportFragmentManager.popBackStack()
     }
 }

@@ -206,7 +206,7 @@ public class RegisterFragment extends Fragment{
             }
             Date currentTime = Calendar.getInstance().getTime();
             Long userId = userViewModel.getmUserData().getId();
-            final User user = new User(userId.toString(), fullName, email, phoneNumber, currentTime);
+            final User user = new User(userId.toString(), fullName, email, phoneNumber, currentTime, null);
 
             Gson gson = new GsonBuilder()
                     .setLenient()

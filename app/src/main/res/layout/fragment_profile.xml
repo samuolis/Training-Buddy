@@ -39,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_alignParentTop="true"
+                    android:scaleType="centerCrop"
                     android:layout_centerHorizontal="true"
                     android:background="@color/colorPrimary" />
             </androidx.cardview.widget.CardView>
@@ -65,6 +66,7 @@
                     android:gravity="center"
                     android:paddingTop="16dp"
                     android:paddingBottom="16dp"
+                    android:background="@drawable/profile_button_selector"
                     android:text="Lukas"
                     android:textSize="20sp" />
 
@@ -91,6 +93,7 @@
                     android:gravity="center"
                     android:paddingTop="16dp"
                     android:paddingBottom="16dp"
+                    android:background="@drawable/profile_button_selector"
                     android:text="samuoli@gmail.com"
                     android:textSize="20sp" />
 
@@ -105,7 +108,6 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/profile_button_selector"
                 android:elevation="12dp"
                 android:innerRadius="10dp">
 
@@ -117,6 +119,7 @@
                     android:gravity="center"
                     android:paddingTop="16dp"
                     android:paddingBottom="16dp"
+                    android:background="@drawable/profile_button_selector"
                     android:text="+37067867798"
                     android:textSize="20sp" />
 

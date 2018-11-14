@@ -9,4 +9,5 @@
     <color name="loadingBackground">#CC263238</color>
     <color name="divider">#FFFFFF</color>
     <color name="loginButtons">#90A4AE</color>
+    <color name="user_edit_submit_selected_color">#c8b900</color>
 </resources>
