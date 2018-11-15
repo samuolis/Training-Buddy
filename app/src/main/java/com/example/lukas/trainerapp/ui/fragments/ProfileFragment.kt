@@ -15,6 +15,7 @@ import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.utils.DrawableUtils
+import kotlinx.android.synthetic.main.fragment_account_edit.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 
@@ -50,7 +51,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupInfo(){
         userViewModel.user.observe(this, Observer { user: User ->
-            if (user.profilePictureIndex == null){
+            if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size){
                 DrawableUtils.setupInitials(initials_image_view, user)
             } else{
                 initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)

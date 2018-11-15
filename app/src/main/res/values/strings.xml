@@ -47,5 +47,10 @@
     <string name="full_name_edit_text_hint">Enter your full name</string>
     <string name="email_edit_text_hint">Enter your email</string>
     <string name="phone_number_edit_text_hint">Enter your phone number</string>
+    <string name="set_default_image_view">Set default</string>
+    <string name="event_name_hint">Event name</string>
+    <string name="event_description_hint">Description</string>
+    <string name="edit_acount_title">Edit account</string>
+    <string name="create_new_event_title">New event</string>
 
 </resources>

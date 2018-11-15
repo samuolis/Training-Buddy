@@ -41,6 +41,8 @@ class User {
     @ColumnInfo(name = "createdAt")
     var createdAt: Date? = null
 
+    @SerializedName("profilePictureIndex")
+    @ColumnInfo(name = "profilePictureIndex")
     var profilePictureIndex: Int? = null
 
     @Ignore

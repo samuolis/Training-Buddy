@@ -52,7 +52,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         return mProfilePicture!!.value
     }
 
-    fun setmProfilePicture(index: Int) {
+    fun setmProfilePicture(index: Int?) {
         this.mProfilePicture!!.value = index
     }
 

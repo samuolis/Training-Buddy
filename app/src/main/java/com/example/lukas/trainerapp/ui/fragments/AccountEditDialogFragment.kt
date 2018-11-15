@@ -1,41 +1,33 @@
 package com.example.lukas.trainerapp.ui.fragments
 
 
-import android.app.Activity.RESULT_OK
 import android.app.Dialog
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.view.*
-
+import android.text.SpannableStringBuilder
+import android.text.TextUtils
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.R
+import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
-import kotlinx.android.synthetic.main.fragment_account_edit.*
-import android.text.SpannableStringBuilder
-import android.text.TextUtils
-import android.widget.ImageView
-import android.widget.Toast
-import com.example.lukas.trainerapp.AppExecutors
-import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.server.service.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.utils.DrawableUtils
 import com.google.gson.GsonBuilder
-import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.fragment_account_edit.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.ByteArrayOutputStream
 import java.util.*
 
 class AccountEditDialogFragment : DialogFragment() {
@@ -43,12 +35,7 @@ class AccountEditDialogFragment : DialogFragment() {
     lateinit var userViewModel : UserViewModel
     lateinit var mDb: AppDatabase
     var userId: String? = null
-    var uriToImage: Uri? = null
     var databaseId: Long = 0
-    val PICK_IMAGE = 1
-    var bArray: ByteArray? = null
-    val maxSize: Double = 300000.0
-    var bitmap: Bitmap? = null
     var profileInt: Int? = null
 
     override fun onCreateView(
@@ -61,14 +48,12 @@ class AccountEditDialogFragment : DialogFragment() {
         rootView.post({
             userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
             userViewModel.user.observe(this, Observer { user: User ->
-                userViewModel.mProfilePicture?.observe(this, Observer {
-                    profileInt = it
-                    initials_image_view_fragment_edit.setImageResource(ProfilePicture.values()[it].drawableId)
-                })
-                if (profileInt == null) {
+                profileInt = user.profilePictureIndex
+                if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size){
                     DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
+                } else{
+                    initials_image_view_fragment_edit.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
                 }
-
                 name_edit_text.text = SpannableStringBuilder(user.fullName)
                 phone_edit_text.text = SpannableStringBuilder(user.phoneNumber)
                 email_edit_text.text = SpannableStringBuilder(user.email)
@@ -80,25 +65,13 @@ class AccountEditDialogFragment : DialogFragment() {
                 initials_image_view_fragment_edit.setOnClickListener {
                     (activity as NavigationActivity).showProfilePictureDialogFragment()
                 }
+                edit_profile_default_picture_text_view.setOnClickListener {
+                    profileInt = ProfilePicture.values().size
+                    DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
+                }
             })
         })
         return rootView
-    }
-
-    /** The system calls this only when creating the layout in a dialog. */
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // The only reason you might override this method when using onCreateView() is
-        // to modify any dialog characteristics. For example, the dialog includes a
-        // title by default, but your custom layout might not need it. So here you can
-        // remove the dialog title, but you must call the superclass to get the Dialog.
-        val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.actionBar.setDisplayHomeAsUpEnabled(true)
-        return dialog
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -175,7 +148,6 @@ class AccountEditDialogFragment : DialogFragment() {
     }
 
     private fun isEmailValid(email: String): Boolean {
-        //TODO: Replace this with your own logic
         return email.contains("@")
     }
 }

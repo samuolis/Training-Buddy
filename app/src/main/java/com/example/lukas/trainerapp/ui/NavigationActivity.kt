@@ -16,37 +16,33 @@ import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
-import com.example.lukas.trainerapp.ui.fragments.AccountEditDialogFragment
-import com.example.lukas.trainerapp.ui.fragments.ProfileFragment
-import com.example.lukas.trainerapp.ui.fragments.ProfilePictureDialogFragment
+import com.example.lukas.trainerapp.ui.fragments.*
 import kotlinx.android.synthetic.main.activity_navigation.*
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
 
     var profileFragment = ProfileFragment()
+    var homeFragment = HomeFragment()
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                message.setText(R.string.title_home)
-                message.visibility = View.VISIBLE
                 supportFragmentManager.beginTransaction()
-                        .remove(profileFragment)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.navigation_frame, homeFragment)
                         .commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
-                message.setText(R.string.title_dashboard)
-                message.visibility = View.VISIBLE
                 supportFragmentManager.beginTransaction()
                         .remove(profileFragment)
+                        .remove(homeFragment)
                         .commit()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
-                message.setText(R.string.title_profile)
-                message.visibility = View.INVISIBLE
                 supportFragmentManager.beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, profileFragment)
                         .commit()
                 return@OnNavigationItemSelectedListener true
@@ -68,12 +64,18 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         //Listen for changes in the back stack
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         //Handle when activity is recreated like on orientation Change
-        shouldDisplayHomeUp();
+        shouldDisplayHomeUp()
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.navigation_frame, homeFragment)
+                .commit()
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     override fun onBackStackChanged() {
         fragmentAdded = supportFragmentManager.backStackEntryCount > 0
+        if (!fragmentAdded){
+            supportActionBar!!.title = getString(R.string.app_name)
+        }
         shouldDisplayHomeUp()
         invalidateOptionsMenu()
     }
@@ -163,6 +165,25 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                 .add(android.R.id.content, newFragment)
                 .addToBackStack(null)
                 .commit()
+        supportFragmentManager.executePendingTransactions()
+        supportActionBar!!.title = getString(R.string.edit_acount_title)
+    }
+
+    fun showEventCreateDialogFragment() {
+        val fragmentManager = supportFragmentManager
+        val newFragment = AddEventDialogFragment()
+        // The device is smaller, so show the fragment fullscreen
+        val transaction = fragmentManager.beginTransaction()
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction
+                .add(android.R.id.content, newFragment)
+                .addToBackStack(null)
+                .commit()
+        supportFragmentManager.executePendingTransactions()
+        supportActionBar!!.title = getString(R.string.create_new_event_title)
     }
 
     fun showProfilePictureDialogFragment() {
