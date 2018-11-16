@@ -25,6 +25,9 @@
         <meta-data
             android:name="com.facebook.accountkit.ClientToken"
             android:value="@string/ACCOUNT_KIT_CLIENT_TOKEN" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDieqcCVlDG0Zb6WPwBxieBEIfSVEH-Cfc"/>
 
         <activity
             android:name=".ui.LoginActivity"

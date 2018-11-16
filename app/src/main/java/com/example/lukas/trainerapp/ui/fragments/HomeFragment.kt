@@ -21,9 +21,6 @@ class HomeFragment : Fragment() {
         var rootView = inflater.inflate(R.layout.fragment_home, container, false)
         rootView.post {
             fab.setOnClickListener { view ->
-                Snackbar.make(view, getString(R.string.create_new_event_title), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null)
-                        .show()
                 (activity as NavigationActivity).showEventCreateDialogFragment()
             }
         }

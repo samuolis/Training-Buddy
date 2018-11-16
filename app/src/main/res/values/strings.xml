@@ -52,5 +52,8 @@
     <string name="event_description_hint">Description</string>
     <string name="edit_acount_title">Edit account</string>
     <string name="create_new_event_title">New event</string>
+    <string name="event_date_and_time_label">Event date and time</string>
+    <string name="set_event_location_hint">Event location</string>
+    <string name="event_needed_players">Needed players</string>
 
 </resources>
