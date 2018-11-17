@@ -56,4 +56,7 @@
     <string name="set_event_location_hint">Event location</string>
     <string name="event_needed_players">Needed players</string>
 
+    <string name="user_id_key">user_id_key</string>
+    <string name="user_id_preferences">user_id_preferences</string>
+
 </resources>

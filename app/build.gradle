@@ -6,7 +6,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.lukas.trainerapp"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -36,8 +36,15 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    implementation 'com.facebook.android:account-kit-sdk:4.+'
-    implementation 'com.facebook.android:facebook-android-sdk:4.+'
+    implementation ('com.facebook.android:account-kit-sdk:4.+'){
+        exclude group: 'com.google.android.gms', module: 'play-services-auth-api-phone'
+        exclude group: 'com.google.android.gms', module: 'play-services-auth'
+    }
+    implementation ('com.facebook.android:facebook-android-sdk:4.+'){
+        exclude group: 'com.google.android.gms', module: 'play-services-auth-api-phone'
+        exclude group: 'com.google.android.gms', module: 'play-services-auth'
+    }
+
     implementation 'com.jakewharton:butterknife:9.0.0-rc1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
     implementation 'com.facebook.android:facebook-core:[4,5)'
@@ -50,11 +57,11 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation "androidx.room:room-runtime:2.0.0-rc01"
     annotationProcessor "androidx.room:room-compiler:2.0.0-rc01"
-    implementation "android.arch.persistence.room:rxjava2:1.0.0-alpha5"
+    implementation "androidx.room:room-rxjava2:2.1.0-alpha02"
     implementation deps.room.rxjava2
 
-    implementation "android.arch.lifecycle:extensions:1.1.0"
-    annotationProcessor "android.arch.lifecycle:compiler:1.1.0"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.0.0"
 
     implementation deps.rx_android
     implementation deps.rxjava2
@@ -64,7 +71,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation "com.google.android.gms:play-services-maps:16.0.0"
-    implementation "com.google.android.gms:play-services-location:16.0.0"
-    implementation 'com.google.android.gms:play-services-places:16.0.0'
+    implementation 'com.google.android.gms:play-services-places:+'
+    implementation 'com.google.android.gms:play-services-auth:+'
+    implementation 'com.google.firebase:firebase-messaging:+'
+    implementation 'com.google.android.gms:play-services-location:+'
 }

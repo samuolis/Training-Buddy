@@ -35,7 +35,7 @@ class ProfilePictureDialogFragment : DialogFragment() {
         userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
         userViewModel.user.observe(this, Observer {
             viewManager = GridLayoutManager(activity, 2)
-            viewAdapter = ProfilePictureRecyclerViewAdapter(userViewModel.bitmap, activity = activity as NavigationActivity, user = it)
+            viewAdapter = ProfilePictureRecyclerViewAdapter(activity = activity as NavigationActivity, user = it)
             profile_picture_recycler_view.apply {
                 // use this setting to improve performance if you know that changes
                 // in content do not change the layout size of the RecyclerView

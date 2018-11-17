@@ -21,14 +21,14 @@ class DrawableUtils {
             var bitmap = Bitmap.createBitmap(imageView.width, imageView.height, Bitmap.Config.ARGB_8888)
             var canvas = Canvas(bitmap)
             var paint = Paint()
-            var firstAndLastName = user?.fullName?.split(" ")
+            var firstAndLastName = user.fullName?.split(" ")
             var initials = ""
             firstAndLastName?.forEach { name ->
                 initials = initials + name.get(0)
             }
             setTextSizeForWidth(paint,imageView.width.toFloat()-100, initials)
             drawCenter(canvas, paint, initials)
-            imageView!!.setImageBitmap(bitmap)
+            imageView.setImageBitmap(bitmap)
             return bitmap
         }
 
@@ -37,7 +37,7 @@ class DrawableUtils {
             var bitmap = Bitmap.createBitmap(imageView.width, imageView.height, Bitmap.Config.ARGB_8888)
             var canvas = Canvas(bitmap)
             var paint = Paint()
-            var firstAndLastName = user?.fullName?.split(" ")
+            var firstAndLastName = user.fullName?.split(" ")
             var initials = ""
             firstAndLastName?.forEach { name ->
                 initials = initials + name.get(0)

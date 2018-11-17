@@ -23,7 +23,7 @@ import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.utils.DrawableUtils
 
-class ProfilePictureRecyclerViewAdapter(bitmap: Bitmap?, activity: NavigationActivity, user: User) : RecyclerView.Adapter<ProfilePictureRecyclerViewAdapter.ViewHolder>() {
+class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, user: User) : RecyclerView.Adapter<ProfilePictureRecyclerViewAdapter.ViewHolder>() {
 
     var activity: NavigationActivity = activity
     var user: User = user
@@ -40,7 +40,7 @@ class ProfilePictureRecyclerViewAdapter(bitmap: Bitmap?, activity: NavigationAct
                 var mDb = AppDatabase.getInstance(activity)
                 user.profilePictureIndex = position
                 mDb.userDao().insertUser(user)
-                (activity as NavigationActivity).backOnStack()
+                activity.backOnStack()
 
             }
         }

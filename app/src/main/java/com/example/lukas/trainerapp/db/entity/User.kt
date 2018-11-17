@@ -1,7 +1,5 @@
 package com.example.lukas.trainerapp.db.entity
 
-import android.net.Uri
-
 import com.example.lukas.trainerapp.db.converter.DateConverter
 import com.example.lukas.trainerapp.db.converter.UriConverter
 import com.google.gson.annotations.SerializedName

@@ -8,41 +8,34 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 
 import com.example.lukas.trainerapp.R
 import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
 import java.util.*
-import android.widget.TimePicker
 import android.app.TimePickerDialog
 import android.content.ContentValues.TAG
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
-import androidx.core.app.ShareCompat.IntentBuilder
 import android.content.Intent
 import android.text.SpannableStringBuilder
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
-import com.example.lukas.trainerapp.model.Event
+import com.example.lukas.trainerapp.db.entity.Event
+import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.webService.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
-import com.google.android.gms.location.places.ui.PlaceAutocomplete.getStatus
-import com.google.android.gms.location.places.Place
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder
-import kotlinx.android.synthetic.main.fragment_home.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 
 
 class AddEventDialogFragment : DialogFragment() {
@@ -53,10 +46,11 @@ class AddEventDialogFragment : DialogFragment() {
     var mYear: Int = 0
     var mMonth: Int = 0
     var mDay: Int = 0
-    var selectedDate: Date = Date()
     var selectedLocationName: String? =  null
     var selectedLocationLatitude: Double? = null
     var selectedLocationLongitude: Double? = null
+    var dateAndTimeIsSet: Boolean = false
+    var eventViewModel: EventViewModel? = null;
 
     var mHour: Int = 0
     var mMinute: Int = 0
@@ -67,6 +61,8 @@ class AddEventDialogFragment : DialogFragment() {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
         userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
+        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+
         rootView.post {
             event_date_time_text_view.setOnClickListener {
                 datePicker()
@@ -94,9 +90,15 @@ class AddEventDialogFragment : DialogFragment() {
 
     private fun saveEvent(view: View) {
         var selectedDateAndTime = c.time
+        if(selectedLocationName == null || event_name_edit_text.text == null || !dateAndTimeIsSet){
+            Snackbar.make(view, "Some fields are missing", Snackbar.LENGTH_LONG)
+                    .show()
+            return
+        }
+
 
         var eventPlayersNumber: Int? = null
-        if (event_players_edit_text.text.toString() == null || event_players_edit_text.text.toString() == ""){
+        if (event_players_edit_text.text.toString() == ""){
             eventPlayersNumber = 0
         } else{
             eventPlayersNumber = event_players_edit_text.text?.toString()?.toInt()
@@ -115,13 +117,13 @@ class AddEventDialogFragment : DialogFragment() {
         var event : Event
         userViewModel.user.observe(this, androidx.lifecycle.Observer {
              event = Event(null, it.userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
-                    selectedLocationName, selectedLocationLatitude,
-                    selectedLocationLongitude, eventDate = selectedDateAndTime,
-                    eventPlayers = eventPlayersNumber)
+                     selectedLocationName, selectedLocationLatitude,
+                     selectedLocationLongitude, eventDate = selectedDateAndTime,
+                     eventPlayers = eventPlayersNumber)
 
             eventWebService.createEvent(event).enqueue(object : Callback<Event> {
                 override fun onFailure(call: Call<Event>, t: Throwable) {
-                    Toast.makeText(activity, "failer with " + t.message, Toast.LENGTH_LONG)
+                    Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
                 }
 
                 override fun onResponse(call: Call<Event>, response: Response<Event>) {
@@ -131,6 +133,7 @@ class AddEventDialogFragment : DialogFragment() {
 
                             })
                             .show()
+                    eventViewModel?.loadEvents()
                 }
 
             })
@@ -186,6 +189,7 @@ class AddEventDialogFragment : DialogFragment() {
                     var time = String.format("%02d:%02d", hourOfDay, minute)
                     c.set(Calendar.HOUR_OF_DAY, hourOfDay)
                     c.set(Calendar.MINUTE, minute)
+                    dateAndTimeIsSet = true
                     event_date_time_text_view.setText("$date_time $time")
                 }, mHour, mMinute, true)
         timePickerDialog.show()

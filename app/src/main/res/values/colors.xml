@@ -10,4 +10,5 @@
     <color name="divider">#FFFFFF</color>
     <color name="loginButtons">#90A4AE</color>
     <color name="user_edit_submit_selected_color">#c8b900</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>

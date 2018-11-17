@@ -3,6 +3,8 @@ package com.example.lukas.trainerapp.ui.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,6 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.content.Context.MODE_PRIVATE;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 
@@ -223,8 +226,16 @@ public class RegisterFragment extends Fragment{
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     AppExecutors.getInstance().diskIO().execute(() -> {
-                        mDb.userDao().insertUser(response.body());
-                        ((LoginActivity)getActivity()).GoToNavigationActivity();
+//                        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+//                        SharedPreferences.Editor editor = sharedPref.edit();
+//                        editor.putInt(getString(R.string.user_id_key), Integer.parseInt(response.body().getUserId()));
+//                        editor.commit();
+                        try {
+                            mDb.userDao().insertUser(response.body());
+                            ((LoginActivity)getActivity()).GoToNavigationActivity();
+                        } catch (Exception e){
+                            Toast.makeText(getActivity(), "failed to store data", Toast.LENGTH_LONG).show();
+                        }
                     });
                 }
 

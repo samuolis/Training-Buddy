@@ -20,8 +20,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database: AppDatabase
 
-    var bitmap: Bitmap? = null
-
 
 
     val baseUrl: String
@@ -65,7 +63,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
 
         private val TAG = UserViewModel::class.java.simpleName
-
+        val USER_ID_PREFERENCE = "userId"
         private val BASE_URL = "https://training-222106.appspot.com/"
     }
 }
