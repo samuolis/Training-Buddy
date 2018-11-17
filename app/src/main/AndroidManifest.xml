@@ -28,7 +28,7 @@
             android:value="@string/ACCOUNT_KIT_CLIENT_TOKEN" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDieqcCVlDG0Zb6WPwBxieBEIfSVEH-Cfc"/>
+            android:value="@string/google_maps_api_key"/>
 
         <activity
             android:name=".ui.LoginActivity"
