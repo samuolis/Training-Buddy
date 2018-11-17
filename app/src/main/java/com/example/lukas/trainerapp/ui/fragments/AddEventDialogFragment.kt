@@ -23,30 +23,50 @@ import androidx.core.app.ShareCompat.IntentBuilder
 import android.content.Intent
 import android.text.SpannableStringBuilder
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProviders
+import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.model.Event
 import com.example.lukas.trainerapp.ui.NavigationActivity
+import com.example.lukas.trainerapp.webService.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.gms.location.places.ui.PlaceAutocomplete.getStatus
 import com.google.android.gms.location.places.Place
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.fragment_home.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.Exception
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 
 class AddEventDialogFragment : DialogFragment() {
 
     val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
-
+    lateinit var userViewModel: UserViewModel
     var date_time = ""
     var mYear: Int = 0
     var mMonth: Int = 0
     var mDay: Int = 0
+    var selectedDate: Date = Date()
+    var selectedLocationName: String? =  null
+    var selectedLocationLatitude: Double? = null
+    var selectedLocationLongitude: Double? = null
 
     var mHour: Int = 0
     var mMinute: Int = 0
+    val c = Calendar.getInstance()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
+        userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
         rootView.post {
             event_date_time_text_view.setOnClickListener {
                 datePicker()
@@ -66,21 +86,64 @@ class AddEventDialogFragment : DialogFragment() {
             })
 
             event_fab.setOnClickListener { view ->
-                Snackbar.make(view, "Event added", Snackbar.LENGTH_LONG)
-                        .setAction("Remove", {
-
-                        })
-                        .show()
-                (activity as NavigationActivity).backOnStack()
+                saveEvent(view)
             }
         }
         return rootView
+    }
+
+    private fun saveEvent(view: View) {
+        var selectedDateAndTime = c.time
+
+        var eventPlayersNumber: Int? = null
+        if (event_players_edit_text.text.toString() == null || event_players_edit_text.text.toString() == ""){
+            eventPlayersNumber = 0
+        } else{
+            eventPlayersNumber = event_players_edit_text.text?.toString()?.toInt()
+        }
+        val gson = GsonBuilder()
+                .setLenient()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .create()
+
+        val retrofit = Retrofit.Builder()
+                .baseUrl(userViewModel.baseUrl)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build()
+
+        val eventWebService = retrofit.create(EventWebService::class.java)
+        var event : Event
+        userViewModel.user.observe(this, androidx.lifecycle.Observer {
+             event = Event(null, it.userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
+                    selectedLocationName, selectedLocationLatitude,
+                    selectedLocationLongitude, eventDate = selectedDateAndTime,
+                    eventPlayers = eventPlayersNumber)
+
+            eventWebService.createEvent(event).enqueue(object : Callback<Event> {
+                override fun onFailure(call: Call<Event>, t: Throwable) {
+                    Toast.makeText(activity, "failer with " + t.message, Toast.LENGTH_LONG)
+                }
+
+                override fun onResponse(call: Call<Event>, response: Response<Event>) {
+                    (activity as NavigationActivity).backOnStack()
+                    Snackbar.make(view, "Event added", Snackbar.LENGTH_LONG)
+                            .setAction("Remove", {
+
+                            })
+                            .show()
+                }
+
+            })
+    })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 val place = PlaceAutocomplete.getPlace(context, data)
+                selectedLocationLatitude = place.latLng.latitude
+                selectedLocationLongitude = place.latLng.longitude
+                selectedLocationName = place.name.toString()
                 event_location_edit_text.text = SpannableStringBuilder(place.address)
                 Log.i(TAG, "Place: " + place.name)
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
@@ -97,7 +160,6 @@ class AddEventDialogFragment : DialogFragment() {
     private fun datePicker() {
 
         // Get Current Date
-        val c = Calendar.getInstance()
         mYear = c.get(Calendar.YEAR)
         mMonth = c.get(Calendar.MONTH)
         mDay = c.get(Calendar.DAY_OF_MONTH)
@@ -105,6 +167,7 @@ class AddEventDialogFragment : DialogFragment() {
         val datePickerDialog = DatePickerDialog(context,
                 DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                     date_time = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
+                    c.set(year, monthOfYear, dayOfMonth)
                     //*************Call Time Picker Here ********************
                     timePicker()
                 }, mYear, mMonth, mDay)
@@ -113,7 +176,7 @@ class AddEventDialogFragment : DialogFragment() {
 
     private fun timePicker() {
         // Get Current Time
-        val c = Calendar.getInstance()
+
         mHour = c.get(Calendar.HOUR_OF_DAY)
         mMinute = c.get(Calendar.MINUTE)
 
@@ -121,7 +184,8 @@ class AddEventDialogFragment : DialogFragment() {
         val timePickerDialog = TimePickerDialog(context,
                 TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                     var time = String.format("%02d:%02d", hourOfDay, minute)
-
+                    c.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    c.set(Calendar.MINUTE, minute)
                     event_date_time_text_view.setText("$date_time $time")
                 }, mHour, mMinute, true)
         timePickerDialog.show()

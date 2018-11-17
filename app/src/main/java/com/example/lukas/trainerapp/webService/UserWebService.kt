@@ -1,7 +1,6 @@
-package com.example.lukas.trainerapp.server.service
+package com.example.lukas.trainerapp.webService
 
 import com.example.lukas.trainerapp.db.entity.User
-import com.example.lukas.trainerapp.model.Authorization
 import com.example.lukas.trainerapp.model.UserData
 
 import retrofit2.Call

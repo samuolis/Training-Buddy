@@ -1,7 +1,6 @@
 package com.example.lukas.trainerapp.ui.fragments
 
 
-import android.app.Dialog
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
@@ -18,7 +17,7 @@ import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
-import com.example.lukas.trainerapp.server.service.UserWebService
+import com.example.lukas.trainerapp.webService.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.utils.DrawableUtils
 import com.google.gson.GsonBuilder

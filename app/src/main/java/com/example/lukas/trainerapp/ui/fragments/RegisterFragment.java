@@ -35,7 +35,7 @@ import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
-import com.example.lukas.trainerapp.server.service.UserWebService;
+import com.example.lukas.trainerapp.webService.UserWebService;
 import com.facebook.Profile;
 import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.AccountKit;
