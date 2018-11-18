@@ -104,12 +104,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
-        R.id.action_settings -> {
-            //do something
-            true
-        }
         R.id.action_logout -> {
-            userViewModel.deleteAllUser()
             var database = AppDatabase.getInstance(this.application)
             AppExecutors.getInstance().diskIO().execute {
                 database.userDao().deleteAllUsers()

@@ -59,6 +59,7 @@ class ProfileFragment : Fragment() {
             user_full_name_text_view.text = user.fullName
             user_email_text_view.text = user.email
             user_phone_number_text_view.text = user.phoneNumber
+            profile_linear_layout.visibility = View.VISIBLE
         })
         user_full_name_text_view.setOnClickListener({
             (activity as NavigationActivity).showAccountEditDialogFragment()

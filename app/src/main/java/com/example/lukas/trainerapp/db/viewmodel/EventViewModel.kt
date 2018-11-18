@@ -31,6 +31,7 @@ import com.example.lukas.trainerapp.db.entity.User
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
+    var refreshStatus: MutableLiveData<Int>? = null
     lateinit var eventWebService: EventWebService
     lateinit var mDb: AppDatabase
     private val BASE_URL = "https://training-222106.appspot.com/"
@@ -42,9 +43,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         val sharedPref = myApplication?.getSharedPreferences(myApplication.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = sharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
         mDb = AppDatabase.getInstance(this.getApplication())
-//        AppExecutors.getInstance().diskIO().execute {
-//            user = mDb.userDao().simpleUser
-//        }
         val gson = GsonBuilder()
                 .setLenient()
                 .create()
@@ -58,21 +56,34 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getEvents(): LiveData<List<Event>>? {
-        events = MutableLiveData<List<Event>>()
-        loadEvents()
+        if (events == null) {
+            events = MutableLiveData<List<Event>>()
+            loadEvents()
+        }
         return events
     }
 
-    fun loadEvents() {
+    fun getStatus(): MutableLiveData<Int>? {
+        if (refreshStatus == null) {
+            refreshStatus = MutableLiveData<Int>()
+            refreshStatus?.value = 0
+        }
+        return refreshStatus
+    }
 
+
+    fun loadEvents() {
+        refreshStatus?.value = 1
         eventWebService.getEventsByUserId(userId = userId).enqueue(object : Callback<List<Event>>{
             override fun onFailure(call: Call<List<Event>>, t: Throwable) {
                 Toast.makeText(myApplication, "failure", Toast.LENGTH_LONG).show()
+                refreshStatus?.value = 0
             }
 
             override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
                 if (response.isSuccessful()){
                     events?.value = response.body()
+                    refreshStatus?.value = 0
                 }
             }
         })

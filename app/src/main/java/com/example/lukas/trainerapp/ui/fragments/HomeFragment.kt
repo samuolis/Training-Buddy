@@ -38,7 +38,6 @@ class HomeFragment : Fragment() {
             home_recyclerview.layoutManager = LinearLayoutManager(context)
             swipe_container.setOnRefreshListener {
                 eventViewModel.loadEvents()
-                swipe_container.isRefreshing = false
             }
             swipe_container.setColorSchemeResources(R.color.colorAccent)
             loadUi()
@@ -50,6 +49,9 @@ class HomeFragment : Fragment() {
         eventViewModel.getEvents()?.observe(this, Observer {
             var list = it
             home_recyclerview.adapter = UserEventsRecyclerViewAdapter(list, context!!)
+        })
+        eventViewModel.getStatus()?.observe(this, Observer {
+            swipe_container.isRefreshing = !(it == 0)
         })
     }
 

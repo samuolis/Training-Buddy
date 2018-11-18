@@ -3,12 +3,21 @@ package com.example.lukas.trainerapp.db.viewmodel
 import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.model.UserData
+import com.example.lukas.trainerapp.webService.EventWebService
+import com.example.lukas.trainerapp.webService.UserWebService
+import com.google.gson.GsonBuilder
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -19,6 +28,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     var mProfilePicture: MutableLiveData<Int>? = null
 
     private val database: AppDatabase
+
+    lateinit var userWebService: UserWebService
 
 
 
@@ -32,10 +43,16 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         user = database.userDao().user
         mUserData = MutableLiveData()
         mProfilePicture = MutableLiveData()
-    }
+        val gson = GsonBuilder()
+                .setLenient()
+                .create()
 
-    fun deleteAllUser() {
+        val retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build()
 
+        userWebService = retrofit.create(UserWebService::class.java)
     }
 
     fun getmUserData(): UserData? {
@@ -52,11 +69,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setmProfilePicture(index: Int?) {
         this.mProfilePicture!!.value = index
-    }
-
-    fun init() {
-        mUserData = MutableLiveData()
-        mProfilePicture = MutableLiveData()
     }
 
     companion object {

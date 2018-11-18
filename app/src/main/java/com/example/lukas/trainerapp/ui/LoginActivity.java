@@ -36,7 +36,6 @@ public class LoginActivity extends AppCompatActivity{
         actionBar.setTitle(R.string.app_name);
         setContentView(R.layout.activity_login);
         userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
-        userViewModel.init();
         LoginFragment loginFragment = new LoginFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         // Begin the transaction

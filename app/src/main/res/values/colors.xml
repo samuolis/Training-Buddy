@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#546E7A</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorPrimaryLight">#8e99f3</color>
+    <color name="colorPrimary">#26a69a</color>
+    <color name="colorPrimaryDark">#00766c</color>
+    <color name="colorPrimaryLight">#64d8cb</color>
     <color name="colorAccent">#fdd835</color>
 
     <color name="fbButton">#3B5998</color>

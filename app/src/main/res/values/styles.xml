@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
@@ -9,7 +9,9 @@
     </style>
 
 
-    <style name="AppLoginTheme" parent="Theme.AccountKit"/>
+    <style name="AppLoginTheme" parent="Theme.AccountKit">
+        <item name="android:statusBarColor" tools:targetApi="lollipop">@color/colorPrimaryDark</item>
+    </style>
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@android:color/black</item>

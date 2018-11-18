@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.ColorInt;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -29,6 +30,8 @@ import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
+import com.facebook.accountkit.ui.SkinManager;
+import com.facebook.accountkit.ui.UIManager;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.gson.Gson;
@@ -43,6 +46,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static com.facebook.accountkit.ui.SkinManager.Skin.CONTEMPORARY;
+import static com.facebook.accountkit.ui.SkinManager.Tint.BLACK;
 
 
 public class LoginFragment extends Fragment {
@@ -177,10 +183,15 @@ public class LoginFragment extends Fragment {
         final Intent intent = new Intent(getActivity(), AccountKitActivity.class);
 
         //configure login type and resource type
-        AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
-                new AccountKitConfiguration.AccountKitConfigurationBuilder(
+        AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder;
+        UIManager uiManager;
+        uiManager = new SkinManager(
+                CONTEMPORARY, getActivity().getResources().getColor(R.color.colorPrimary));
+
+        configurationBuilder = new AccountKitConfiguration.AccountKitConfigurationBuilder(
                         loginType,
                         AccountKitActivity.ResponseType.CODE);
+        configurationBuilder.setUIManager(uiManager);
         final AccountKitConfiguration configuration = configurationBuilder.build();
         intent.putExtra(AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION, configuration);
         startActivityForResult(intent,APP_REQUEST_CODE);
@@ -199,7 +210,6 @@ public class LoginFragment extends Fragment {
                 .build();
 
         userWebService = retrofit.create(UserWebService.class);
-        userViewModel.init();
         String userId;
         userWebService.getUser(authCode).enqueue(new Callback<UserData>() {
             @Override
