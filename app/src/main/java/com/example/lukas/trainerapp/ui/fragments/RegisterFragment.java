@@ -226,10 +226,6 @@ public class RegisterFragment extends Fragment{
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     AppExecutors.getInstance().diskIO().execute(() -> {
-//                        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-//                        SharedPreferences.Editor editor = sharedPref.edit();
-//                        editor.putInt(getString(R.string.user_id_key), Integer.parseInt(response.body().getUserId()));
-//                        editor.commit();
                         try {
                             mDb.userDao().insertUser(response.body());
                             ((LoginActivity)getActivity()).GoToNavigationActivity();

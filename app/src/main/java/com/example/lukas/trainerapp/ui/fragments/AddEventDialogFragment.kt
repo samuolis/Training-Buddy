@@ -122,7 +122,7 @@ class AddEventDialogFragment : DialogFragment() {
              event = Event(null, it.userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
                      selectedLocationName, selectedLocationLatitude,
                      selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
-                     eventPlayers = eventPlayersNumber)
+                     eventPlayers = eventPlayersNumber, eventDistance = null)
 
             eventWebService.createEvent(event).enqueue(object : Callback<Event> {
                 override fun onFailure(call: Call<Event>, t: Throwable) {
