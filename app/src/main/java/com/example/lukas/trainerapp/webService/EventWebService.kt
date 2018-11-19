@@ -15,4 +15,9 @@ interface EventWebService {
     @GET("/event/{userId}")
     fun getEventsByUserId(@Path("userId") userId: String?): Call<List<Event>>
 
+    @GET("/event/{countryCode}/{latitude}/{longitude}")
+    fun getEventsByLocation(@Path("countryCode") countryCode: String?,
+                            @Path("latitude") latitude: Double?,
+                            @Path("longitude") longitude: Double?): Call<List<Event>>
+
 }

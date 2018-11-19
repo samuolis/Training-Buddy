@@ -12,4 +12,4 @@ import java.util.Date
 data class Event(@PrimaryKey(autoGenerate = true) val eventId: Long?, val userId: String?, val eventName: String?,
                  val eventDescription: String?, val eventLocationName: String?,
                  val eventLocationLatitude: Double?, val eventLocationLongitude: Double?,
-                 val eventPlayers: Int?, val eventDate: Date?)
+                 val eventLocationCountryCode: String?, val eventPlayers: Int?, val eventDate: Date?)

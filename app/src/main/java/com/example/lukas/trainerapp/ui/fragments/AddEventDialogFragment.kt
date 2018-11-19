@@ -18,6 +18,7 @@ import android.content.ContentValues.TAG
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import android.content.Intent
+import android.location.Geocoder
 import android.text.SpannableStringBuilder
 import android.util.Log
 import android.widget.Toast
@@ -29,6 +30,7 @@ import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.webService.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -49,6 +51,7 @@ class AddEventDialogFragment : DialogFragment() {
     var selectedLocationName: String? =  null
     var selectedLocationLatitude: Double? = null
     var selectedLocationLongitude: Double? = null
+    var selectedLocationCountryCode: String? = null
     var dateAndTimeIsSet: Boolean = false
     var eventViewModel: EventViewModel? = null;
 
@@ -118,7 +121,7 @@ class AddEventDialogFragment : DialogFragment() {
         userViewModel.user.observe(this, androidx.lifecycle.Observer {
              event = Event(null, it.userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
                      selectedLocationName, selectedLocationLatitude,
-                     selectedLocationLongitude, eventDate = selectedDateAndTime,
+                     selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
                      eventPlayers = eventPlayersNumber)
 
             eventWebService.createEvent(event).enqueue(object : Callback<Event> {
@@ -147,6 +150,12 @@ class AddEventDialogFragment : DialogFragment() {
                 selectedLocationLatitude = place.latLng.latitude
                 selectedLocationLongitude = place.latLng.longitude
                 selectedLocationName = place.name.toString()
+
+                var geocoder = Geocoder(context, Locale.getDefault())
+                var adresses = geocoder.getFromLocation(place.latLng.latitude,
+                        place.latLng.longitude, 1)
+                var address = adresses[0]
+                selectedLocationCountryCode = address.getCountryCode()
                 event_location_edit_text.text = SpannableStringBuilder(place.address)
                 Log.i(TAG, "Place: " + place.name)
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {

@@ -29,10 +29,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.0-alpha1'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
@@ -47,16 +47,16 @@ dependencies {
 
     implementation 'com.jakewharton:butterknife:9.0.0-rc1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
-    implementation 'com.facebook.android:facebook-core:[4,5)'
-    implementation 'com.facebook.android:facebook-login:[4,5)'
-    implementation 'com.facebook.android:facebook-share:[4,5)'
-    implementation 'com.facebook.android:facebook-places:[4,5)'
-    implementation 'com.facebook.android:facebook-messenger:[4,5)'
-    implementation 'com.facebook.android:facebook-applinks:[4,5)'
+    implementation 'com.facebook.android:facebook-core:4.38.1'
+    implementation 'com.facebook.android:facebook-login:4.38.1'
+    implementation 'com.facebook.android:facebook-share:4.38.1'
+    implementation 'com.facebook.android:facebook-places:4.38.1'
+    implementation 'com.facebook.android:facebook-messenger:4.38.1'
+    implementation 'com.facebook.android:facebook-applinks:4.38.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation "androidx.room:room-runtime:2.0.0-rc01"
-    annotationProcessor "androidx.room:room-compiler:2.0.0-rc01"
+    implementation "androidx.room:room-runtime:2.1.0-alpha02"
+    annotationProcessor "androidx.room:room-compiler:2.1.0-alpha02"
     implementation "androidx.room:room-rxjava2:2.1.0-alpha02"
     implementation deps.room.rxjava2
 
@@ -71,8 +71,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation 'com.google.android.gms:play-services-places:+'
-    implementation 'com.google.android.gms:play-services-auth:+'
-    implementation 'com.google.firebase:firebase-messaging:+'
-    implementation 'com.google.android.gms:play-services-location:+'
+    implementation 'com.google.android.gms:play-services-places:16.0.0'
+    implementation 'com.google.android.gms:play-services-auth:16.0.1'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 }

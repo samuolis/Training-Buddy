@@ -1,6 +1,9 @@
 package com.example.lukas.trainerapp.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -9,6 +12,8 @@ import android.view.View
 import android.widget.Toast
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
@@ -23,6 +28,13 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     var profileFragment = ProfileFragment()
     var homeFragment = HomeFragment()
+    var dashboardFragment = DashboardFragment()
+
+    private val REQUEST_PERMISION_CODE = 1111
+
+    companion object {
+        var permisionsResult: Boolean = false
+    }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
@@ -35,8 +47,8 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
             }
             R.id.navigation_dashboard -> {
                 supportFragmentManager.beginTransaction()
-                        .remove(profileFragment)
-                        .remove(homeFragment)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.navigation_frame, dashboardFragment)
                         .commit()
                 return@OnNavigationItemSelectedListener true
             }
@@ -63,12 +75,38 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         supportActionBar?.title = getString(R.string.app_name)
         //Listen for changes in the back stack
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+        if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                    REQUEST_PERMISION_CODE /*LOCATION_PERMISSION_REQUEST_CODE*/)
+        }
         //Handle when activity is recreated like on orientation Change
         shouldDisplayHomeUp()
         supportFragmentManager.beginTransaction()
                 .replace(R.id.navigation_frame, homeFragment)
                 .commit()
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_PERMISION_CODE -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    permisionsResult = true
+                } else {
+                    permisionsResult = false
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
     }
 
     override fun onBackStackChanged() {
