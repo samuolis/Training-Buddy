@@ -83,9 +83,12 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         }
         //Handle when activity is recreated like on orientation Change
         shouldDisplayHomeUp()
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.navigation_frame, homeFragment)
-                .commit()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.navigation_frame, homeFragment)
+                    .addToBackStack(null)
+                    .commit()
+        }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
@@ -110,7 +113,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     }
 
     override fun onBackStackChanged() {
-        fragmentAdded = supportFragmentManager.backStackEntryCount > 0
+        fragmentAdded = supportFragmentManager.backStackEntryCount > 1
         if (!fragmentAdded){
             supportActionBar!!.title = getString(R.string.app_name)
         }

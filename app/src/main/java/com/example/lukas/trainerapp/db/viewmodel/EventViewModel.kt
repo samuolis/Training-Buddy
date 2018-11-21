@@ -18,11 +18,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
 import com.example.lukas.trainerapp.db.entity.User
+import java.text.FieldPosition
 
 
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
+    var oneEvent: MutableLiveData<Event>? = MutableLiveData<Event>()
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var userCountryCode: String? = "UK"
     var selectedUserLongitude: Float? =0.toFloat()
@@ -31,7 +33,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var refreshGlobalStatus: MutableLiveData<Int>? = null
     lateinit var eventWebService: EventWebService
     lateinit var mDb: AppDatabase
-    private val BASE_URL = "https://training-222106.appspot.com/"
+    val BASE_URL = "https://training-222106.appspot.com/"
     var userPreferedDistance: String? = "30"
     var user: User? = null
     var userId: String? = null
@@ -61,6 +63,19 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
             loadEvents()
         }
         return events
+    }
+
+    fun getEventByPosition(): LiveData<Event>?{
+        return oneEvent
+    }
+
+    fun loadOneEvent(position: Int? = null){
+        if (position == null){
+            oneEvent?.value = null
+            return
+        }
+        var value = events?.value!![position]
+        oneEvent?.value = value
     }
 
     fun getEventsOfLocation(countryCode: String?, userLatitude: Float?, userLongitude: Float?): LiveData<List<Event>>? {

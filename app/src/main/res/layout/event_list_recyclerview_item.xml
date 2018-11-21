@@ -13,14 +13,16 @@
     android:layout_marginBottom="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/list_content_layout"
         android:layout_width="match_parent"
+        android:background="@drawable/profile_button_selector"
         android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/event_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:text="Event Name"
             android:textColor="@android:color/black"
@@ -59,8 +61,7 @@
             android:id="@+id/event_place_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="Event place name"
             android:textColor="@android:color/black"
@@ -72,8 +73,9 @@
             android:id="@+id/event_date_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:text="Event date"
             android:textColor="@android:color/black"
             android:textSize="16sp"
@@ -82,16 +84,28 @@
             app:layout_constraintTop_toBottomOf="@+id/event_place_name_text_view" />
 
         <TextView
-            android:id="@+id/event_players_number_text_view"
+            android:id="@+id/players_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginEnd="8dp"
-            android:text="Event players number"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="Remaining"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/event_place_name_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/distance_linear_layout" />
+
+        <TextView
+            android:id="@+id/event_players_number_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="6"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/players_label"
+            app:layout_constraintStart_toStartOf="@+id/players_label"
+            app:layout_constraintTop_toBottomOf="@+id/players_label" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

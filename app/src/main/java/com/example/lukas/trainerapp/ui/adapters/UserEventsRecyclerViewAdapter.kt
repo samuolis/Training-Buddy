@@ -9,12 +9,17 @@ import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.entity.Event
 import kotlinx.android.synthetic.main.event_list_recyclerview_item.view.*
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import com.example.lukas.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter.MyClickListener
 
-class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
+
+
+class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context, onClickListener: MyClickListener?) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
 
     var eventList = eventsList
     var layoutInflater: LayoutInflater = LayoutInflater.from(context)
     val context = context
+    var myClickListener = onClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // create a new view
@@ -29,7 +34,9 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.eventName.text = eventList[position].eventName
-        holder.eventDate.text = eventList[position].eventDate.toString()
+        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+        val dateStr = timeStampFormat.format(eventList[position].eventDate)
+        holder.eventDate.text = dateStr
         holder.eventPlaceName.text = eventList[position].eventLocationName
         holder.eventPlayersCount.text = eventList[position].eventPlayers.toString()
         if (eventList[position].eventDistance == null){
@@ -38,6 +45,7 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context) :
             holder.eventsDistanceLinearLAyout.visibility = View.VISIBLE
             holder.eventsDistance.text = DecimalFormat("##.##").format(eventList[position].eventDistance)
         }
+        holder.listContentLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view){
@@ -47,6 +55,11 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context) :
         val eventPlaceName = view.event_place_name_text_view
         val eventsDistance = view.event_distance_text_view
         val eventsDistanceLinearLAyout = view.distance_linear_layout
+        val listContentLayout = view.list_content_layout
+    }
+
+    interface MyClickListener {
+        fun onItemClicked(position: Int)
     }
 
 }

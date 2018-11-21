@@ -51,7 +51,7 @@ import java.util.*
                 dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
                 eventViewModel.getEventsOfLocation(userLocationCountryCode,
                         userLocation?.latitude?.toFloat(), userLocation?.longitude?.toFloat())?.observe(this, androidx.lifecycle.Observer {
-                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!)
+                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, null)
                 })
                 eventViewModel.getStatus()?.observe(this, Observer {
                     dashboard_swipe_container.isRefreshing = !(it == 0)

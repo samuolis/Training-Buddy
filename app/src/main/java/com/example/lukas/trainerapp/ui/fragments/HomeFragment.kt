@@ -33,6 +33,7 @@ class HomeFragment : Fragment() {
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         rootView.post {
             fab.setOnClickListener {
+                eventViewModel.loadOneEvent()
                 (activity as NavigationActivity).showEventCreateDialogFragment()
             }
             home_recyclerview.layoutManager = LinearLayoutManager(context)
@@ -48,7 +49,16 @@ class HomeFragment : Fragment() {
     fun loadUi(){
         eventViewModel.getEvents()?.observe(this, Observer {
             var list = it
-            home_recyclerview.adapter = UserEventsRecyclerViewAdapter(list, context!!)
+            home_recyclerview.adapter = UserEventsRecyclerViewAdapter(
+                    list,
+                    context!!,
+                    object : UserEventsRecyclerViewAdapter.MyClickListener {
+                        override fun onItemClicked(position: Int) {
+                            eventViewModel.loadOneEvent(position)
+                            (activity as NavigationActivity).showEventCreateDialogFragment()
+                        }
+                    }
+            )
         })
         eventViewModel.getStatus()?.observe(this, Observer {
             swipe_container.isRefreshing = !(it == 0)
