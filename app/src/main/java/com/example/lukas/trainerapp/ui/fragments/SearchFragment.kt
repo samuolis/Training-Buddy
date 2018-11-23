@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 
 import com.example.lukas.trainerapp.R
-import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_search.*

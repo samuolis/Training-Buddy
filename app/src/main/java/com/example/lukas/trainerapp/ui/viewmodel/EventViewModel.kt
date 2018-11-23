@@ -1,8 +1,12 @@
-package com.example.lukas.trainerapp.db.viewmodel
+package com.example.lukas.trainerapp.ui.viewmodel
 
+import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
@@ -17,18 +21,18 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.lukas.trainerapp.db.entity.User
-import java.text.FieldPosition
+import com.google.android.gms.location.LocationServices
+import java.util.*
 
 
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
     var oneEvent: MutableLiveData<Event>? = MutableLiveData<Event>()
+    var oneEventDashboard: MutableLiveData<Event>? = MutableLiveData<Event>()
     var eventsByLocation: MutableLiveData<List<Event>>? = null
-    var userCountryCode: String? = "UK"
-    var selectedUserLongitude: Float? =0.toFloat()
-    var selectedUserLatitude: Float? =0.toFloat()
     var refreshStatus: MutableLiveData<Int>? = null
     var refreshGlobalStatus: MutableLiveData<Int>? = null
     lateinit var eventWebService: EventWebService
@@ -78,33 +82,46 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         oneEvent?.value = value
     }
 
-    fun getEventsOfLocation(countryCode: String?, userLatitude: Float?, userLongitude: Float?): LiveData<List<Event>>? {
+    fun getEventInDashboard(): LiveData<Event>?{
+        return oneEventDashboard
+    }
+
+    fun loadOneEventInDashboard(position: Int? = null){
+        if (position == null){
+            oneEventDashboard?.value = null
+            return
+        }
+        var value = eventsByLocation?.value!![position]
+        oneEventDashboard?.value = value
+    }
+
+    fun getEventsOfLocation(): LiveData<List<Event>>? {
         if (eventsByLocation == null) {
             eventsByLocation = MutableLiveData<List<Event>>()
-            userCountryCode = countryCode
-            selectedUserLatitude = userLatitude
-            selectedUserLongitude = userLongitude
-            loadEventsByLocation(countryCode, userLatitude, userLongitude)
+            loadEventsByLocation()
         }
         return eventsByLocation
     }
 
-    fun loadEventsByLocation(countryCode: String? = userCountryCode, userLatitude: Float? = selectedUserLatitude,
-                             userLongitude: Float? = selectedUserLongitude) {
+    fun loadEventsByLocation() {
         userPreferedDistance = userSharedPref?.getString(myApplication.getString(R.string.user_prefered_distance_key), "30")
-        eventWebService.getEventsByLocation(userId, userPreferedDistance, countryCode,
-                userLatitude, userLongitude).enqueue(object : Callback<List<Event>> {
-            override fun onFailure(call: Call<List<Event>>, t: Throwable) {
-                Toast.makeText(myApplication, "failure", Toast.LENGTH_LONG).show()
-                refreshStatus?.value = 0
-            }
+        getDataFromLocation {deviceLocation, deviceCountryCode ->
+            eventWebService.getEventsByLocation(userId, userPreferedDistance, deviceCountryCode,
+                    deviceLocation?.latitude?.toFloat(),
+                    deviceLocation?.longitude?.toFloat())
+                    .enqueue(object : Callback<List<Event>> {
+                override fun onFailure(call: Call<List<Event>>, t: Throwable) {
+                    Toast.makeText(myApplication, "failure", Toast.LENGTH_LONG).show()
+                    refreshStatus?.value = 0
+                }
 
-            override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
-                eventsByLocation?.value = response.body()
-                refreshStatus?.value = 0
-            }
+                override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
+                    eventsByLocation?.value = response.body()
+                    refreshStatus?.value = 0
+                }
 
-        })
+            })
+        }
     }
 
     fun getStatus(): MutableLiveData<Int>? {
@@ -113,17 +130,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
             refreshStatus?.value = 0
         }
         return refreshStatus
-    }
-
-    fun getGlobalStatus(): MutableLiveData<Int>? {
-        if (refreshGlobalStatus == null) {
-            refreshGlobalStatus = MutableLiveData<Int>()
-            refreshGlobalStatus?.value = 0
-        }
-        if (refreshGlobalStatus?.value == 1){
-
-        }
-        return refreshGlobalStatus
     }
 
 
@@ -142,5 +148,26 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         })
+    }
+
+    fun getDataFromLocation (callback: (gotLocation: Location?, countryCode: String?) -> Unit){
+        var fusedLocationClient = LocationServices.getFusedLocationProviderClient(myApplication)
+        if (ContextCompat.checkSelfPermission(myApplication,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location: Location? ->
+                        if (location != null)
+                        {
+                            var geocoder = Geocoder(myApplication, Locale.getDefault())
+                            var adresses = geocoder.getFromLocation(location.latitude,
+                                    location.longitude, 1)
+                            var address = adresses[0]
+                            callback(location, address.countryCode)
+                        }
+                    }
+        } else {
+            Toast.makeText(myApplication, "You do not enabled location", Toast.LENGTH_LONG).show()
+            callback(null, null)
+        }
     }
 }

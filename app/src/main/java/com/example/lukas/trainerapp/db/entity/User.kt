@@ -44,6 +44,10 @@ class User {
     var profilePictureIndex: Int? = null
 
     @Ignore
+    @SerializedName("signedEventsList")
+    var signedEventsList: List<Long>? = null
+
+    @Ignore
     constructor(userId: String?, fullName: String?, email: String?, phoneNumber: String?,
                 createdAt: Date?) {
         this.fullName = fullName

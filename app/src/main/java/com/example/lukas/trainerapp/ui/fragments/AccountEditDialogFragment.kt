@@ -15,7 +15,7 @@ import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.webService.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity

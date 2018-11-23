@@ -22,4 +22,11 @@ interface EventWebService {
                             @Path("latitude") latitude: Float?,
                             @Path("longitude") longitude: Float?): Call<List<Event>>
 
+    @POST("/event/{userId}/{eventId}")
+    fun signEvent(@Path("userId") userId: String?,
+                  @Path("eventId") eventId: Long?): Call<Void>
+
+    @POST("/events")
+    fun getEventByIds(@Body eventsIds: List<Long>?): Call<List<Event>>
+
 }

@@ -3,8 +3,6 @@ package com.example.lukas.trainerapp.ui.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,7 +33,7 @@ import com.example.lukas.trainerapp.ui.LoginActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
 import com.example.lukas.trainerapp.webService.UserWebService;
 import com.facebook.Profile;
@@ -49,7 +47,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static android.Manifest.permission.READ_CONTACTS;
-import static android.content.Context.MODE_PRIVATE;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 

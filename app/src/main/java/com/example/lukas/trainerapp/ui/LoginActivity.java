@@ -11,7 +11,7 @@ import android.view.Window;
 
 
 import com.example.lukas.trainerapp.R;
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.ui.fragments.LoginFragment;
 import com.example.lukas.trainerapp.ui.fragments.RegisterFragment;
 import com.facebook.CallbackManager;

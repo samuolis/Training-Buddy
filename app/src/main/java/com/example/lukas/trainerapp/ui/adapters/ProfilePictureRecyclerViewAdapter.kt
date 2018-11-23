@@ -1,27 +1,15 @@
 package com.example.lukas.trainerapp.ui.adapters
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.ui.NavigationActivity
-import com.example.lukas.trainerapp.utils.DrawableUtils
 
 class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, user: User) : RecyclerView.Adapter<ProfilePictureRecyclerViewAdapter.ViewHolder>() {
 

@@ -1,8 +1,6 @@
 package com.example.lukas.trainerapp.ui.fragments
 
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
 
 import android.view.LayoutInflater
@@ -12,14 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 import com.example.lukas.trainerapp.R
-import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class HomeFragment : Fragment() {

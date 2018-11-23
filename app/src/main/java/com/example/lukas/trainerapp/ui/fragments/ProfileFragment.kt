@@ -9,13 +9,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.entity.User
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
+import com.example.lukas.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.example.lukas.trainerapp.utils.DrawableUtils
-import kotlinx.android.synthetic.main.fragment_account_edit.*
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 
@@ -50,7 +51,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupInfo(){
-        userViewModel.user.observe(this, Observer { user: User ->
+        profile_events_recycler_view.layoutManager = LinearLayoutManager(context)
+        userViewModel.getUserWeb()?.observe(this, Observer { user: User ->
             if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size){
                 DrawableUtils.setupInitials(initials_image_view, user)
             } else{
@@ -60,6 +62,9 @@ class ProfileFragment : Fragment() {
             user_email_text_view.text = user.email
             user_phone_number_text_view.text = user.phoneNumber
             profile_linear_layout.visibility = View.VISIBLE
+
+            userViewModel.loadUserEventsByIds()
+
         })
         user_full_name_text_view.setOnClickListener({
             (activity as NavigationActivity).showAccountEditDialogFragment()
@@ -69,6 +74,17 @@ class ProfileFragment : Fragment() {
         })
         user_phone_number_text_view.setOnClickListener({
             (activity as NavigationActivity).showAccountEditDialogFragment()
+        })
+
+        userViewModel.getUserEvents()?.observe(this, Observer { userEvents ->
+            if(userEvents != null) {
+                profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(userEvents, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
+                    override fun onItemClicked(position: Int) {
+
+                    }
+
+                })
+            }
         })
 
     }

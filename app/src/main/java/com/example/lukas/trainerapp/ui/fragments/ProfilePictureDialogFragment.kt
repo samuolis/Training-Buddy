@@ -1,7 +1,6 @@
 package com.example.lukas.trainerapp.ui.fragments
 
 
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import com.example.lukas.trainerapp.R
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.adapters.ProfilePictureRecyclerViewAdapter
 import kotlinx.android.synthetic.main.fragment_profile_picture_dialog.*

@@ -23,15 +23,12 @@ import android.location.Geocoder
 import android.text.SpannableStringBuilder
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.db.entity.Event
-import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.webService.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder
 import retrofit2.Call

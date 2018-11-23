@@ -17,17 +17,13 @@ import androidx.fragment.app.Fragment
 import com.example.lukas.trainerapp.R
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.lukas.trainerapp.db.entity.Event
-import com.example.lukas.trainerapp.db.viewmodel.EventViewModel
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
-import com.example.lukas.trainerapp.webService.EventWebService
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.android.synthetic.main.fragment_home.*
 import java.util.*
 
 
@@ -42,25 +38,25 @@ import java.util.*
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val sharedPref = context?.getSharedPreferences(context?.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         rootView.post {
-            getDataFromLocation { gotLocation, countryCode ->
-                userLocation = gotLocation
-                userLocationCountryCode = countryCode
-                dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
-                eventViewModel.getEventsOfLocation(userLocationCountryCode,
-                        userLocation?.latitude?.toFloat(), userLocation?.longitude?.toFloat())?.observe(this, androidx.lifecycle.Observer {
-                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, null)
+            dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
+            eventViewModel.getEventsOfLocation()?.observe(this, androidx.lifecycle.Observer {
+                dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
+                    override fun onItemClicked(position: Int) {
+                        eventViewModel.loadOneEventInDashboard(position)
+                        (activity as NavigationActivity).showEventDetailsDialogFragment()
+                    }
+
                 })
-                eventViewModel.getStatus()?.observe(this, Observer {
-                    dashboard_swipe_container.isRefreshing = !(it == 0)
-                })
-                dashboard_swipe_container.setOnRefreshListener {
-                    eventViewModel.loadEventsByLocation(userLocationCountryCode,
-                            userLocation?.latitude?.toFloat(), userLocation?.longitude?.toFloat())
-                }
+            })
+            eventViewModel.getStatus()?.observe(this, Observer {
+                dashboard_swipe_container.isRefreshing = !(it == 0)
+            })
+            dashboard_swipe_container.setOnRefreshListener {
+                eventViewModel.loadEventsByLocation()
             }
+
             dashboard_fab.setOnClickListener {
                 (activity as NavigationActivity).showDashnoardSearchDialogFragment()
             }
@@ -68,27 +64,5 @@ import java.util.*
         }
         return rootView
     }
-
-    fun getDataFromLocation (callback: (gotLocation: Location?, countryCode: String?) -> Unit){
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
-        if (ContextCompat.checkSelfPermission(context!!,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location: Location? ->
-                        if (location != null)
-                        {
-                            var geocoder = Geocoder(context, Locale.getDefault())
-                            var adresses = geocoder.getFromLocation(location.latitude,
-                                    location.longitude, 1)
-                            var address = adresses[0]
-                            callback(location, address.countryCode)
-                        }
-                    }
-        } else {
-            Toast.makeText(context, "You do not enabled location", Toast.LENGTH_LONG).show()
-            callback(null, null)
-        }
-    }
-
 
 }

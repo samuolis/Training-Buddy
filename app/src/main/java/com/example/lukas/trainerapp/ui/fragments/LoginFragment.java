@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.ColorInt;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -20,7 +19,7 @@ import com.example.lukas.trainerapp.ui.LoginActivity;
 import com.example.lukas.trainerapp.R;
 import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
-import com.example.lukas.trainerapp.db.viewmodel.UserViewModel;
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
 import com.example.lukas.trainerapp.webService.UserWebService;
 import com.facebook.CallbackManager;
@@ -48,7 +47,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.facebook.accountkit.ui.SkinManager.Skin.CONTEMPORARY;
-import static com.facebook.accountkit.ui.SkinManager.Tint.BLACK;
 
 
 public class LoginFragment extends Fragment {
