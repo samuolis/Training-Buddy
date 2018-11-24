@@ -20,6 +20,7 @@ import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.ui.fragments.*
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
@@ -37,6 +38,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
+                eventViewModel.loadEvents()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, homeFragment)
@@ -44,6 +46,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
+                eventViewModel.loadEventsByLocation()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, dashboardFragment)
@@ -51,6 +54,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
+                eventViewModel.loadUserData()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, profileFragment)
@@ -63,6 +67,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     private var doubleBackToExitPressedOnce = false
     lateinit var userViewModel : UserViewModel
+    lateinit var eventViewModel: EventViewModel
     lateinit var logoutIntent : Intent
     var fragmentAdded : Boolean = false
 
@@ -70,6 +75,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
+        eventViewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
         supportActionBar?.title = getString(R.string.app_name)
         //Listen for changes in the back stack
         getSupportFragmentManager().addOnBackStackChangedListener(this);

@@ -28,6 +28,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     var userEvents: MutableLiveData<List<Event>>? = null
 
+    var userEventInProfile: MutableLiveData<Event>? = MutableLiveData<Event>()
+
     var userWeb: MutableLiveData<User>? = null
 
     private var mUserData: MutableLiveData<UserData>? = null
@@ -136,6 +138,19 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
                 })
+    }
+
+    fun getEventInProfile(): LiveData<Event>?{
+        return userEventInProfile
+    }
+
+    fun loadOneEventInUserProfile(position: Int? = null){
+        if (position == null){
+            userEventInProfile?.value = null
+            return
+        }
+        var value = userEvents?.value!![position]
+        userEventInProfile?.value = value
     }
 
     companion object {

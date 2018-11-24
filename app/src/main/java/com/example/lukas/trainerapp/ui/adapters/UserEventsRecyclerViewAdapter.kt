@@ -14,7 +14,7 @@ import com.example.lukas.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter.My
 
 
 
-class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context, onClickListener: MyClickListener?) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
+class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, onClickListener: MyClickListener?) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
 
     var eventList = eventsList
     var layoutInflater: LayoutInflater = LayoutInflater.from(context)
@@ -29,23 +29,25 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>, context: Context, o
     }
 
     override fun getItemCount(): Int {
-        return eventList.size
+        return eventList?.size ?: 0
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.eventName.text = eventList[position].eventName
-        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-        val dateStr = timeStampFormat.format(eventList[position].eventDate)
-        holder.eventDate.text = dateStr
-        holder.eventPlaceName.text = eventList[position].eventLocationName
-        holder.eventPlayersCount.text = eventList[position].eventPlayers.toString()
-        if (eventList[position].eventDistance == null){
-            holder.eventsDistanceLinearLAyout.visibility = View.INVISIBLE
-        }else{
-            holder.eventsDistanceLinearLAyout.visibility = View.VISIBLE
-            holder.eventsDistance.text = DecimalFormat("##.##").format(eventList[position].eventDistance)
+        if (eventList != null) {
+            holder.eventName.text = eventList!![position].eventName
+            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            val dateStr = timeStampFormat.format(eventList!![position].eventDate)
+            holder.eventDate.text = dateStr
+            holder.eventPlaceName.text = eventList!![position].eventLocationName
+            holder.eventPlayersCount.text = eventList!![position].eventPlayers.toString()
+            if (eventList!![position].eventDistance == null) {
+                holder.eventsDistanceLinearLAyout.visibility = View.INVISIBLE
+            } else {
+                holder.eventsDistanceLinearLAyout.visibility = View.VISIBLE
+                holder.eventsDistance.text = DecimalFormat("##.##").format(eventList!![position].eventDistance)
+            }
+            holder.listContentLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
         }
-        holder.listContentLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view){

@@ -42,13 +42,15 @@ import java.util.*
         rootView.post {
             dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
             eventViewModel.getEventsOfLocation()?.observe(this, androidx.lifecycle.Observer {
-                dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
-                    override fun onItemClicked(position: Int) {
-                        eventViewModel.loadOneEventInDashboard(position)
-                        (activity as NavigationActivity).showEventDetailsDialogFragment()
-                    }
+                if (it != null && it.size != 0) {
+                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
+                        override fun onItemClicked(position: Int) {
+                            eventViewModel.loadOneEventInDashboard(position)
+                            (activity as NavigationActivity).showEventDetailsDialogFragment()
+                        }
 
-                })
+                    })
+                }
             })
             eventViewModel.getStatus()?.observe(this, Observer {
                 dashboard_swipe_container.isRefreshing = !(it == 0)

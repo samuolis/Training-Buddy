@@ -62,5 +62,7 @@
     <string name="prefered_distance_preferences">distance_preference_preferences</string>
     <string name="radius_in_meters_from_your_locations">Radius in kilometers</string>
     <string name="search_properties_title">Search properties</string>
+    <string name="event_description_negative_button">I can\'t</string>
+    <string name="event_description_positive_button">I\'m in</string>
 
 </resources>

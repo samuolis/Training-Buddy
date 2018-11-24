@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import com.example.lukas.trainerapp.ui.NavigationActivity
+import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.webService.EventWebService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder
@@ -34,12 +35,14 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
     lateinit var eventWebService: EventWebService
+    lateinit var userViewModel: UserViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_event_details_dialog, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+        userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
         var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         var userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
         val gson = GsonBuilder()
@@ -55,36 +58,85 @@ class EventDetailsDialogFragment : DialogFragment() {
         val eventWebService = retrofit.create(EventWebService::class.java)
 
         rootView.post {
-            eventViewModel.oneEventDashboard?.observe(this, Observer {
-                event_details_title.text = SpannableStringBuilder(it.eventName)
-                val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                val dateStr = timeStampFormat.format(it.eventDate)
-                event_details_date.text = SpannableStringBuilder(dateStr)
-                event_details_description.text = SpannableStringBuilder(it.eventDescription)
-                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-                event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-                event_details_submit_button.setOnClickListener {view ->
-                    eventWebService.signEvent(userId, it.eventId).enqueue(object : Callback<Void>{
-                        override fun onFailure(call: Call<Void>, t: Throwable) {
-                            Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                    .show()
+
+            eventViewModel.getStatusForDescription()?.observe(this, Observer {status ->
+                if (status == 0){
+                    eventViewModel.getEventInDashboard()?.observe(this, Observer {
+                        event_details_title.text = SpannableStringBuilder(it.eventName)
+                        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+                        val dateStr = timeStampFormat.format(it.eventDate)
+                        event_details_date.text = SpannableStringBuilder(dateStr)
+                        event_details_description.text = SpannableStringBuilder(it.eventDescription)
+                        if (it.eventDistance == null){
+                            event_details_distance_layout.visibility = View.GONE
+                        } else{
+                            event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
                         }
+                        event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
+                        event_details_location.text = SpannableStringBuilder(it.eventLocationName)
+                        event_details_submit_button.text = getString(R.string.event_description_positive_button)
+                        event_details_submit_button.setOnClickListener {view ->
+                            eventWebService.signEvent(userId, it.eventId).enqueue(object : Callback<Void>{
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                            .show()
+                                }
 
-                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                            (activity as NavigationActivity).backOnStack()
-                            Snackbar.make(view, "Event signed", Snackbar.LENGTH_LONG)
-                                    .setAction("Unsign", {
+                                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                    (activity as NavigationActivity).backOnStack()
+                                    Snackbar.make(view, "Event signed", Snackbar.LENGTH_LONG)
+                                            .setAction("Unsign", {
 
-                                    })
-                                    .show()
-                            eventViewModel?.loadEventsByLocation()
+                                            })
+                                            .show()
+                                    eventViewModel?.loadEventsByLocation()
+                                    eventViewModel.loadUserData()
+                                }
+
+                            })
                         }
 
                     })
-                }
+                } else if(status == 1){
+                    eventViewModel.getEventInProfile()?.observe(this, Observer {
+                        event_details_title.text = SpannableStringBuilder(it.eventName)
+                        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+                        val dateStr = timeStampFormat.format(it.eventDate)
+                        event_details_date.text = SpannableStringBuilder(dateStr)
+                        event_details_description.text = SpannableStringBuilder(it.eventDescription)
+                        if (it.eventDistance == null){
+                            event_details_distance_layout.visibility = View.GONE
+                        } else{
+                            event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
+                        }
+                        event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
+                        event_details_location.text = SpannableStringBuilder(it.eventLocationName)
+                        event_details_submit_button.text = getString(R.string.event_description_negative_button)
+                        event_details_submit_button.setOnClickListener {view ->
+                            eventWebService.unsignEvent(userId, it.eventId).enqueue(object : Callback<Void>{
+                                override fun onFailure(call: Call<Void>, t: Throwable) {
+                                    Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                            .show()
+                                }
 
+                                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                    (activity as NavigationActivity).backOnStack()
+                                    Snackbar.make(view, "Event unsigned", Snackbar.LENGTH_LONG)
+                                            .setAction("Sign", {
+
+                                            })
+                                            .show()
+                                    eventViewModel?.loadUserData()
+                                    eventViewModel?.loadEventsByLocation()
+                                }
+
+                            })
+                        }
+                    })
+                }
             })
+
+
         }
         val actionBar = (activity as AppCompatActivity).supportActionBar
         if (actionBar != null) {

@@ -47,7 +47,6 @@ class User {
     @SerializedName("signedEventsList")
     var signedEventsList: List<Long>? = null
 
-    @Ignore
     constructor(userId: String?, fullName: String?, email: String?, phoneNumber: String?,
                 createdAt: Date?) {
         this.fullName = fullName
@@ -57,8 +56,9 @@ class User {
         this.createdAt = createdAt
     }
 
+    @Ignore
     constructor(id: Long, userId: String?, fullName: String?, email: String?, phoneNumber: String?,
-                createdAt: Date?, profilePictureIndex: Int?) {
+                createdAt: Date?, profilePictureIndex: Int?, signedEventsList: List<Long>?) {
         this.id = id
         this.fullName = fullName
         this.email = email
@@ -66,5 +66,6 @@ class User {
         this.phoneNumber = phoneNumber
         this.createdAt = createdAt
         this.profilePictureIndex = profilePictureIndex
+        this.signedEventsList = signedEventsList
     }
 }

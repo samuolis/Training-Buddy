@@ -19,6 +19,7 @@ import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.webService.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.utils.DrawableUtils
 import com.google.gson.GsonBuilder
 import kotlinx.android.synthetic.main.fragment_account_edit.*
@@ -32,10 +33,12 @@ import java.util.*
 class AccountEditDialogFragment : DialogFragment() {
 
     lateinit var userViewModel : UserViewModel
+    lateinit var eventViewModel: EventViewModel
     lateinit var mDb: AppDatabase
     var userId: String? = null
     var databaseId: Long = 0
     var profileInt: Int? = null
+    var signedEvents: List<Long>? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -46,7 +49,8 @@ class AccountEditDialogFragment : DialogFragment() {
         mDb = AppDatabase.getInstance(activity)
         rootView.post({
             userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
-            userViewModel.user.observe(this, Observer { user: User ->
+            eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+            eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
                 profileInt = user.profilePictureIndex
                 if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size){
                     DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
@@ -68,6 +72,7 @@ class AccountEditDialogFragment : DialogFragment() {
                     profileInt = ProfilePicture.values().size
                     DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
                 }
+                signedEvents = user.signedEventsList
             })
         })
         return rootView
@@ -117,7 +122,7 @@ class AccountEditDialogFragment : DialogFragment() {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             val currentTime = Calendar.getInstance().time
-            val user = User(databaseId, userId, fullName, email, phoneNumber, currentTime, profileInt)
+            val user = User(databaseId, userId, fullName, email, phoneNumber, currentTime, profileInt, signedEvents)
 
             val gson = GsonBuilder()
                     .setLenient()

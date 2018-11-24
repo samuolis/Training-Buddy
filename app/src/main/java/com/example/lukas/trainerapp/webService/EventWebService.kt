@@ -26,6 +26,10 @@ interface EventWebService {
     fun signEvent(@Path("userId") userId: String?,
                   @Path("eventId") eventId: Long?): Call<Void>
 
+    @POST("/event/delete/{userId}/{eventId}")
+    fun unsignEvent(@Path("userId") userId: String?,
+                  @Path("eventId") eventId: Long?): Call<Void>
+
     @POST("/events")
     fun getEventByIds(@Body eventsIds: List<Long>?): Call<List<Event>>
 
