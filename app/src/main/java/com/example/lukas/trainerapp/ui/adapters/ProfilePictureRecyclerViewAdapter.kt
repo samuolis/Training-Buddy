@@ -11,10 +11,10 @@ import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.enums.ProfilePicture
 import com.example.lukas.trainerapp.ui.NavigationActivity
 
-class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, user: User) : RecyclerView.Adapter<ProfilePictureRecyclerViewAdapter.ViewHolder>() {
+class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, onClickListener: MyClickListener?) : RecyclerView.Adapter<ProfilePictureRecyclerViewAdapter.ViewHolder>() {
 
     var activity: NavigationActivity = activity
-    var user: User = user
+    var myClickListener = onClickListener
 
     override fun getItemCount(): Int {
         return ProfilePicture.values().size
@@ -23,15 +23,7 @@ class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, user: User
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         holder.imageView.setImageResource(ProfilePicture.values()[position].drawableId)
-        holder.imageView.setOnClickListener {
-            AppExecutors.getInstance().diskIO().execute {
-                var mDb = AppDatabase.getInstance(activity)
-                user.profilePictureIndex = position
-                mDb.userDao().insertUser(user)
-                activity.backOnStack()
-
-            }
-        }
+        holder.imageView.setOnClickListener { myClickListener?.onItemClicked(position) }
     }
 
     class ViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
@@ -43,6 +35,10 @@ class ProfilePictureRecyclerViewAdapter(activity: NavigationActivity, user: User
                 .inflate(R.layout.profile_recyclerview_item, parent, false) as ImageView
         // set the view's size, margins, paddings and layout parameters
         return ViewHolder(imageView)
+    }
+
+    interface MyClickListener {
+        fun onItemClicked(position: Int)
     }
 
 }

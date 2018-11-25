@@ -15,6 +15,7 @@ import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.adapters.ProfilePictureRecyclerViewAdapter
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_profile_picture_dialog.*
 
 /**
@@ -25,16 +26,23 @@ class ProfilePictureDialogFragment : DialogFragment() {
 
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    lateinit var userViewModel : UserViewModel
+    lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_profile_picture_dialog, container, false)
-        userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
-        userViewModel.user.observe(this, Observer {
+        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+        rootView.post {
             viewManager = GridLayoutManager(activity, 2)
-            viewAdapter = ProfilePictureRecyclerViewAdapter(activity = activity as NavigationActivity, user = it)
+            viewAdapter = ProfilePictureRecyclerViewAdapter(activity = activity as NavigationActivity,
+                    onClickListener = object : ProfilePictureRecyclerViewAdapter.MyClickListener {
+                        override fun onItemClicked(position: Int) {
+                            eventViewModel.loadProfilePicture(position)
+                            (activity as NavigationActivity).backOnStack()
+                        }
+
+                    })
             profile_picture_recycler_view.apply {
                 // use this setting to improve performance if you know that changes
                 // in content do not change the layout size of the RecyclerView
@@ -46,7 +54,8 @@ class ProfilePictureDialogFragment : DialogFragment() {
                 // specify an viewAdapter (see also next example)
                 adapter = viewAdapter
             }
-        })
+        }
+
         return rootView
     }
 

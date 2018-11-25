@@ -47,8 +47,13 @@ class User {
     @SerializedName("signedEventsList")
     var signedEventsList: List<Long>? = null
 
-    constructor(userId: String?, fullName: String?, email: String?, phoneNumber: String?,
+    @Ignore
+    @SerializedName("userFcmToken")
+    var userFcmToken: String? = null
+
+    constructor(id: Long, userId: String?, fullName: String?, email: String?, phoneNumber: String?,
                 createdAt: Date?) {
+        this.id = id
         this.fullName = fullName
         this.email = email
         this.phoneNumber = phoneNumber
@@ -57,9 +62,8 @@ class User {
     }
 
     @Ignore
-    constructor(id: Long, userId: String?, fullName: String?, email: String?, phoneNumber: String?,
-                createdAt: Date?, profilePictureIndex: Int?, signedEventsList: List<Long>?) {
-        this.id = id
+    constructor(userId: String?, fullName: String?, email: String?, phoneNumber: String?,
+                createdAt: Date?, profilePictureIndex: Int?, signedEventsList: List<Long>?, userFcmToken: String?) {
         this.fullName = fullName
         this.email = email
         this.userId = userId
@@ -67,5 +71,7 @@ class User {
         this.createdAt = createdAt
         this.profilePictureIndex = profilePictureIndex
         this.signedEventsList = signedEventsList
+        this.userFcmToken = userFcmToken
+
     }
 }

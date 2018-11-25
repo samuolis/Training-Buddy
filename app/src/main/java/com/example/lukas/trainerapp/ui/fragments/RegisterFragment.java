@@ -20,6 +20,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,12 @@ import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
-import com.example.lukas.trainerapp.webService.UserWebService;
+import com.example.lukas.trainerapp.web.webservice.UserWebService;
 import com.facebook.Profile;
 import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.AccountKit;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -206,37 +208,51 @@ public class RegisterFragment extends Fragment{
             }
             Date currentTime = Calendar.getInstance().getTime();
             Long userId = userViewModel.getmUserData().getId();
-            final User user = new User(userId.toString(), fullName, email, phoneNumber, currentTime);
 
-            Gson gson = new GsonBuilder()
-                    .setLenient()
-                    .create();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(userViewModel.getBaseUrl())
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build();
-
-            UserWebService userWebService = retrofit.create(UserWebService.class);
-
-            userWebService.postUser(user).enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(Call<User> call, Response<User> response) {
-                    AppExecutors.getInstance().diskIO().execute(() -> {
-                        try {
-                            mDb.userDao().insertUser(response.body());
-                            ((LoginActivity)getActivity()).GoToNavigationActivity();
-                        } catch (Exception e){
-                            Toast.makeText(getActivity(), "failed to store data", Toast.LENGTH_LONG).show();
+            FirebaseInstanceId.getInstance().getInstanceId()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Log.w("LoginFragment", "getInstanceId failed", task.getException());
+                            return;
                         }
-                    });
-                }
 
-                @Override
-                public void onFailure(Call<User> call, Throwable t) {
-                    Toast.makeText(getActivity(),t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        final User user = new User(userId.toString(), fullName, email, phoneNumber,
+                                currentTime, null, null, token);
+
+                        Gson gson = new GsonBuilder()
+                                .setLenient()
+                                .create();
+
+                        Retrofit retrofit = new Retrofit.Builder()
+                                .baseUrl(userViewModel.getBaseUrl())
+                                .addConverterFactory(GsonConverterFactory.create(gson))
+                                .build();
+
+                        UserWebService userWebService = retrofit.create(UserWebService.class);
+
+                        userWebService.postUser(user).enqueue(new Callback<User>() {
+                            @Override
+                            public void onResponse(Call<User> call, Response<User> response) {
+                                AppExecutors.getInstance().diskIO().execute(() -> {
+                                    try {
+                                        mDb.userDao().insertUser(response.body());
+                                        ((LoginActivity)getActivity()).GoToNavigationActivity();
+                                    } catch (Exception e){
+                                        Toast.makeText(getActivity(), "failed to store data", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(Call<User> call, Throwable t) {
+                                Toast.makeText(getActivity(),t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                    });
 
         }
     }

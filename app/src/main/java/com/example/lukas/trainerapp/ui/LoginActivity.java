@@ -1,13 +1,16 @@
 package com.example.lukas.trainerapp.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 
 
 import com.example.lukas.trainerapp.R;
@@ -15,6 +18,10 @@ import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.ui.fragments.LoginFragment;
 import com.example.lukas.trainerapp.ui.fragments.RegisterFragment;
 import com.facebook.CallbackManager;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;

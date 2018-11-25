@@ -1,14 +1,12 @@
 package com.example.lukas.trainerapp.ui.fragments
 
 
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 
@@ -21,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
-import com.example.lukas.trainerapp.webService.EventWebService
+import com.example.lukas.trainerapp.web.webservice.EventWebService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder
 import retrofit2.Call

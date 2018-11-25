@@ -21,7 +21,7 @@ import com.example.lukas.trainerapp.db.AppDatabase;
 import com.example.lukas.trainerapp.db.entity.User;
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel;
 import com.example.lukas.trainerapp.model.UserData;
-import com.example.lukas.trainerapp.webService.UserWebService;
+import com.example.lukas.trainerapp.web.webservice.UserWebService;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -33,8 +33,11 @@ import com.facebook.accountkit.ui.SkinManager;
 import com.facebook.accountkit.ui.UIManager;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import java.io.IOException;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProviders;
@@ -246,6 +249,33 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
                         if(response.isSuccessful()) {
+                            if (response.body().getUserFcmToken() == null || response.body().getUserFcmToken() == "")
+                            {
+                                FirebaseInstanceId.getInstance().getInstanceId()
+                                        .addOnCompleteListener(task -> {
+                                            if (!task.isSuccessful()) {
+                                                Log.w("LoginFragment", "getInstanceId failed", task.getException());
+                                                return;
+                                            }
+
+                                            // Get new Instance ID token
+                                            String token = task.getResult().getToken();
+                                            User user = response.body();
+                                            user.setUserFcmToken(token);
+                                            userWebService.postUser(user).enqueue(new Callback<User>() {
+                                                @Override
+                                                public void onResponse(Call<User> call, Response<User> response) {
+
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<User> call, Throwable t) {
+
+                                                }
+                                            });
+
+                                        });
+                            }
                             AppExecutors.getInstance().diskIO().execute(() -> {
                                 mDb.userDao().insertUser(response.body());
                                 ((LoginActivity)getActivity()).GoToNavigationActivity();

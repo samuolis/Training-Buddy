@@ -1,4 +1,4 @@
-package com.example.lukas.trainerapp.webService
+package com.example.lukas.trainerapp.web.webservice
 
 import com.example.lukas.trainerapp.db.entity.Event
 import retrofit2.Call

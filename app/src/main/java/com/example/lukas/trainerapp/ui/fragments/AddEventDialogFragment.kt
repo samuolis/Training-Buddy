@@ -27,7 +27,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.lukas.trainerapp.db.entity.Event
 import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.ui.NavigationActivity
-import com.example.lukas.trainerapp.webService.EventWebService
+import com.example.lukas.trainerapp.web.webservice.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.GsonBuilder

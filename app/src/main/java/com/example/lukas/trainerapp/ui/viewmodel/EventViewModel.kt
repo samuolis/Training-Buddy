@@ -13,7 +13,7 @@ import androidx.lifecycle.LiveData
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.Event
-import com.example.lukas.trainerapp.webService.EventWebService
+import com.example.lukas.trainerapp.web.webservice.EventWebService
 import com.google.gson.GsonBuilder
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.lukas.trainerapp.db.entity.User
-import com.example.lukas.trainerapp.webService.UserWebService
+import com.example.lukas.trainerapp.web.webservice.UserWebService
 import com.google.android.gms.location.LocationServices
 import java.util.*
 
@@ -35,7 +35,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var oneEventDashboard: MutableLiveData<Event>? = MutableLiveData<Event>()
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
-    var profileStatus: MutableLiveData<Int>? = null
+    var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
     var refreshStatus: MutableLiveData<Int>? = null
     var refreshGlobalStatus: MutableLiveData<Int>? = null
 
@@ -264,6 +264,16 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                     }
 
                 })
+    }
+
+    fun getProfilePicture(): LiveData<Int>?{
+        return profilePicture
+    }
+
+    fun loadProfilePicture(pictureIndex: Int){
+        var userCache = userWeb?.value
+        userCache?.profilePictureIndex = pictureIndex
+        userWeb?.value = userCache
     }
 
     fun getEventInProfile(): LiveData<Event>?{

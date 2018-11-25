@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 28
@@ -36,11 +37,11 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    implementation ('com.facebook.android:account-kit-sdk:4.+'){
+    implementation('com.facebook.android:account-kit-sdk:4.+') {
         exclude group: 'com.google.android.gms', module: 'play-services-auth-api-phone'
         exclude group: 'com.google.android.gms', module: 'play-services-auth'
     }
-    implementation ('com.facebook.android:facebook-android-sdk:4.+'){
+    implementation('com.facebook.android:facebook-android-sdk:4.+') {
         exclude group: 'com.google.android.gms', module: 'play-services-auth-api-phone'
         exclude group: 'com.google.android.gms', module: 'play-services-auth'
     }
@@ -75,4 +76,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
 }

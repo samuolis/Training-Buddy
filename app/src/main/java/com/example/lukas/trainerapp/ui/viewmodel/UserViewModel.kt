@@ -7,14 +7,13 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.lukas.trainerapp.AppExecutors
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.Event
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.model.UserData
-import com.example.lukas.trainerapp.webService.EventWebService
-import com.example.lukas.trainerapp.webService.UserWebService
+import com.example.lukas.trainerapp.web.webservice.EventWebService
+import com.example.lukas.trainerapp.web.webservice.UserWebService
 import com.google.gson.GsonBuilder
 import retrofit2.Call
 import retrofit2.Callback

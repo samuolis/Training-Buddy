@@ -17,7 +17,7 @@ import com.example.lukas.trainerapp.db.AppDatabase
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.enums.ProfilePicture
-import com.example.lukas.trainerapp.webService.UserWebService
+import com.example.lukas.trainerapp.web.webservice.UserWebService
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import com.example.lukas.trainerapp.utils.DrawableUtils
@@ -39,6 +39,7 @@ class AccountEditDialogFragment : DialogFragment() {
     var databaseId: Long = 0
     var profileInt: Int? = null
     var signedEvents: List<Long>? = null
+    var token: String? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -73,6 +74,7 @@ class AccountEditDialogFragment : DialogFragment() {
                     DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
                 }
                 signedEvents = user.signedEventsList
+                token = user.userFcmToken
             })
         })
         return rootView
@@ -122,7 +124,7 @@ class AccountEditDialogFragment : DialogFragment() {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             val currentTime = Calendar.getInstance().time
-            val user = User(databaseId, userId, fullName, email, phoneNumber, currentTime, profileInt, signedEvents)
+            val user = User(userId, fullName, email, phoneNumber, currentTime, profileInt, signedEvents, token)
 
             val gson = GsonBuilder()
                     .setLenient()
@@ -139,8 +141,9 @@ class AccountEditDialogFragment : DialogFragment() {
                 override fun onResponse(call: Call<User>, response: Response<User>) {
                     AppExecutors.getInstance().diskIO().execute {
                         mDb.userDao().insertUser(user)
-                        (activity as NavigationActivity).backOnStack()
                     }
+                    eventViewModel.loadUserData()
+                    (activity as NavigationActivity).backOnStack()
                 }
 
                 override fun onFailure(call: Call<User>, t: Throwable) {
