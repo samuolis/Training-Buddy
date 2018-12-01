@@ -4,7 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -42,6 +45,15 @@ public class LoginActivity extends AppCompatActivity{
         actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.app_name);
         setContentView(R.layout.activity_login);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            String channelId  = getString(R.string.default_notification_channel_id);
+            String channelName = getString(R.string.default_notification_channel_name);
+            NotificationManager notificationManager =
+                    getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId,
+                    channelName, NotificationManager.IMPORTANCE_LOW));
+        }
         userViewModel = ViewModelProviders.of(this).get(UserViewModel.class);
         LoginFragment loginFragment = new LoginFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -51,6 +63,7 @@ public class LoginActivity extends AppCompatActivity{
                 .commit();
         // Replace the contents of the container with the new fragment
         //ft.replace(R.id.fragment_frame, new LoginFragment());
+
     }
 
     public void GoToRegisterFragment(){

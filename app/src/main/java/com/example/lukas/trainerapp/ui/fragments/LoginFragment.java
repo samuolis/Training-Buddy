@@ -249,19 +249,20 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
                         if(response.isSuccessful()) {
-                            if (response.body().getUserFcmToken() == null || response.body().getUserFcmToken() == "")
-                            {
                                 FirebaseInstanceId.getInstance().getInstanceId()
                                         .addOnCompleteListener(task -> {
                                             if (!task.isSuccessful()) {
                                                 Log.w("LoginFragment", "getInstanceId failed", task.getException());
                                                 return;
                                             }
+                                            User user = response.body();
 
                                             // Get new Instance ID token
                                             String token = task.getResult().getToken();
-                                            User user = response.body();
-                                            user.setUserFcmToken(token);
+                                            if (response.body().getUserFcmToken() == null ||
+                                                    response.body().getUserFcmToken() == user.getUserFcmToken()) {
+                                                user.setUserFcmToken(token);
+                                            }
                                             userWebService.postUser(user).enqueue(new Callback<User>() {
                                                 @Override
                                                 public void onResponse(Call<User> call, Response<User> response) {
@@ -275,7 +276,6 @@ public class LoginFragment extends Fragment {
                                             });
 
                                         });
-                            }
                             AppExecutors.getInstance().diskIO().execute(() -> {
                                 mDb.userDao().insertUser(response.body());
                                 ((LoginActivity)getActivity()).GoToNavigationActivity();

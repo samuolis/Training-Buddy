@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.lukas.trainerapp.ui.NavigationActivity
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.db.entity.User
@@ -54,7 +55,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupInfo(){
-        profile_events_recycler_view.layoutManager = LinearLayoutManager(context)
+        profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.getStatus()?.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
         })

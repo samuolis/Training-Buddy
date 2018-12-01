@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
                     object : UserEventsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
                             eventViewModel.loadOneEvent(position)
-                            (activity as NavigationActivity).showEventCreateDialogFragment()
+                            (activity as NavigationActivity).showEventDetailsDialogFragment()
                         }
                     }
             )

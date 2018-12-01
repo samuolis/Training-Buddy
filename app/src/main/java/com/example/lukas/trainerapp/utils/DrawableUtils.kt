@@ -32,6 +32,22 @@ class DrawableUtils {
             return bitmap
         }
 
+        fun setupInitialsForDetails(imageView: ImageView, user: User) : Bitmap{
+
+            var bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
+            var canvas = Canvas(bitmap)
+            var paint = Paint()
+            var firstAndLastName = user.fullName?.split(" ")
+            var initials = ""
+            firstAndLastName?.forEach { name ->
+                initials = initials + name.get(0)
+            }
+            setTextSizeForWidth(paint,(35).toFloat(), initials)
+            drawCenter(canvas, paint, initials)
+            imageView.setImageBitmap(bitmap)
+            return bitmap
+        }
+
         fun getBitmapForImageViewSize(imageView: ImageView, user: User) : Bitmap{
 
             var bitmap = Bitmap.createBitmap(imageView.width, imageView.height, Bitmap.Config.ARGB_8888)

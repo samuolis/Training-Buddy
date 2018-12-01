@@ -24,4 +24,7 @@ interface UserWebService {
 
     @GET("/user/{userId}")
     fun getExistantUser(@Path("userId") userId: String?): Call<User>
+
+    @POST("/users")
+    fun getUserByIds(@Body userIds: List<String>?): Call<List<User>>
 }

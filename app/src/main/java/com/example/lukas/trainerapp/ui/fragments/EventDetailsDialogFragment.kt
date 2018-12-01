@@ -17,7 +17,9 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lukas.trainerapp.ui.NavigationActivity
+import com.example.lukas.trainerapp.ui.adapters.EventDetailsRecyclerViewAdapter
 import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.web.webservice.EventWebService
 import com.google.android.material.snackbar.Snackbar
@@ -34,6 +36,7 @@ class EventDetailsDialogFragment : DialogFragment() {
     lateinit var eventViewModel: EventViewModel
     lateinit var eventWebService: EventWebService
     lateinit var userViewModel: UserViewModel
+    lateinit var userId: String
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -42,7 +45,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
         var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-        var userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
+        userId = userSharedPref?.getString(getString(R.string.user_id_key), "0") ?: "0"
         val gson = GsonBuilder()
                 .setLenient()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
@@ -53,85 +56,31 @@ class EventDetailsDialogFragment : DialogFragment() {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
-        val eventWebService = retrofit.create(EventWebService::class.java)
+        eventWebService = retrofit.create(EventWebService::class.java)
 
         rootView.post {
+            event_details_recycler_view.layoutManager = LinearLayoutManager(context)
+
+            eventViewModel.changeLoadStatus(1)
+
+            eventViewModel.getLoadingStatus()?.observe(this, Observer {
+                when (it) {
+                    0 -> hideProgressBar()
+                    1 -> showProgressBar()
+                }
+            })
+
+            eventViewModel.getSignedUsers()?.observe(this, Observer {
+                event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it ,context!!)
+            })
 
             eventViewModel.getStatusForDescription()?.observe(this, Observer {status ->
-                if (status == 0){
-                    eventViewModel.getEventInDashboard()?.observe(this, Observer {
-                        event_details_title.text = SpannableStringBuilder(it.eventName)
-                        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                        val dateStr = timeStampFormat.format(it.eventDate)
-                        event_details_date.text = SpannableStringBuilder(dateStr)
-                        event_details_description.text = SpannableStringBuilder(it.eventDescription)
-                        if (it.eventDistance == null){
-                            event_details_distance_layout.visibility = View.GONE
-                        } else{
-                            event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                        }
-                        event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-                        event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-                        event_details_submit_button.text = getString(R.string.event_description_positive_button)
-                        event_details_submit_button.setOnClickListener {view ->
-                            eventWebService.signEvent(userId, it.eventId).enqueue(object : Callback<Void>{
-                                override fun onFailure(call: Call<Void>, t: Throwable) {
-                                    Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                            .show()
-                                }
-
-                                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                                    (activity as NavigationActivity).backOnStack()
-                                    Snackbar.make(view, "Event signed", Snackbar.LENGTH_LONG)
-                                            .setAction("Unsign", {
-
-                                            })
-                                            .show()
-                                    eventViewModel?.loadEventsByLocation()
-                                    eventViewModel.loadUserData()
-                                }
-
-                            })
-                        }
-
-                    })
-                } else if(status == 1){
-                    eventViewModel.getEventInProfile()?.observe(this, Observer {
-                        event_details_title.text = SpannableStringBuilder(it.eventName)
-                        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                        val dateStr = timeStampFormat.format(it.eventDate)
-                        event_details_date.text = SpannableStringBuilder(dateStr)
-                        event_details_description.text = SpannableStringBuilder(it.eventDescription)
-                        if (it.eventDistance == null){
-                            event_details_distance_layout.visibility = View.GONE
-                        } else{
-                            event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                        }
-                        event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-                        event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-                        event_details_submit_button.text = getString(R.string.event_description_negative_button)
-                        event_details_submit_button.setOnClickListener {view ->
-                            eventWebService.unsignEvent(userId, it.eventId).enqueue(object : Callback<Void>{
-                                override fun onFailure(call: Call<Void>, t: Throwable) {
-                                    Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                            .show()
-                                }
-
-                                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                                    (activity as NavigationActivity).backOnStack()
-                                    Snackbar.make(view, "Event unsigned", Snackbar.LENGTH_LONG)
-                                            .setAction("Sign", {
-
-                                            })
-                                            .show()
-                                    eventViewModel?.loadUserData()
-                                    eventViewModel?.loadEventsByLocation()
-                                }
-
-                            })
-                        }
-                    })
+                when (status) {
+                    0 -> setupDashboardUI()
+                    1 -> setupProfileUI()
+                    2 -> setupHomeUI()
                 }
+
             })
 
 
@@ -140,9 +89,117 @@ class EventDetailsDialogFragment : DialogFragment() {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeButtonEnabled(true)
-            actionBar.title = ""
+            actionBar.title = getString(R.string.event_details_title_label)
             actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
         }
         return rootView
+    }
+
+
+
+    private fun setupHomeUI() {
+        eventViewModel?.getEventByPosition()?.observe(this, androidx.lifecycle.Observer {
+            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
+            event_details_title.text = SpannableStringBuilder(it.eventName)
+            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            val dateStr = timeStampFormat.format(it.eventDate)
+            event_details_date.text = SpannableStringBuilder(dateStr)
+            event_details_description.text = SpannableStringBuilder(it.eventDescription)
+            if (it.eventDistance == null) {
+                event_details_distance_layout.visibility = View.GONE
+                event_details_location.setPadding(0, 0, 0, 16)
+            } else {
+                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
+                event_details_location.setPadding(0, 0, 0, 0)
+            }
+            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
+            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
+            event_details_submit_button.text = getString(R.string.edit_event_button_label)
+            event_details_submit_button.setOnClickListener { view ->
+                (activity as NavigationActivity).showEventCreateDialogFragment()
+            }
+
+        })
+    }
+
+    fun setupDashboardUI() {
+        eventViewModel.getEventInDashboard()?.observe(this, Observer {
+            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
+            event_details_title.text = SpannableStringBuilder(it.eventName)
+            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            val dateStr = timeStampFormat.format(it.eventDate)
+            event_details_date.text = SpannableStringBuilder(dateStr)
+            event_details_description.text = SpannableStringBuilder(it.eventDescription)
+            if (it.eventDistance == null) {
+                event_details_distance_layout.visibility = View.GONE
+                event_details_location.setPadding(0, 0, 0, 16)
+            } else {
+                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
+                event_details_location.setPadding(0, 0, 0, 0)
+            }
+            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
+            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
+            event_details_submit_button.text = getString(R.string.event_description_positive_button)
+            event_details_submit_button.setOnClickListener { view ->
+                eventWebService.signEvent(userId, it.eventId).enqueue(object : Callback<Void> {
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                .show()
+                    }
+
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        (activity as NavigationActivity).backOnStack()
+                        eventViewModel?.loadEventsByLocation()
+                        eventViewModel.loadUserData()
+                    }
+
+                })
+            }
+        })
+    }
+
+    fun setupProfileUI() {
+        eventViewModel.getEventInProfile()?.observe(this, Observer {
+            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
+            event_details_title.text = SpannableStringBuilder(it.eventName)
+            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            val dateStr = timeStampFormat.format(it.eventDate)
+            event_details_date.text = SpannableStringBuilder(dateStr)
+            event_details_description.text = SpannableStringBuilder(it.eventDescription)
+            if (it.eventDistance == null){
+                event_details_distance_layout.visibility = View.GONE
+                event_details_location.setPadding(0,0,0,32)
+            } else{
+                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
+                event_details_location.setPadding(0,0,0,0)
+            }
+            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
+            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
+            event_details_submit_button.text = getString(R.string.event_description_negative_button)
+            event_details_submit_button.setOnClickListener {view ->
+                eventWebService.unsignEvent(userId, it.eventId).enqueue(object : Callback<Void>{
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                .show()
+                    }
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        (activity as NavigationActivity).backOnStack()
+                        eventViewModel?.loadUserData()
+                        eventViewModel?.loadEventsByLocation()
+                    }
+
+                })
+            }
+        })
+    }
+
+    private fun showProgressBar() {
+        progress_bar_background_event_details.setVisibility(View.VISIBLE)
+        login_progress_event_details.setVisibility(View.VISIBLE)
+    }
+
+    private fun hideProgressBar() {
+        progress_bar_background_event_details.setVisibility(View.GONE)
+        login_progress_event_details.setVisibility(View.GONE)
     }
 }

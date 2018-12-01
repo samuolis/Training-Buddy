@@ -43,7 +43,8 @@ import java.util.*
             dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
             eventViewModel.getEventsOfLocation()?.observe(this, androidx.lifecycle.Observer {
                 if (it != null && it.size != 0) {
-                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
+                    dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!,
+                            object : UserEventsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
                             eventViewModel.loadOneEventInDashboard(position)
                             (activity as NavigationActivity).showEventDetailsDialogFragment()

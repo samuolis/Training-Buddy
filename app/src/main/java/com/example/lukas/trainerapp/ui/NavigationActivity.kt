@@ -134,6 +134,9 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     override fun onSupportNavigateUp(): Boolean {
         //This method is called when the up button is pressed. Just the pop back stack.
         supportFragmentManager.popBackStack()
+        if (eventViewModel.myEventPosition != null){
+            eventViewModel.myEventPosition = null
+        }
         return true
     }
 
@@ -168,6 +171,9 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     override fun onBackPressed() {
         if (supportFragmentManager.fragments.count() > 1){
             supportFragmentManager.popBackStack()
+        }
+        if (eventViewModel.myEventPosition != null){
+            eventViewModel.myEventPosition = null
         }
         else {
             if (doubleBackToExitPressedOnce) {

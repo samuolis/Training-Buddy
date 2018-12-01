@@ -38,8 +38,11 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
     var refreshStatus: MutableLiveData<Int>? = null
     var refreshGlobalStatus: MutableLiveData<Int>? = null
+    var myEventPosition: Int? = null
+    var loadingStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
 
     var userEvents: MutableLiveData<List<Event>>? = null
+    var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
 
     var userEventInProfile: MutableLiveData<Event>? = MutableLiveData<Event>()
 
@@ -86,11 +89,17 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadOneEvent(position: Int? = null){
-        if (position == null){
+        if (myEventPosition != null){
+            var value = events?.value!![myEventPosition!!]
+            oneEvent?.value = value
+            return
+        } else if (position == null){
             oneEvent?.value = null
             return
         }
-        var value = events?.value!![position]
+        myEventPosition = position
+        descriptionStatus?.value = 2
+        var value = events?.value!![position!!]
         oneEvent?.value = value
     }
 
@@ -172,6 +181,10 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful()){
                     events?.value = response.body()
                     refreshStatus?.value = 0
+                    if (myEventPosition != null){
+                        loadOneEvent()
+                        myEventPosition = null
+                    }
                 }
             }
         })
@@ -270,6 +283,32 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return profilePicture
     }
 
+    fun getSignedUsers(): LiveData<List<User>>?{
+        return signedUsersList
+    }
+
+    fun loadSignedUserList(userIdsList: List<String>?){
+        userWebService.getUserByIds(userIdsList).enqueue(object : Callback<List<User>>{
+
+            override fun onFailure(call: Call<List<User>>, t: Throwable) {
+                Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                loadingStatus?.value = 0
+            }
+
+            override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
+                if (response.isSuccessful) {
+                    signedUsersList?.value = response.body()
+                    loadingStatus?.value = 0
+
+                } else {
+                    Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                    loadingStatus?.value = 0
+                }
+            }
+
+        })
+    }
+
     fun loadProfilePicture(pictureIndex: Int){
         var userCache = userWeb?.value
         userCache?.profilePictureIndex = pictureIndex
@@ -288,5 +327,15 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         descriptionStatus?.value = 1
         var value = userEvents?.value!![position]
         userEventInProfile?.value = value
+    }
+
+    fun getLoadingStatus(): LiveData<Int>?{
+        return loadingStatus
+    }
+
+    // 0 - stop loading
+    // 1 - start loading
+    fun changeLoadStatus(status: Int){
+        loadingStatus?.value = status
     }
 }

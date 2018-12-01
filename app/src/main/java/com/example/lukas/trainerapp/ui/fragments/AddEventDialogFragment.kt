@@ -55,6 +55,7 @@ class AddEventDialogFragment : DialogFragment() {
     var userId: String? = null
     var eventViewModel: EventViewModel? = null
     var selectedDateAndTime: Date? = null
+    var eventSignedPlayers: List<String>? = null
 
     var mHour: Int = 0
     var mMinute: Int = 0
@@ -106,6 +107,7 @@ class AddEventDialogFragment : DialogFragment() {
                     val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
                     event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
                     selectedDateAndTime = it.eventDate
+                    eventSignedPlayers = it.eventSignedPlayers
                 }
 
             })
@@ -139,17 +141,11 @@ class AddEventDialogFragment : DialogFragment() {
 
         val eventWebService = retrofit.create(EventWebService::class.java)
         var event : Event
-        if (eventId == null) {
-            event = Event(null, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
-                    selectedLocationName, selectedLocationLatitude,
-                    selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
-                    eventPlayers = eventPlayersNumber, eventDistance = null)
-        } else {
-            event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
-                    selectedLocationName, selectedLocationLatitude,
-                    selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
-                    eventPlayers = eventPlayersNumber, eventDistance = null)
-        }
+
+        event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
+                selectedLocationName, selectedLocationLatitude,
+                selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
+                eventPlayers = eventPlayersNumber, eventDistance = null, eventSignedPlayers = eventSignedPlayers)
 
         eventWebService.createEvent(event).enqueue(object : Callback<Event> {
             override fun onFailure(call: Call<Event>, t: Throwable) {
@@ -158,11 +154,6 @@ class AddEventDialogFragment : DialogFragment() {
 
             override fun onResponse(call: Call<Event>, response: Response<Event>) {
                 (activity as NavigationActivity).backOnStack()
-                Snackbar.make(view, "Event added", Snackbar.LENGTH_LONG)
-                        .setAction("Remove", {
-
-                        })
-                        .show()
                 eventViewModel?.loadEvents()
             }
 
