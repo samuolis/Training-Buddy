@@ -12,8 +12,10 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.ViewModelProviders
 import com.example.lukas.trainerapp.R
 import com.example.lukas.trainerapp.ui.NavigationActivity
+import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -69,6 +71,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(remoteMessage: RemoteMessage.Notification?) {
+        NavigationActivity.updateMyActivity(context = applicationContext)
         val intent = Intent(this, NavigationActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -97,6 +100,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(channel)
         }
+
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
     }

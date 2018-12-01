@@ -22,6 +22,11 @@ import com.example.lukas.trainerapp.ui.viewmodel.UserViewModel
 import com.example.lukas.trainerapp.ui.fragments.*
 import com.example.lukas.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
+
+
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
 
@@ -33,6 +38,14 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     companion object {
         var permisionsResult: Boolean = false
+        // This function will create an intent. This intent must take as parameter the "unique_name" that you registered your activity with
+        fun updateMyActivity(context: Context) {
+
+            val intent = Intent("refresh")
+
+            //send broadcast
+            context.sendBroadcast(intent)
+        }
     }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -125,6 +138,14 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         invalidateOptionsMenu()
     }
 
+    fun getBackOnStackToMainMenu(){
+        var fragmentSize = supportFragmentManager.fragments.count()
+        while (fragmentSize > 1){
+            supportFragmentManager.popBackStack()
+            fragmentSize -= 1
+        }
+    }
+
     fun shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
         supportActionBar!!.setDisplayHomeAsUpEnabled(fragmentAdded)
@@ -145,11 +166,6 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
             menuInflater.inflate(R.menu.main, menu)
         }
         return true;
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        return super.onPrepareOptionsMenu(menu)
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
@@ -282,5 +298,25 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     fun backOnStack(){
         supportFragmentManager.popBackStack()
+    }
+
+    //register your activity onResume()
+    public override fun onResume() {
+        super.onResume()
+        registerReceiver(mMessageReceiver, IntentFilter("refresh"))
+    }
+
+    //Must unregister onPause()
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(mMessageReceiver)
+    }
+
+
+    //This is the handler that will manager to process the broadcast intent
+    private val mMessageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            eventViewModel.loadEvents()
+        }
     }
 }

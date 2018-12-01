@@ -70,7 +70,6 @@ class AddEventDialogFragment : DialogFragment() {
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
 
         rootView.post {
-
             event_date_time_text_view.setOnClickListener {
                 datePicker()
             }
@@ -109,7 +108,6 @@ class AddEventDialogFragment : DialogFragment() {
                     selectedDateAndTime = it.eventDate
                     eventSignedPlayers = it.eventSignedPlayers
                 }
-
             })
 
         }

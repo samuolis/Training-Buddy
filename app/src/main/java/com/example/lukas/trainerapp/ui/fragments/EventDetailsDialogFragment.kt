@@ -4,9 +4,9 @@ package com.example.lukas.trainerapp.ui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.text.SpannableStringBuilder
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.ActionBar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 
@@ -37,6 +37,7 @@ class EventDetailsDialogFragment : DialogFragment() {
     lateinit var eventWebService: EventWebService
     lateinit var userViewModel: UserViewModel
     lateinit var userId: String
+    var eventId: Long? = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -98,7 +99,9 @@ class EventDetailsDialogFragment : DialogFragment() {
 
 
     private fun setupHomeUI() {
+        setHasOptionsMenu(true)
         eventViewModel?.getEventByPosition()?.observe(this, androidx.lifecycle.Observer {
+            eventId = it.eventId
             eventViewModel.loadSignedUserList(it.eventSignedPlayers)
             event_details_title.text = SpannableStringBuilder(it.eventName)
             val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
@@ -202,4 +205,36 @@ class EventDetailsDialogFragment : DialogFragment() {
         progress_bar_background_event_details.setVisibility(View.GONE)
         login_progress_event_details.setVisibility(View.GONE)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+//        inflater?.inflate(R.menu.main, menu)
+        menu?.add("Remove")
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when(item?.itemId) {
+        0 -> {
+            eventWebService.deleteEventById(eventId).enqueue(object : Callback<Void>{
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
+                }
+
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    (activity as NavigationActivity).getBackOnStackToMainMenu()
+                    eventViewModel?.loadEvents()
+                }
+
+            })
+            true
+        }
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?) {
+        super.onPrepareOptionsMenu(menu)
+    }
+
+
 }

@@ -88,6 +88,11 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return oneEvent
     }
 
+    fun loadAllData(){
+        loadEvents()
+        loadEventsByLocation()
+    }
+
     fun loadOneEvent(position: Int? = null){
         if (myEventPosition != null){
             var value = events?.value!![myEventPosition!!]

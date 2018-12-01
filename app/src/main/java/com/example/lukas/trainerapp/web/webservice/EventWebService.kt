@@ -2,10 +2,7 @@ package com.example.lukas.trainerapp.web.webservice
 
 import com.example.lukas.trainerapp.db.entity.Event
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface EventWebService {
 
@@ -32,5 +29,8 @@ interface EventWebService {
 
     @POST("/events")
     fun getEventByIds(@Body eventsIds: List<Long>?): Call<List<Event>>
+
+    @DELETE("/event/{eventId}")
+    fun deleteEventById(@Path("eventId") eventId: Long?): Call<Void>
 
 }
