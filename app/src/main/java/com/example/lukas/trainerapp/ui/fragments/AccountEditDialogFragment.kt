@@ -48,7 +48,7 @@ class AccountEditDialogFragment : DialogFragment() {
         // Inflate the layout to use as dialog or embedded fragment
         var rootView = inflater.inflate(R.layout.fragment_account_edit, container, false)
         mDb = AppDatabase.getInstance(activity)
-        rootView.post({
+        rootView.post {
             userViewModel = ViewModelProviders.of(activity!!).get(UserViewModel::class.java)
             eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
             eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
@@ -76,7 +76,7 @@ class AccountEditDialogFragment : DialogFragment() {
                 signedEvents = user.signedEventsList
                 token = user.userFcmToken
             })
-        })
+        }
         return rootView
     }
 

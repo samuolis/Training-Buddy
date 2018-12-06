@@ -25,7 +25,11 @@ import kotlinx.android.synthetic.main.activity_navigation.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
-
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
@@ -82,6 +86,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     lateinit var userViewModel : UserViewModel
     lateinit var eventViewModel: EventViewModel
     lateinit var logoutIntent : Intent
+    private lateinit var googleSignInClient: GoogleSignInClient
     var fragmentAdded : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +111,13 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                     .addToBackStack(null)
                     .commit()
         }
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+        // [END config_signin]
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
@@ -206,13 +218,16 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         }
     }
 
-    public fun Logout(){
+    fun Logout(){
         for (fragment in supportFragmentManager.fragments) {
             supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
-        logoutIntent = Intent(this@NavigationActivity, LoginActivity::class.java)
-        startActivity(logoutIntent)
-        finish()
+        FirebaseAuth.getInstance().signOut()
+        googleSignInClient.signOut().addOnCompleteListener {
+            logoutIntent = Intent(this@NavigationActivity, LoginActivity::class.java)
+            startActivity(logoutIntent)
+            finish()
+        }
     }
 
     fun showAccountEditDialogFragment() {

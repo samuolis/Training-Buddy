@@ -24,7 +24,10 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.lukas.trainerapp.db.entity.User
 import com.example.lukas.trainerapp.web.webservice.UserWebService
+import com.facebook.CallbackManager
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import java.util.*
 
 
@@ -40,11 +43,13 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var refreshGlobalStatus: MutableLiveData<Int>? = null
     var myEventPosition: Int? = null
     var loadingStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
+    var loggedUser: FirebaseUser? = null
 
     var userEvents: MutableLiveData<List<Event>>? = null
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
 
     var userEventInProfile: MutableLiveData<Event>? = MutableLiveData<Event>()
+    var callbackManager: CallbackManager? = null
 
     var userWeb: MutableLiveData<User>? = null
 
@@ -63,6 +68,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
         mDb = AppDatabase.getInstance(this.getApplication())
+        loggedUser = FirebaseAuth.getInstance().currentUser
         val gson = GsonBuilder()
                 .setLenient()
                 .create()

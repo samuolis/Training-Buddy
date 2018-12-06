@@ -26,15 +26,8 @@
     <string name="phone_number_hint">Phone number</string>
     <string name="action_register">Save your info</string>
 
-    <string name="FACEBOOK_APP_ID">357099475220262</string>
-    <string name="ACCOUNT_KIT_CLIENT_TOKEN">a8bb6b0ee8e3b177f196ee46dec671de</string>
-
-    <string name="action_sign_in_email">Login via Email</string>
-    <string name="action_sign_in_phone">Login via Phone</string>
-    <string name="ak_login_protocol_scheme">ak357099475220262</string>
-
-    <string name="facebook_app_id">357099475220262</string>
-    <string name="fb_login_protocol_scheme">fb357099475220262</string>
+    <string name="facebook_app_id">264557054234642</string>
+    <string name="fb_login_protocol_scheme">fb264557054234642</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -73,5 +66,6 @@
     <string name="default_notification_channel_name" translatable="true">Event</string>
     <string name="edit_event_button_label">Edit event</string>
     <string name="event_details_title_label">Event details</string>
+    <string name="logged_user_token">logged_user_token</string>
 
 </resources>
