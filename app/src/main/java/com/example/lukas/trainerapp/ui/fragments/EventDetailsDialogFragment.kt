@@ -110,7 +110,7 @@ class EventDetailsDialogFragment : DialogFragment() {
             event_details_description.text = SpannableStringBuilder(it.eventDescription)
             if (it.eventDistance == null) {
                 event_details_distance_layout.visibility = View.GONE
-                event_details_location.setPadding(0, 0, 0, 16)
+                event_details_location.setPadding(0, 0, 0, 32)
             } else {
                 event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
                 event_details_location.setPadding(0, 0, 0, 0)

@@ -39,7 +39,8 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, 
             val dateStr = timeStampFormat.format(eventList!![position].eventDate)
             holder.eventDate.text = dateStr
             holder.eventPlaceName.text = eventList!![position].eventLocationName
-            holder.eventPlayersCount.text = eventList!![position].eventPlayers.toString()
+            var signedUsersCount = eventList!![position].eventSignedPlayers?.size ?: 0
+            holder.eventPlayersCount.text = signedUsersCount.toString() + " of " + eventList!![position].eventPlayers.toString()
             if (eventList!![position].eventDistance == null) {
                 holder.eventsDistanceLinearLAyout.visibility = View.INVISIBLE
             } else {

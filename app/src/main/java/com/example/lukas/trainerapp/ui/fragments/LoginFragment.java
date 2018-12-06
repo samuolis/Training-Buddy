@@ -66,9 +66,8 @@ public class LoginFragment extends Fragment {
 
     @BindView(R.id.login_email)
     ConstraintLayout loginViaEmail;
-    @BindView(R.id.login_phone) ConstraintLayout loginViaPhone;
-//    @BindView(R.id.facebook_login_button)
-//    LoginButton facebookLoginButton;
+    @BindView(R.id.login_phone)
+    ConstraintLayout loginViaPhone;
     @BindView(R.id.login_progress)
     ProgressBar mProgressView;
     @BindView(R.id.progress_bar_background) View mProgressBarBackground;
@@ -138,14 +137,6 @@ public class LoginFragment extends Fragment {
                 onPhoneLogin();
             }
         });
-
-//        facebookLoginButton.setFragment(this);
-//        facebookLoginButton.setReadPermissions(Arrays.asList(EMAIL));
-//        // If you are using in a fragment, call loginButton.setFragment(this);
-//
-//        facebookLoginButton.setOnClickListener(view ->
-//                mProgressBarBackground.setVisibility(View.VISIBLE));
-
 
         return rootView;
     }

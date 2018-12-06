@@ -86,6 +86,9 @@ class ProfileFragment : Fragment() {
         user_phone_number_text_view.setOnClickListener({
             (activity as NavigationActivity).showAccountEditDialogFragment()
         })
+        initials_image_view.setOnClickListener {
+            (activity as NavigationActivity).showAccountEditDialogFragment()
+        }
 
         eventViewModel.getUserEvents()?.observe(this, Observer { userEvents ->
             profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(userEvents, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
