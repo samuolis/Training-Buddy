@@ -13,6 +13,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -44,6 +45,10 @@ dependencies {
     implementation('com.facebook.android:facebook-android-sdk:4.+') {
         exclude group: 'com.google.android.gms', module: 'play-services-auth-api-phone'
         exclude group: 'com.google.android.gms', module: 'play-services-auth'
+    }
+    implementation ('com.firebaseui:firebase-ui-auth:4.1.0'){
+        exclude group: 'com.google.android.gms', module: 'play-services-base'
+        exclude group: 'com.google.android.gms', module: 'play-services-basement'
     }
 
     implementation 'com.jakewharton:butterknife:9.0.0-rc1'
@@ -77,4 +82,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
 }
