@@ -278,8 +278,27 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
                     override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
                         if (response.isSuccessful) {
-                            userEvents?.value = response.body()
-                            refreshStatus?.value = 0
+                            getDataFromLocation { deviceLocation, deviceCountryCode ->
+                                if (deviceLocation == null || deviceCountryCode == null) {
+                                    eventsByLocation = null
+                                    refreshStatus?.value = 0
+                                    return@getDataFromLocation
+                                }
+                                var userEventsList = response.body()
+                                var newUserEventList = mutableListOf<Event>()
+                                userEventsList?.forEach {
+                                    var newEvent = it
+                                    var eventLoacation = Location("Event")
+                                    eventLoacation.longitude = newEvent.eventLocationLongitude!!
+                                    eventLoacation.latitude = newEvent.eventLocationLatitude!!
+                                    var distance = eventLoacation.distanceTo(deviceLocation)/1000
+                                    newEvent.eventDistance = distance
+                                    newUserEventList.add(newEvent)
+                                }
+
+                                userEvents?.value = newUserEventList
+                                refreshStatus?.value = 0
+                            }
 
                         } else {
                             Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()

@@ -79,28 +79,28 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callbackManager = CallbackManager.Factory.create()
+//        callbackManager = CallbackManager.Factory.create()
 
-        val permissionsList = mutableListOf<String>("email", "public_profile")
-        LoginManager.getInstance().logInWithReadPermissions(activity, permissionsList)
-        LoginManager.getInstance().registerCallback(callbackManager,
-                object : FacebookCallback<LoginResult> {
-            override fun onSuccess(loginResult: LoginResult) {
-                Log.d(TAG, "facebook:onSuccess:$loginResult")
-                handleFacebookAccessToken(loginResult.accessToken)
-            }
-
-            override fun onCancel() {
-                Log.d(TAG, "facebook:onCancel")
-                // ...
-            }
-
-            override fun onError(error: FacebookException) {
-                Log.d(TAG, "facebook:onError", error)
-                // ...
-            }
-
-        })
+//        val permissionsList = mutableListOf<String>("email", "public_profile")
+//        LoginManager.getInstance().logInWithReadPermissions(activity, permissionsList)
+//        LoginManager.getInstance().registerCallback(callbackManager,
+//                object : FacebookCallback<LoginResult> {
+//            override fun onSuccess(loginResult: LoginResult) {
+//                Log.d(TAG, "facebook:onSuccess:$loginResult")
+//                handleFacebookAccessToken(loginResult.accessToken)
+//            }
+//
+//            override fun onCancel() {
+//                Log.d(TAG, "facebook:onCancel")
+//                // ...
+//            }
+//
+//            override fun onError(error: FacebookException) {
+//                Log.d(TAG, "facebook:onError", error)
+//                // ...
+//            }
+//
+//        })
 
         // Configure Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -161,8 +161,9 @@ class LoginFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        callbackManager?.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
+
+//        callbackManager?.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -212,30 +213,30 @@ class LoginFragment : Fragment() {
                 }
     }
 
-    private fun handleFacebookAccessToken(token: AccessToken) {
-        Log.d(TAG, "handleFacebookAccessToken:$token")
-        // [START_EXCLUDE silent]
-        showProgressBar()
-        // [END_EXCLUDE]
-
-        val credential = FacebookAuthProvider.getCredential(token.token)
-        auth.signInWithCredential(credential)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInWithCredential:success")
-                        val user = auth.currentUser
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        Toast.makeText(context, "Authentication failed.",
-                                Toast.LENGTH_SHORT).show()
-
-                    }
-
-                    hideProgressBar()
-                }
-    }
+//    private fun handleFacebookAccessToken(token: AccessToken) {
+//        Log.d(TAG, "handleFacebookAccessToken:$token")
+//        // [START_EXCLUDE silent]
+//        showProgressBar()
+//        // [END_EXCLUDE]
+//
+//        val credential = FacebookAuthProvider.getCredential(token.token)
+//        auth.signInWithCredential(credential)
+//                .addOnCompleteListener { task ->
+//                    if (task.isSuccessful) {
+//                        // Sign in success, update UI with the signed-in user's information
+//                        Log.d(TAG, "signInWithCredential:success")
+//                        val user = auth.currentUser
+//                    } else {
+//                        // If sign in fails, display a message to the user.
+//                        Log.w(TAG, "signInWithCredential:failure", task.exception)
+//                        Toast.makeText(context, "Authentication failed.",
+//                                Toast.LENGTH_SHORT).show()
+//
+//                    }
+//
+//                    hideProgressBar()
+//                }
+//    }
 
     fun getUser(userId: String) {
         userWebService!!.getExistantUser(userId)
@@ -246,13 +247,15 @@ class LoginFragment : Fragment() {
                                     .addOnCompleteListener { task ->
                                         if (!task.isSuccessful) {
                                             hideProgressBar()
-                                            Log.w("LoginFragment", "getInstanceId failed", task.exception)
+                                            Log.w("LoginFragment", "getInstanceId failed",
+                                                    task.exception)
                                         } else {
                                             val user = response.body()
 
                                             // Get new Instance ID token
                                             val token = task.result!!.token
-                                            if (response.body()!!.userFcmToken == null || response.body()!!.userFcmToken === user!!.userFcmToken) {
+                                            if (response.body()!!.userFcmToken == null ||
+                                                    response.body()!!.userFcmToken == user!!.userFcmToken) {
                                                 user!!.userFcmToken = token
                                             }
                                             userWebService!!.postUser(user!!).enqueue(object : Callback<User> {

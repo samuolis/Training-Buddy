@@ -109,17 +109,17 @@ class LoginActivity : AppCompatActivity() {
         return false
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        var frags = getSupportFragmentManager().getFragments();
-            if (frags != null) {
-                for (f in frags) {
-                    if (f != null)
-                        if (f is LoginFragment) { // custom interface with no signitures
-                            f.onActivityResult(requestCode, resultCode, data);
-                        }
-                }
-            }
-        }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        var frags = getSupportFragmentManager().getFragments();
+//            if (frags != null) {
+//                for (f in frags) {
+//                    if (f != null)
+//                        if (f is LoginFragment) { // custom interface with no signitures
+//                            f.onActivityResult(requestCode, resultCode, data);
+//                        }
+//                }
+//            }
+//        }
 }
 

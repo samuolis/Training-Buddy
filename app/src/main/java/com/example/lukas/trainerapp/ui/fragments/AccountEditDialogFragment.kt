@@ -110,11 +110,6 @@ class AccountEditDialogFragment : DialogFragment() {
             focusView = email_edit_text
             cancel = true
         }
-        if (TextUtils.isEmpty(phoneNumber)) {
-            phone_edit_text.setError(getString(R.string.error_field_required))
-            focusView = phone_edit_text
-            cancel = true
-        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first

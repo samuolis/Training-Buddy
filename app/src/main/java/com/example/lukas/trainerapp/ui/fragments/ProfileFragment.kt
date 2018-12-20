@@ -30,17 +30,8 @@ import kotlinx.android.synthetic.main.fragment_profile.*
  */
 class ProfileFragment : Fragment() {
 
-    lateinit var bitmap : Bitmap
-    private val r = Rect()
     lateinit var userViewModel : UserViewModel
     lateinit var eventViewModel: EventViewModel
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -91,6 +82,7 @@ class ProfileFragment : Fragment() {
         }
 
         eventViewModel.getUserEvents()?.observe(this, Observer { userEvents ->
+
             profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(userEvents, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
                 override fun onItemClicked(position: Int) {
                     eventViewModel.loadOneEventInUserProfile(position)

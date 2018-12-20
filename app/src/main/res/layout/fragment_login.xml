@@ -40,14 +40,14 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/login_background">
 
-        <com.facebook.login.widget.LoginButton
-            android:id="@+id/facebook_login_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp" />
+        <!--<com.facebook.login.widget.LoginButton-->
+            <!--android:id="@+id/facebook_login_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginLeft="16dp"-->
+            <!--android:layout_marginRight="16dp"-->
+            <!--android:layout_marginBottom="16dp" />-->
 
 
         <com.google.android.gms.common.SignInButton
