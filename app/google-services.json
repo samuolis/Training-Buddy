@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:232578995058:android:c14868281a8859f4",
+        "mobilesdk_app_id": "1:232578995058:android:73150e6aa72fde61",
         "android_client_info": {
-          "package_name": "com.example.lukas.trainerapp"
+          "package_name": "com.trainerapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "232578995058-vrd7sdf8la6t7g5tg9b4ebobhah1mgup.apps.googleusercontent.com",
+          "client_id": "232578995058-g45rennfnnqfu60sq2fegcg0041skhji.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.lukas.trainerapp",
+            "package_name": "com.trainerapp",
             "certificate_hash": "b2998a7095e3951f4b02fc4d6ebb85e6d2c612dd"
           }
         },

@@ -33,18 +33,18 @@
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/circle_card_view"
-                        android:layout_width="150dp"
+                        android:layout_width="100dp"
                         android:layout_height="0dp"
                         android:layout_centerHorizontal="true"
                         android:layout_gravity="center"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
                         android:elevation="12dp"
                         android:innerRadius="0dp"
                         android:shape="ring"
                         android:thicknessRatio="1.9"
-                        app:cardCornerRadius="40dp"
+                        app:cardCornerRadius="10dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
@@ -65,7 +65,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="16dp"
                         android:background="@drawable/profile_button_selector"
                         android:elevation="12dp"
                         android:innerRadius="10dp"
@@ -92,9 +92,11 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
                         android:background="@drawable/profile_button_selector"
                         android:elevation="12dp"
                         android:innerRadius="10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@+id/user_full_name_card_holder"
                         app:layout_constraintStart_toStartOf="@+id/user_full_name_card_holder"
                         app:layout_constraintTop_toBottomOf="@+id/user_full_name_card_holder">
@@ -109,33 +111,6 @@
                             android:paddingTop="16dp"
                             android:paddingBottom="16dp"
                             android:text="samuoli@gmail.com"
-                            android:textSize="20sp" />
-
-                    </androidx.cardview.widget.CardView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/user_phone_number_card_holder"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:elevation="12dp"
-                        android:innerRadius="10dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="@+id/user_email_card_holder"
-                        app:layout_constraintStart_toStartOf="@+id/user_full_name_card_holder"
-                        app:layout_constraintTop_toBottomOf="@+id/user_email_card_holder">
-
-                        <TextView
-                            android:id="@+id/user_phone_number_text_view"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:background="@drawable/profile_button_selector"
-                            android:gravity="center"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp"
-                            android:text="+37067867798"
                             android:textSize="20sp" />
 
                     </androidx.cardview.widget.CardView>

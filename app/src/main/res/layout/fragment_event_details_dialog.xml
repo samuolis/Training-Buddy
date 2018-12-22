@@ -37,7 +37,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="32dp"
+                        android:layout_marginTop="16dp"
                         android:layout_marginEnd="8dp"
                         android:gravity="center_horizontal"
                         android:text="Title"
@@ -171,11 +171,62 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/event_details_recycler_view"
+            <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false" />
+                android:text="@string/signed_users_label"
+                android:paddingTop="8dp"
+                android:paddingLeft="16dp"
+                android:paddingBottom="8dp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:nestedScrollingEnabled="true">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/event_details_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/comments_label"
+                    android:paddingTop="8dp"
+                    android:paddingLeft="16dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"/>
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:nestedScrollingEnabled="true">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/event_comments_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+
+                </ScrollView>
+
+            </LinearLayout>
+
 
         </LinearLayout>
 

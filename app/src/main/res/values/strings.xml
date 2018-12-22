@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Training Buddy</string>
+    <string name="app_name">Active Side</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -67,5 +67,7 @@
     <string name="edit_event_button_label">Edit event</string>
     <string name="event_details_title_label">Event details</string>
     <string name="logged_user_token">logged_user_token</string>
+    <string name="signed_users_label">Signed users</string>
+    <string name="comments_label">Comments</string>
 
 </resources>
