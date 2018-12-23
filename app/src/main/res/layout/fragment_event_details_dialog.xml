@@ -6,7 +6,8 @@
     android:background="@android:color/background_light"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.EventDetailsDialogFragment">
+    tools:context=".ui.fragments.EventDetailsDialogFragment"
+    android:id="@+id/event_details_layout">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
@@ -14,8 +15,10 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/event_details_submit_button_layout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -172,58 +175,124 @@
             </androidx.cardview.widget.CardView>
 
             <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/signed_users_label"
-                android:paddingTop="8dp"
-                android:paddingLeft="16dp"
-                android:paddingBottom="8dp"
-                android:textColor="@android:color/black"
-                android:textStyle="bold"/>
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="170dp"
-                android:nestedScrollingEnabled="true">
+                android:orientation="vertical">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/event_details_recycler_view"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    />
+                    android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/signed_users_label"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
 
-            </ScrollView>
+                <com.trainerapp.ui.customui.MaxHeightScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    app:maxHeight="170dp">
 
-        </LinearLayout>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/event_details_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.trainerapp.ui.customui.MaxHeightScrollView>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/comments_label"
-                    android:paddingTop="8dp"
                     android:paddingLeft="16dp"
+                    android:paddingTop="8dp"
                     android:paddingBottom="8dp"
+                    android:text="@string/comments_label"
                     android:textColor="@android:color/black"
-                    android:textStyle="bold"/>
-                <ScrollView
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/view"
                     android:layout_width="match_parent"
-                    android:layout_height="170dp"
-                    android:nestedScrollingEnabled="true">
+                    android:layout_height="2dp"
+                    android:background="@android:color/darker_gray"
+                    />
+
+                <com.trainerapp.ui.customui.MaxHeightScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"
+                    app:maxHeight="500dp">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/event_comments_recycler_view"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        />
+                        android:layout_height="wrap_content" />
 
-                </ScrollView>
+                </com.trainerapp.ui.customui.MaxHeightScrollView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="3"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_gravity="center"
+                        android:hint="@string/comment_hint_your_message"
+                        app:hintAnimationEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/comment_edit_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/confirm_message_submit_holder"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginRight="8dp"
+                        android:elevation="12dp"
+                        android:innerRadius="10dp">
+
+                        <TextView
+                            android:id="@+id/confirm_message_submit_text_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:enabled="false"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:text="Send"
+                            android:background="@drawable/edit_user_submit_button_selector"
+                            android:textSize="20sp" />
+
+                    </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
 
             </LinearLayout>
 

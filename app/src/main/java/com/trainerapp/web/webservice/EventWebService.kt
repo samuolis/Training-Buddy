@@ -1,6 +1,7 @@
 package com.trainerapp.web.webservice
 
 import com.trainerapp.db.entity.Event
+import com.trainerapp.models.CommentMessage
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -33,8 +34,18 @@ interface EventWebService {
     @POST("/events")
     fun getEventByIds(@Body eventsIds: List<Long>?): Call<List<Event>>
 
-    @DELETE("/event/{eventId}")
+    @DELETE("/event/delete/{eventId}")
     fun deleteEventById(@Path("eventId") eventId: Long?,
                         @Header("authorization-code") authorizationCode: String?): Call<Void>
+
+    @GET("/event/one/{eventId}")
+    fun getEventById(@Path("eventId") eventId: Long?): Call<Event>
+
+    @POST("/event/comment")
+    fun createCommentMessage(@Body commentMessage: CommentMessage,
+                             @Header("authorization-code") authorizationCode: String?): Call<CommentMessage>
+
+    @POST("/event/comments")
+    fun getEventCommentsByIds(@Body eventsIds: List<Long>?): Call<List<CommentMessage>>
 
 }

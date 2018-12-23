@@ -53,6 +53,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
+                eventViewModel.setDescriptionStatus(2)
                 eventViewModel.loadEvents()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -61,6 +62,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
+                eventViewModel.setDescriptionStatus(0)
                 eventViewModel.loadEventsByLocation()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -69,6 +71,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
+                eventViewModel.setDescriptionStatus(1)
                 eventViewModel.loadUserData()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -102,6 +105,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         //Handle when activity is recreated like on orientation Change
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {
+            eventViewModel.setDescriptionStatus(2)
             supportFragmentManager.beginTransaction()
                     .replace(R.id.navigation_frame, homeFragment)
                     .commit()
@@ -138,7 +142,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     }
 
     override fun onBackStackChanged() {
-        fragmentAdded = supportFragmentManager.backStackEntryCount > 1
+        fragmentAdded = supportFragmentManager.backStackEntryCount > 0
         if (!fragmentAdded){
             supportActionBar!!.title = getString(R.string.app_name)
         }
@@ -147,8 +151,8 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     }
 
     fun getBackOnStackToMainMenu(){
-        var fragmentSize = supportFragmentManager.fragments.count()
-        while (fragmentSize > 1){
+        var fragmentSize = supportFragmentManager.backStackEntryCount
+        while (fragmentSize > 0){
             supportFragmentManager.popBackStack()
             fragmentSize -= 1
         }
@@ -163,8 +167,13 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     override fun onSupportNavigateUp(): Boolean {
         //This method is called when the up button is pressed. Just the pop back stack.
         supportFragmentManager.popBackStack()
-        if (eventViewModel.myEventPosition != null){
-            eventViewModel.myEventPosition = null
+        if (supportFragmentManager.backStackEntryCount < 2) {
+            if (eventViewModel.myEventPosition != null) {
+                eventViewModel.myEventPosition = null
+            }
+            if (eventViewModel.eventComments != null) {
+                eventViewModel.cleanComments()
+            }
         }
         return true
     }
@@ -194,10 +203,15 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     override fun onBackPressed() {
 
-        if (supportFragmentManager.fragments.count() > 2){
+        if (supportFragmentManager.backStackEntryCount > 0){
             supportFragmentManager.popBackStack()
-            if (eventViewModel.myEventPosition != null){
-                eventViewModel.myEventPosition = null
+            if (supportFragmentManager.backStackEntryCount < 2) {
+                if (eventViewModel.myEventPosition != null) {
+                    eventViewModel.myEventPosition = null
+                }
+                if (eventViewModel.eventComments != null) {
+                    eventViewModel.cleanComments()
+                }
             }
         } else {
             if (doubleBackToExitPressedOnce) {

@@ -3,7 +3,9 @@ package com.trainerapp.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
 import android.text.SpannableStringBuilder
+import android.text.TextWatcher
 import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
@@ -24,11 +26,15 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.gson.GsonBuilder
+import com.trainerapp.db.entity.Event
+import com.trainerapp.models.CommentMessage
+import com.trainerapp.ui.adapters.EventDetailsCommentsRecyclerViewAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 
 class EventDetailsDialogFragment : DialogFragment() {
@@ -65,6 +71,19 @@ class EventDetailsDialogFragment : DialogFragment() {
 
         rootView.post {
             event_details_recycler_view.layoutManager = LinearLayoutManager(context)
+            event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
+
+            comment_edit_text.addTextChangedListener(object: TextWatcher{
+                override fun afterTextChanged(p0: Editable?) {
+                }
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                }
+                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                   var editTextString = comment_edit_text.text.toString().trim()
+                    confirm_message_submit_text_view.isEnabled = !editTextString.isEmpty()
+                }
+
+            })
 
             eventViewModel.changeLoadStatus(1)
 
@@ -79,136 +98,150 @@ class EventDetailsDialogFragment : DialogFragment() {
                 event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it ,context!!)
             })
 
-            eventViewModel.getStatusForDescription()?.observe(this, Observer {status ->
-                when (status) {
-                    0 -> setupDashboardUI()
-                    1 -> setupProfileUI()
-                    2 -> setupHomeUI()
-                }
-
+            eventViewModel.getEventComments()?.observe(this, Observer {
+                event_comments_recycler_view.adapter = EventDetailsCommentsRecyclerViewAdapter(it, context!!)
             })
 
+            setupUI()
 
         }
-        val actionBar = (activity as AppCompatActivity).supportActionBar
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.title = getString(R.string.event_details_title_label)
-            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
-        }
+//        val actionBar = (activity as AppCompatActivity).supportActionBar
+//        if (actionBar != null) {
+//            actionBar.setDisplayHomeAsUpEnabled(true)
+//            actionBar.setHomeButtonEnabled(true)
+//            actionBar.title = getString(R.string.event_details_title_label)
+//            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
+//        }
         return rootView
     }
 
+    fun sendCommentMessage(eventId: Long?){
+        var message = comment_edit_text.text.toString()
+        var timeNow = Calendar.getInstance().timeInMillis
+        var commentMessage = CommentMessage(message, userId, eventId, timeNow, "")
+        val currentUser = auth.currentUser
+        currentUser?.getIdToken(true)?.addOnCompleteListener {
+            if (it.isSuccessful()) {
+                var token = it.getResult()?.getToken();
+                eventWebService.createCommentMessage(commentMessage, token).enqueue(object : Callback<CommentMessage>{
+                    override fun onFailure(call: Call<CommentMessage>, t: Throwable) {
+                        Snackbar.make(event_details_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
+                    }
+
+                    override fun onResponse(call: Call<CommentMessage>, response: Response<CommentMessage>) {
+                        comment_edit_text.text = SpannableStringBuilder("")
+                        eventViewModel.loadEventComments(true)
+                    }
+
+                })
+            }
+        }
+
+    }
+
+    private fun setupUI(){
+        eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+            eventViewModel.getStatusForDescription()?.observe(this, Observer { status ->
+                when (status) {
+                    0 -> setupDashboardUI(it)
+                    1 -> setupProfileUI(it)
+                    2 -> setupHomeUI(it)
+                }
+
+            })
+        })
+    }
 
 
-    private fun setupHomeUI() {
+
+    private fun setupHomeUI(event: Event) {
         setHasOptionsMenu(true)
-        eventViewModel?.getEventByPosition()?.observe(this, androidx.lifecycle.Observer {
-            eventId = it.eventId
-            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
-            event_details_title.text = SpannableStringBuilder(it.eventName)
-            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-            val dateStr = timeStampFormat.format(it.eventDate)
-            event_details_date.text = SpannableStringBuilder(dateStr)
-            event_details_description.text = SpannableStringBuilder(it.eventDescription)
-            if (it.eventDistance == null) {
-                event_details_distance_layout.visibility = View.GONE
-                event_details_location.setPadding(0, 0, 0, 32)
-            } else {
-                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                event_details_location.setPadding(0, 0, 0, 0)
-            }
-            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-            event_details_submit_button.text = getString(R.string.edit_event_button_label)
-            event_details_submit_button.setOnClickListener { view ->
-                (activity as NavigationActivity).showEventCreateDialogFragment()
-            }
+        eventId = event.eventId
+        updateUI(event)
+        event_details_submit_button.text = getString(R.string.edit_event_button_label)
+        event_details_submit_button.setOnClickListener { view ->
+            (activity as NavigationActivity).showEventCreateDialogFragment()
+        }
 
-        })
     }
 
-    fun setupDashboardUI() {
-        eventViewModel.getEventInDashboard()?.observe(this, Observer {
-            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
-            event_details_title.text = SpannableStringBuilder(it.eventName)
-            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-            val dateStr = timeStampFormat.format(it.eventDate)
-            event_details_date.text = SpannableStringBuilder(dateStr)
-            event_details_description.text = SpannableStringBuilder(it.eventDescription)
-            if (it.eventDistance == null) {
-                event_details_distance_layout.visibility = View.GONE
-                event_details_location.setPadding(0, 0, 0, 16)
-            } else {
-                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                event_details_location.setPadding(0, 0, 0, 0)
-            }
-            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-            event_details_submit_button.text = getString(R.string.event_description_positive_button)
-            event_details_submit_button.setOnClickListener { view ->
-                currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-                    if (task.isSuccessful()) {
-                        var token = task.getResult()?.getToken()
-                        eventWebService.signEvent(userId, it.eventId, token).enqueue(object : Callback<Void> {
-                            override fun onFailure(call: Call<Void>, t: Throwable) {
-                                Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                        .show()
-                            }
+    fun setupDashboardUI(event: Event) {
+        eventId = event.eventId
+        updateUI(event)
+        event_details_submit_button.setOnClickListener { view ->
+            currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
+                if (task.isSuccessful()) {
+                    var token = task.getResult()?.getToken()
+                    eventWebService.signEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                    .show()
+                        }
 
-                            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                                (activity as NavigationActivity).backOnStack()
-                                eventViewModel?.loadEventsByLocation()
-                                eventViewModel.loadUserData()
-                            }
+                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                            (activity as NavigationActivity).backOnStack()
+                            eventViewModel?.loadEventsByLocation()
+                            eventViewModel.loadUserData()
+                        }
 
-                        })
-                    }
+                    })
                 }
             }
-        })
+        }
+
     }
 
-    fun setupProfileUI() {
-        eventViewModel.getEventInProfile()?.observe(this, Observer {
-            eventViewModel.loadSignedUserList(it.eventSignedPlayers)
-            event_details_title.text = SpannableStringBuilder(it.eventName)
-            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-            val dateStr = timeStampFormat.format(it.eventDate)
-            event_details_date.text = SpannableStringBuilder(dateStr)
-            event_details_description.text = SpannableStringBuilder(it.eventDescription)
-            if (it.eventDistance == null){
-                event_details_distance_layout.visibility = View.GONE
-                event_details_location.setPadding(0,0,0,32)
+    fun setupProfileUI(event: Event) {
+        eventId = event.eventId
+        updateUI(event)
+        event_details_submit_button.setOnClickListener { view ->
+            currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
+                if (task.isSuccessful()) {
+                    var token = task.getResult()?.getToken()
+                    eventWebService.unsignEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
+                                    .show()
+                        }
+
+                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                            (activity as NavigationActivity).backOnStack()
+                            eventViewModel?.loadUserData()
+                            eventViewModel?.loadOneEventInUserProfile()
+                        }
+
+                    })
+                }
+            }
+        }
+    }
+
+    private fun updateUI(event: Event){
+        eventViewModel.loadSignedUserList(event.eventSignedPlayers)
+        eventViewModel.loadEventComments()
+        event_details_title.text = SpannableStringBuilder(event.eventName)
+        val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+        timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        val dateStr = timeStampFormat.format(event.eventDate)
+        event_details_date.text = SpannableStringBuilder(dateStr)
+        event_details_description.text = SpannableStringBuilder(event.eventDescription)
+        if (event.eventDistance == null){
+            event_details_distance_layout.visibility = View.GONE
+            event_details_location.setPadding(0,0,0,32)
+        } else{
+            event_details_distance.text = DecimalFormat("##.##").format(event.eventDistance)
+            event_details_location.setPadding(0,0,0,0)
+        }
+        event_details_players_spot_left.text = SpannableStringBuilder(event.eventPlayers.toString())
+        event_details_location.text = SpannableStringBuilder(event.eventLocationName)
+        event_details_submit_button.text = getString(R.string.event_description_negative_button)
+        confirm_message_submit_text_view.setOnClickListener { view ->
+            if (comment_edit_text.text.toString().length <= 100){
+                sendCommentMessage(event.eventId)
             } else{
-                event_details_distance.text = DecimalFormat("##.##").format(it.eventDistance)
-                event_details_location.setPadding(0,0,0,0)
+                Snackbar.make(event_details_layout, "Text is too long", Snackbar.LENGTH_SHORT).show()
             }
-            event_details_players_spot_left.text = SpannableStringBuilder(it.eventPlayers.toString())
-            event_details_location.text = SpannableStringBuilder(it.eventLocationName)
-            event_details_submit_button.text = getString(R.string.event_description_negative_button)
-            event_details_submit_button.setOnClickListener { view ->
-                currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-                    if (task.isSuccessful()) {
-                        var token = task.getResult()?.getToken()
-                        eventWebService.unsignEvent(userId, it.eventId, token).enqueue(object : Callback<Void> {
-                            override fun onFailure(call: Call<Void>, t: Throwable) {
-                                Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                        .show()
-                            }
-
-                            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                                (activity as NavigationActivity).backOnStack()
-                                eventViewModel?.loadUserData()
-                                eventViewModel?.loadEventsByLocation()
-                            }
-
-                        })
-                    }
-                }
-            }
-        })
+        }
     }
 
     private fun showProgressBar() {

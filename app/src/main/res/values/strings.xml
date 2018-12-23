@@ -69,5 +69,6 @@
     <string name="logged_user_token">logged_user_token</string>
     <string name="signed_users_label">Signed users</string>
     <string name="comments_label">Comments</string>
+    <string name="comment_hint_your_message">Your message</string>
 
 </resources>

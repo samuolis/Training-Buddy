@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.event_list_recyclerview_item.view.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter.MyClickListener
-
+import java.util.*
 
 
 class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, onClickListener: MyClickListener?) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
@@ -36,6 +36,7 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, 
         if (eventList != null) {
             holder.eventName.text = eventList!![position].eventName
             val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
             val dateStr = timeStampFormat.format(eventList!![position].eventDate)
             holder.eventDate.text = dateStr
             holder.eventPlaceName.text = eventList!![position].eventLocationName

@@ -24,24 +24,25 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.trainerapp.db.entity.User
 import com.trainerapp.web.webservice.UserWebService
-import com.facebook.CallbackManager
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.trainerapp.models.CommentMessage
 import java.util.*
 
 
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
-    var oneEvent: MutableLiveData<Event>? = MutableLiveData<Event>()
+    var oneEventInHome: MutableLiveData<Event>? = MutableLiveData<Event>()
     var oneEventDashboard: MutableLiveData<Event>? = MutableLiveData<Event>()
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
     var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
     var refreshStatus: MutableLiveData<Int>? = null
-    var refreshGlobalStatus: MutableLiveData<Int>? = null
+    var eventComments: MutableLiveData<List<CommentMessage>>? = MutableLiveData<List<CommentMessage>>()
     var myEventPosition: Int? = null
+    var detailsOneEvent: MutableLiveData<Event>? = MutableLiveData<Event>()
     var loadingStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
     var loggedUser: FirebaseUser? = null
 
@@ -49,7 +50,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
 
     var userEventInProfile: MutableLiveData<Event>? = MutableLiveData<Event>()
-    var callbackManager: CallbackManager? = null
 
     var userWeb: MutableLiveData<User>? = null
 
@@ -95,28 +95,42 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return events
     }
 
-    fun getEventByPosition(): LiveData<Event>?{
-        return oneEvent
+    fun getDetailsOneEvent(): LiveData<Event>?{
+        return detailsOneEvent
     }
 
-    fun loadAllData(){
-        loadEvents()
-        loadEventsByLocation()
+    fun loadDetailsOneEvent(){
+        when (descriptionStatus?.value) {
+            0 -> loadOneEventInDashboard()
+            1 -> loadOneEventInUserProfile()
+            2 -> loadOneEventInHome()
+        }
+        loadEventComments()
     }
 
-    fun loadOneEvent(position: Int? = null){
+    // 0 -> Dashboard
+    // 1 -> Profile
+    // 2 -> Home
+    fun setDescriptionStatus(status: Int){
+        descriptionStatus?.value = status
+    }
+
+    fun getOneEventInHome(): LiveData<Event>?{
+        return oneEventInHome
+    }
+
+    fun loadOneEventInHome(position: Int? = null){
         if (myEventPosition != null){
             var value = events?.value!![myEventPosition!!]
-            oneEvent?.value = value
+            detailsOneEvent?.value = value
             return
         } else if (position == null){
-            oneEvent?.value = null
+            detailsOneEvent?.value = null
             return
         }
         myEventPosition = position
-        descriptionStatus?.value = 2
         var value = events?.value!![position!!]
-        oneEvent?.value = value
+        detailsOneEvent?.value = value
     }
 
     fun getEventInDashboard(): LiveData<Event>?{
@@ -124,13 +138,35 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadOneEventInDashboard(position: Int? = null){
-        if (position == null){
-            oneEventDashboard?.value = null
+        if (myEventPosition != null){
+            var value = eventsByLocation?.value!![myEventPosition!!]
+            detailsOneEvent?.value = value
+            return
+        } else if (position == null){
+            detailsOneEvent?.value = null
             return
         }
-        descriptionStatus?.value = 0
+        myEventPosition = position
         var value = eventsByLocation?.value!![position]
-        oneEventDashboard?.value = value
+        detailsOneEvent?.value = value
+    }
+
+    fun getEventInProfile(): LiveData<Event>?{
+        return userEventInProfile
+    }
+
+    fun loadOneEventInUserProfile(position: Int? = null){
+        if (myEventPosition != null){
+            var value = userEvents?.value!![myEventPosition!!]
+            detailsOneEvent?.value = value
+            return
+        } else if (position == null){
+            detailsOneEvent?.value = null
+            return
+        }
+        myEventPosition = position
+        var value = userEvents?.value!![position]
+        detailsOneEvent?.value = value
     }
 
     fun getEventsOfLocation(): LiveData<List<Event>>? {
@@ -198,9 +234,11 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                     events?.value = response.body()
                     refreshStatus?.value = 0
                     if (myEventPosition != null){
-                        loadOneEvent()
+                        loadOneEventInHome()
                         myEventPosition = null
                     }
+                } else{
+                    Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
                 }
             }
         })
@@ -350,18 +388,56 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         userWeb?.value = userCache
     }
 
-    fun getEventInProfile(): LiveData<Event>?{
-        return userEventInProfile
+    fun getEventComments(): LiveData<List<CommentMessage>>? {
+        return eventComments
     }
 
-    fun loadOneEventInUserProfile(position: Int? = null){
-        if (position == null){
-            userEventInProfile?.value = null
-            return
+    fun loadEventComments(needRefresh: Boolean = false){
+        var event: Event? = null
+        event = detailsOneEvent?.value
+        if (needRefresh) {
+            eventWebService.getEventById(event?.eventId).enqueue(object : Callback<Event>{
+                override fun onFailure(call: Call<Event>, t: Throwable) {
+                    Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
+                }
+
+                override fun onResponse(call: Call<Event>, response: Response<Event>) {
+                    if (response.isSuccessful) {
+                        querryComments(response.body())
+
+                    } else {
+                        Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+            })
+        } else{
+            querryComments(event)
         }
-        descriptionStatus?.value = 1
-        var value = userEvents?.value!![position]
-        userEventInProfile?.value = value
+    }
+
+    fun querryComments(event: Event?){
+        if (event?.eventComments != null) {
+            eventWebService.getEventCommentsByIds(event?.eventComments).enqueue(object : Callback<List<CommentMessage>> {
+                override fun onFailure(call: Call<List<CommentMessage>>, t: Throwable) {
+                    Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                }
+
+                override fun onResponse(call: Call<List<CommentMessage>>, response: Response<List<CommentMessage>>) {
+                    if (response.isSuccessful) {
+                        eventComments?.value = response.body()
+
+                    } else {
+                        Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+            })
+        }
+    }
+
+    fun cleanComments(){
+        eventComments?.value = mutableListOf()
     }
 
     fun getLoadingStatus(): LiveData<Int>?{

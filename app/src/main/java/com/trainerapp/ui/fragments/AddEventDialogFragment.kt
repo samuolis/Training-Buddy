@@ -5,9 +5,6 @@ import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.app.DatePickerDialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 
 import com.trainerapp.R
@@ -22,6 +19,7 @@ import android.content.Intent
 import android.location.Geocoder
 import android.text.SpannableStringBuilder
 import android.util.Log
+import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import com.trainerapp.db.entity.Event
@@ -51,17 +49,18 @@ class AddEventDialogFragment : DialogFragment() {
     var selectedLocationLatitude: Double? = null
     var selectedLocationLongitude: Double? = null
     var selectedLocationCountryCode: String? = null
-    var dateAndTimeIsSet: Boolean = false
     var eventId: Long? = null
     var userId: String? = null
     var eventViewModel: EventViewModel? = null
     var selectedDateAndTime: Date? = null
     var eventSignedPlayers: List<String>? = null
+    var eventCommentMessage: List<Long>? = null
 
     var mHour: Int = 0
     var mMinute: Int = 0
     val c = Calendar.getInstance()
     lateinit var auth: FirebaseAuth
+    lateinit var eventWebService: EventWebService
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -69,6 +68,19 @@ class AddEventDialogFragment : DialogFragment() {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+
+        val gson = GsonBuilder()
+                .setLenient()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .create()
+
+        val retrofit = Retrofit.Builder()
+                .baseUrl(eventViewModel?.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build()
+
+
+        eventWebService = retrofit.create(EventWebService::class.java)
         var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
         auth = FirebaseAuth.getInstance()
@@ -95,7 +107,7 @@ class AddEventDialogFragment : DialogFragment() {
                 saveEvent(view)
             }
 
-            eventViewModel?.getEventByPosition()?.observe(this, androidx.lifecycle.Observer {
+            eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
                 if (it != null) {
                     event_name_edit_text.text = SpannableStringBuilder(it.eventName)
                     event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
@@ -108,9 +120,11 @@ class AddEventDialogFragment : DialogFragment() {
                     eventId = it.eventId
                     userId = it.userId
                     val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+                    timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
                     event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
                     selectedDateAndTime = it.eventDate
                     eventSignedPlayers = it.eventSignedPlayers
+                    eventCommentMessage = it.eventComments
                 }
             })
 
@@ -147,7 +161,8 @@ class AddEventDialogFragment : DialogFragment() {
         event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
                 selectedLocationName, selectedLocationLatitude,
                 selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
-                eventPlayers = eventPlayersNumber, eventDistance = null, eventSignedPlayers = eventSignedPlayers)
+                eventPlayers = eventPlayersNumber, eventDistance = null,
+                eventSignedPlayers = eventSignedPlayers, eventComments = eventCommentMessage)
 
         val currentUser = auth.currentUser
         currentUser?.getIdToken(true)?.addOnCompleteListener {
