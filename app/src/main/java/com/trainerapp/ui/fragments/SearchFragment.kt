@@ -3,6 +3,7 @@ package com.trainerapp.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.trainerapp.R
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.google.android.material.snackbar.Snackbar
+import com.trainerapp.ui.customui.InputFilterMinMax
 import kotlinx.android.synthetic.main.fragment_search.*
 
 class SearchFragment : Fragment() {
@@ -31,6 +33,7 @@ class SearchFragment : Fragment() {
         rootView.post {
             var radiusValue = userSharedPref?.getString(context?.getString(R.string.user_prefered_distance_key), "30")
             events_radius_edit_text.text = SpannableStringBuilder(radiusValue)
+            events_radius_edit_text.filters = arrayOf<InputFilter>(InputFilterMinMax("1", "10000"))
             search_fab.setOnClickListener {
                 if (events_radius_edit_text.text != null) {
                     editor?.putString(getString(R.string.user_prefered_distance_key), events_radius_edit_text.text.toString())

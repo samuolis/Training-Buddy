@@ -20,19 +20,23 @@
 
         <TextView
             android:id="@+id/event_name_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:text="Event Name"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@android:color/black"
             android:textSize="24sp"
+            app:layout_constraintEnd_toStartOf="@+id/distance_linear_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/distance_linear_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:orientation="horizontal"
@@ -45,6 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Distance"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="@android:color/black"
                 android:textSize="24sp" />
 
@@ -59,27 +65,35 @@
 
         <TextView
             android:id="@+id/event_place_name_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Event place name"
             android:textColor="@android:color/black"
             android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/players_label"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/event_name_text_view" />
 
         <TextView
             android:id="@+id/event_date_text_view"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Event date"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/event_players_number_text_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/event_place_name_text_view" />
 

@@ -4,6 +4,7 @@ package com.trainerapp.ui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.view.*
@@ -72,6 +73,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         rootView.post {
             event_details_recycler_view.layoutManager = LinearLayoutManager(context)
             event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
+            comment_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
 
             comment_edit_text.addTextChangedListener(object: TextWatcher{
                 override fun afterTextChanged(p0: Editable?) {
@@ -116,6 +118,7 @@ class EventDetailsDialogFragment : DialogFragment() {
     }
 
     fun sendCommentMessage(eventId: Long?){
+        showProgressBarComment()
         var message = comment_edit_text.text.toString()
         var timeNow = Calendar.getInstance().timeInMillis
         var commentMessage = CommentMessage(message, userId, eventId, timeNow, "")
@@ -125,15 +128,20 @@ class EventDetailsDialogFragment : DialogFragment() {
                 var token = it.getResult()?.getToken();
                 eventWebService.createCommentMessage(commentMessage, token).enqueue(object : Callback<CommentMessage>{
                     override fun onFailure(call: Call<CommentMessage>, t: Throwable) {
+                        hideProgressBarComment()
                         Snackbar.make(event_details_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
                     }
 
                     override fun onResponse(call: Call<CommentMessage>, response: Response<CommentMessage>) {
+                        hideProgressBarComment()
                         comment_edit_text.text = SpannableStringBuilder("")
                         eventViewModel.loadEventComments(true)
                     }
 
                 })
+            } else{
+                hideProgressBarComment()
+                Snackbar.make(event_details_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -168,7 +176,9 @@ class EventDetailsDialogFragment : DialogFragment() {
     fun setupDashboardUI(event: Event) {
         eventId = event.eventId
         updateUI(event)
+        event_details_submit_button.text = getString(R.string.event_description_positive_button)
         event_details_submit_button.setOnClickListener { view ->
+            showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
                     var token = task.getResult()?.getToken()
@@ -176,12 +186,13 @@ class EventDetailsDialogFragment : DialogFragment() {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
                                     .show()
+                            hideProgressBar()
                         }
 
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
+                            (activity as NavigationActivity).cleanCashedData()
                             eventViewModel?.loadEventsByLocation()
-                            eventViewModel.loadUserData()
                         }
 
                     })
@@ -195,6 +206,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         eventId = event.eventId
         updateUI(event)
         event_details_submit_button.setOnClickListener { view ->
+            showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
                     var token = task.getResult()?.getToken()
@@ -202,12 +214,13 @@ class EventDetailsDialogFragment : DialogFragment() {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
                                     .show()
+                            hideProgressBar()
                         }
 
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
+                            (activity as NavigationActivity).cleanCashedData()
                             eventViewModel?.loadUserData()
-                            eventViewModel?.loadOneEventInUserProfile()
                         }
 
                     })
@@ -237,6 +250,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         event_details_submit_button.text = getString(R.string.event_description_negative_button)
         confirm_message_submit_text_view.setOnClickListener { view ->
             if (comment_edit_text.text.toString().length <= 100){
+                comment_edit_text.isEnabled = false
                 sendCommentMessage(event.eventId)
             } else{
                 Snackbar.make(event_details_layout, "Text is too long", Snackbar.LENGTH_SHORT).show()
@@ -252,6 +266,18 @@ class EventDetailsDialogFragment : DialogFragment() {
     private fun hideProgressBar() {
         progress_bar_background_event_details.setVisibility(View.GONE)
         login_progress_event_details.setVisibility(View.GONE)
+    }
+
+    private fun showProgressBarComment() {
+//        progress_bar_background_event_details_comment_recycler.layoutParams =
+//                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        progress_bar_background_event_details_comment_recycler.setVisibility(View.VISIBLE)
+        progress_event_details_comment_recycler.setVisibility(View.VISIBLE)
+    }
+
+    private fun hideProgressBarComment() {
+        progress_bar_background_event_details_comment_recycler.setVisibility(View.GONE)
+        progress_event_details_comment_recycler.setVisibility(View.GONE)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {

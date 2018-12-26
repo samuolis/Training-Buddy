@@ -232,10 +232,43 @@
                     android:nestedScrollingEnabled="true"
                     app:maxHeight="500dp">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/event_comments_recycler_view"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="match_parent">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/event_comments_recycler_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <!-- Login progress -->
+                        <ProgressBar
+                            android:id="@+id/progress_event_details_comment_recycler"
+                            style="?android:attr/progressBarStyleLarge"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <View
+                            android:id="@+id/progress_bar_background_event_details_comment_recycler"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@color/loadingBackground"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </com.trainerapp.ui.customui.MaxHeightScrollView>
 

@@ -23,6 +23,22 @@
           }
         },
         {
+          "client_id": "232578995058-tmdjch4jbr57gobtv0bfbbln8q47so60.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trainerapp",
+            "certificate_hash": "8502af05f358b3f3557e86c8b86b71371bedd090"
+          }
+        },
+        {
+          "client_id": "232578995058-3lcothm8k8ak4808fkc65rg95mlv23cl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trainerapp",
+            "certificate_hash": "dbefc5b5d2281cc62e86296fa09a65f047451484"
+          }
+        },
+        {
           "client_id": "232578995058-1b8bsv0i0ab1rgcj30tngs9i3bglnn84.apps.googleusercontent.com",
           "client_type": 3
         }

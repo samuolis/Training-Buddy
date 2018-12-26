@@ -158,7 +158,7 @@ class LoginFragment : Fragment() {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
                 hideProgressBar()
-                Snackbar.make(login_layout, "Google sign in failed.", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(login_layout, "Google sign in failed." + e.message, Snackbar.LENGTH_SHORT).show()
 
             }
         } else {
@@ -252,6 +252,8 @@ class LoginFragment : Fragment() {
                                                         Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
                                                     }
                                                 })
+                                            } else{
+                                                (activity as LoginActivity).GoToNavigationActivity()
                                             }
                                         }
                                     } else {

@@ -17,6 +17,7 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import android.content.Intent
 import android.location.Geocoder
+import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.*
@@ -30,6 +31,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.GsonBuilder
+import com.trainerapp.ui.customui.InputFilterMinMax
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -89,6 +91,11 @@ class AddEventDialogFragment : DialogFragment() {
             event_date_time_text_view.setOnClickListener {
                 datePicker()
             }
+
+            event_players_edit_text.filters = arrayOf<InputFilter>(InputFilterMinMax("1", "1000"))
+            event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+            event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
+
             event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener({ view: View, b: Boolean ->
                 if (b == true) {
                     try {
@@ -138,10 +145,15 @@ class AddEventDialogFragment : DialogFragment() {
                     .show()
             return
         }
+        if(event_players_edit_text.text.toString().toInt() < 1){
+            Snackbar.make(view, "Some fields are incorrect", Snackbar.LENGTH_LONG)
+                    .show()
+            return
+        }
 
         var eventPlayersNumber: Int? = null
-        if (event_players_edit_text.text.toString() == ""){
-            eventPlayersNumber = 0
+        if (event_players_edit_text.text.toString() == "") {
+            eventPlayersNumber = 1
         } else{
             eventPlayersNumber = event_players_edit_text.text?.toString()?.toInt()
         }
@@ -175,7 +187,7 @@ class AddEventDialogFragment : DialogFragment() {
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
                         (activity as NavigationActivity).backOnStack()
-                        eventViewModel?.loadEvents()
+                        eventViewModel?.loadEvents(true)
                     }
 
                 })

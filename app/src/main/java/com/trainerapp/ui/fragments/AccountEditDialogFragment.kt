@@ -2,6 +2,7 @@ package com.trainerapp.ui.fragments
 
 
 import android.os.Bundle
+import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -48,6 +49,7 @@ class AccountEditDialogFragment : DialogFragment() {
         var rootView = inflater.inflate(R.layout.fragment_account_edit, container, false)
         mDb = AppDatabase.getInstance(activity)
         rootView.post {
+            name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(100))
             eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
             eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
                 profileInt = user.profilePictureIndex

@@ -22,6 +22,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.facebook.internal.BoltsMeasurementEventListener
 import com.trainerapp.db.entity.User
 import com.trainerapp.web.webservice.UserWebService
 import com.google.android.gms.location.LocationServices
@@ -221,7 +222,7 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return descriptionStatus
     }
 
-    fun loadEvents() {
+    fun loadEvents(refreshOneEvent: Boolean = false) {
         refreshStatus?.value = 1
         eventWebService.getEventsByUserId(userId = userId).enqueue(object : Callback<List<Event>>{
             override fun onFailure(call: Call<List<Event>>, t: Throwable) {
@@ -233,9 +234,8 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 if (response.isSuccessful()){
                     events?.value = response.body()
                     refreshStatus?.value = 0
-                    if (myEventPosition != null){
+                    if (myEventPosition != null && refreshOneEvent){
                         loadOneEventInHome()
-                        myEventPosition = null
                     }
                 } else{
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()

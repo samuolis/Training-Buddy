@@ -125,11 +125,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         when (requestCode) {
             REQUEST_PERMISION_CODE -> {
                 // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    permisionsResult = true
-                } else {
-                    permisionsResult = false
-                }
+                permisionsResult = (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 return
             }
 
@@ -206,12 +202,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         if (supportFragmentManager.backStackEntryCount > 0){
             supportFragmentManager.popBackStack()
             if (supportFragmentManager.backStackEntryCount < 2) {
-                if (eventViewModel.myEventPosition != null) {
-                    eventViewModel.myEventPosition = null
-                }
-                if (eventViewModel.eventComments != null) {
-                    eventViewModel.cleanComments()
-                }
+                cleanCashedData()
             }
         } else {
             if (doubleBackToExitPressedOnce) {
@@ -225,6 +216,15 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
             Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
 
             Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
+        }
+    }
+
+    fun cleanCashedData(){
+        if (eventViewModel.myEventPosition != null) {
+            eventViewModel.myEventPosition = null
+        }
+        if (eventViewModel.eventComments != null) {
+            eventViewModel.cleanComments()
         }
     }
 
