@@ -274,6 +274,40 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         supportActionBar!!.title = getString(R.string.create_new_event_title)
     }
 
+    fun showEventSignedUsersListDialogFragment() {
+        val fragmentManager = supportFragmentManager
+        val newFragment = EventSignedUsersListDialogFragment()
+        // The device is smaller, so show the fragment fullscreen
+        val transaction = fragmentManager.beginTransaction()
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction
+                .add(android.R.id.content, newFragment)
+                .addToBackStack(null)
+                .commit()
+        supportFragmentManager.executePendingTransactions()
+        supportActionBar!!.title = getString(R.string.signed_user_list_title)
+    }
+
+    fun showEventCommentsDialogFragment() {
+        val fragmentManager = supportFragmentManager
+        val newFragment = EventCommentsDialogFragment()
+        // The device is smaller, so show the fragment fullscreen
+        val transaction = fragmentManager.beginTransaction()
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction
+                .add(android.R.id.content, newFragment)
+                .addToBackStack(null)
+                .commit()
+        supportFragmentManager.executePendingTransactions()
+        supportActionBar!!.title = getString(R.string.event_comments)
+    }
+
     fun showDashnoardSearchDialogFragment() {
         val fragmentManager = supportFragmentManager
         val newFragment = SearchFragment()

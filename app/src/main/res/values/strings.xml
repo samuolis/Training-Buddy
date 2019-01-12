@@ -70,5 +70,7 @@
     <string name="signed_users_label">Signed users</string>
     <string name="comments_label">Comments</string>
     <string name="comment_hint_your_message">Your message</string>
+    <string name="signed_user_list_title">Signed Users List</string>
+    <string name="event_comments">Comments</string>
 
 </resources>

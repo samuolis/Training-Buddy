@@ -11,8 +11,8 @@ import kotlinx.android.synthetic.main.event_comment_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class EventDetailsCommentsRecyclerViewAdapter(commentMessages: List<CommentMessage>?, context: Context):
-        RecyclerView.Adapter<EventDetailsCommentsRecyclerViewAdapter.ViewHolder>() {
+class CommentsDetailsRecyclerViewAdapter(commentMessages: List<CommentMessage>?, context: Context):
+        RecyclerView.Adapter<CommentsDetailsRecyclerViewAdapter.ViewHolder>() {
 
     var layoutInflater: LayoutInflater = LayoutInflater.from(context)
     val context = context

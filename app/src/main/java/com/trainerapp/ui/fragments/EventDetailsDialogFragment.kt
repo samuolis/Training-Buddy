@@ -3,10 +3,7 @@ package com.trainerapp.ui.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.InputFilter
 import android.text.SpannableStringBuilder
-import android.text.TextWatcher
 import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.Observer
@@ -29,7 +26,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.gson.GsonBuilder
 import com.trainerapp.db.entity.Event
 import com.trainerapp.models.CommentMessage
-import com.trainerapp.ui.adapters.EventDetailsCommentsRecyclerViewAdapter
+import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
+import com.trainerapp.ui.adapters.EventCommentsRecyclerViewAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -71,21 +69,19 @@ class EventDetailsDialogFragment : DialogFragment() {
         eventWebService = retrofit.create(EventWebService::class.java)
 
         rootView.post {
-            event_details_recycler_view.layoutManager = LinearLayoutManager(context)
+            event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
-            comment_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
 
-            comment_edit_text.addTextChangedListener(object: TextWatcher{
-                override fun afterTextChanged(p0: Editable?) {
-                }
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                }
-                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                   var editTextString = comment_edit_text.text.toString().trim()
-                    confirm_message_submit_text_view.isEnabled = !editTextString.isEmpty()
-                }
+            signed_users_layout.setOnClickListener {
+                (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+            }
+            event_details_recycler_view.setOnClickListener {
+                (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+            }
 
-            })
+            event_comments_label.setOnClickListener {
+                (activity as NavigationActivity).showEventCommentsDialogFragment()
+            }
 
             eventViewModel.changeLoadStatus(1)
 
@@ -97,54 +93,45 @@ class EventDetailsDialogFragment : DialogFragment() {
             })
 
             eventViewModel.getSignedUsers()?.observe(this, Observer {
-                event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it ,context!!)
+                event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it ,context!!,
+                        object : EventDetailsRecyclerViewAdapter.MyClickListener{
+                    override fun onItemClicked(position: Int) {
+                        (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+                    }
+
+                })
             })
 
             eventViewModel.getEventComments()?.observe(this, Observer {
-                event_comments_recycler_view.adapter = EventDetailsCommentsRecyclerViewAdapter(it, context!!)
+                var commentsList = mutableListOf<CommentMessage>()
+                if (it.size > 2){
+                    commentsList.add(CommentMessage("View " + (it.size - 2) + " more comments...", null, null,
+                            null, ""))
+                    commentsList.add(it[it.size - 2])
+                    commentsList.add(it[it.size - 1])
+                } else{
+                    commentsList = it.toMutableList()
+                }
+                event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
+                        object : EventCommentsRecyclerViewAdapter.MyClickListener{
+                            override fun onItemClicked(position: Int) {
+                                (activity as NavigationActivity).showEventCommentsDialogFragment()
+                            }
+
+                        })
             })
 
             setupUI()
 
         }
-//        val actionBar = (activity as AppCompatActivity).supportActionBar
-//        if (actionBar != null) {
-//            actionBar.setDisplayHomeAsUpEnabled(true)
-//            actionBar.setHomeButtonEnabled(true)
-//            actionBar.title = getString(R.string.event_details_title_label)
-//            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
-//        }
-        return rootView
-    }
-
-    fun sendCommentMessage(eventId: Long?){
-        showProgressBarComment()
-        var message = comment_edit_text.text.toString()
-        var timeNow = Calendar.getInstance().timeInMillis
-        var commentMessage = CommentMessage(message, userId, eventId, timeNow, "")
-        val currentUser = auth.currentUser
-        currentUser?.getIdToken(true)?.addOnCompleteListener {
-            if (it.isSuccessful()) {
-                var token = it.getResult()?.getToken();
-                eventWebService.createCommentMessage(commentMessage, token).enqueue(object : Callback<CommentMessage>{
-                    override fun onFailure(call: Call<CommentMessage>, t: Throwable) {
-                        hideProgressBarComment()
-                        Snackbar.make(event_details_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
-                    }
-
-                    override fun onResponse(call: Call<CommentMessage>, response: Response<CommentMessage>) {
-                        hideProgressBarComment()
-                        comment_edit_text.text = SpannableStringBuilder("")
-                        eventViewModel.loadEventComments(true)
-                    }
-
-                })
-            } else{
-                hideProgressBarComment()
-                Snackbar.make(event_details_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
-            }
+        val actionBar = (activity as AppCompatActivity).supportActionBar
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeButtonEnabled(true)
+            actionBar.title = getString(R.string.event_details_title_label)
+            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
         }
-
+        return rootView
     }
 
     private fun setupUI(){
@@ -178,6 +165,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         updateUI(event)
         event_details_submit_button.text = getString(R.string.event_description_positive_button)
         event_details_submit_button.setOnClickListener { view ->
+            event_details_submit_button.isEnabled = false
             showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
@@ -206,6 +194,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         eventId = event.eventId
         updateUI(event)
         event_details_submit_button.setOnClickListener { view ->
+            event_details_submit_button.isEnabled = false
             showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
@@ -237,25 +226,25 @@ class EventDetailsDialogFragment : DialogFragment() {
         timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
         val dateStr = timeStampFormat.format(event.eventDate)
         event_details_date.text = SpannableStringBuilder(dateStr)
-        event_details_description.text = SpannableStringBuilder(event.eventDescription)
+        if (event.eventDescription == null || event.eventDescription == ""){
+            event_details_description.text = SpannableStringBuilder("No description")
+        } else {
+            event_details_description.text = SpannableStringBuilder(event.eventDescription)
+        }
         if (event.eventDistance == null){
             event_details_distance_layout.visibility = View.GONE
-            event_details_location.setPadding(0,0,0,32)
         } else{
             event_details_distance.text = DecimalFormat("##.##").format(event.eventDistance)
-            event_details_location.setPadding(0,0,0,0)
         }
-        event_details_players_spot_left.text = SpannableStringBuilder(event.eventPlayers.toString())
+        var spotsLeft: Int? = 0
+        if (event.eventSignedPlayers != null) {
+            spotsLeft = event.eventPlayers!! - event.eventSignedPlayers.size
+        } else{
+            spotsLeft = event.eventPlayers
+        }
+        event_details_players_spot_left.text = SpannableStringBuilder(spotsLeft.toString())
         event_details_location.text = SpannableStringBuilder(event.eventLocationName)
         event_details_submit_button.text = getString(R.string.event_description_negative_button)
-        confirm_message_submit_text_view.setOnClickListener { view ->
-            if (comment_edit_text.text.toString().length <= 100){
-                comment_edit_text.isEnabled = false
-                sendCommentMessage(event.eventId)
-            } else{
-                Snackbar.make(event_details_layout, "Text is too long", Snackbar.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun showProgressBar() {
@@ -266,18 +255,6 @@ class EventDetailsDialogFragment : DialogFragment() {
     private fun hideProgressBar() {
         progress_bar_background_event_details.setVisibility(View.GONE)
         login_progress_event_details.setVisibility(View.GONE)
-    }
-
-    private fun showProgressBarComment() {
-//        progress_bar_background_event_details_comment_recycler.layoutParams =
-//                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        progress_bar_background_event_details_comment_recycler.setVisibility(View.VISIBLE)
-        progress_event_details_comment_recycler.setVisibility(View.VISIBLE)
-    }
-
-    private fun hideProgressBarComment() {
-        progress_bar_background_event_details_comment_recycler.setVisibility(View.GONE)
-        progress_event_details_comment_recycler.setVisibility(View.GONE)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -316,5 +293,14 @@ class EventDetailsDialogFragment : DialogFragment() {
         super.onPrepareOptionsMenu(menu)
     }
 
-
+    override fun onStart() {
+        super.onStart()
+        val actionBar = (activity as AppCompatActivity).supportActionBar
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeButtonEnabled(true)
+            actionBar.title = getString(R.string.event_details_title_label)
+            actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
+        }
+    }
 }
