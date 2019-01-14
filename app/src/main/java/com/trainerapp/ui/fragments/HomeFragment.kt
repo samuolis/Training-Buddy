@@ -28,7 +28,7 @@ class HomeFragment : Fragment() {
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         rootView.post {
             fab.setOnClickListener {
-                eventViewModel.loadDetailsOneEvent()
+                eventViewModel.loadDetailsEvent()
                 (activity as NavigationActivity).showEventCreateDialogFragment()
             }
             home_recyclerview.layoutManager = LinearLayoutManager(context)
@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
                     context!!,
                     object : UserEventsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
-                            eventViewModel.loadOneEventInHome(position)
+                            eventViewModel.loadDetailsEvent(it[position].eventId)
                             (activity as NavigationActivity).showEventDetailsDialogFragment()
                         }
                     }

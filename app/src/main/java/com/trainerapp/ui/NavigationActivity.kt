@@ -40,11 +40,22 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     companion object {
         var permisionsResult: Boolean = false
+
+        val EVENTIDINTENT: String = "EVENTID"
         // This function will create an intent. This intent must take as parameter the "unique_name" that you registered your activity with
         fun updateMyActivity(context: Context) {
 
             val intent = Intent("refresh")
+            intent.putExtra(EVENTIDINTENT, "")
 
+            //send broadcast
+            context.sendBroadcast(intent)
+        }
+
+        fun updateComments(context: Context, eventId: String) {
+
+            val intent = Intent("refresh")
+            intent.putExtra(EVENTIDINTENT, eventId)
             //send broadcast
             context.sendBroadcast(intent)
         }
@@ -375,7 +386,16 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     //This is the handler that will manager to process the broadcast intent
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            eventViewModel.loadEvents()
+            var eventId = intent.getStringExtra(EVENTIDINTENT)
+            if (eventId == "") {
+                eventViewModel.loadEvents()
+            } else {
+                if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
+                    eventViewModel.loadEventComments(eventId.toLong())
+                    eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
+                }
+                eventViewModel.loadUserEventsByIds()
+            }
         }
     }
 }

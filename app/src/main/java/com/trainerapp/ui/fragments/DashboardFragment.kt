@@ -46,7 +46,7 @@ import java.util.*
                     dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(it, context!!,
                             object : UserEventsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
-                            eventViewModel.loadOneEventInDashboard(position)
+                            eventViewModel.loadDetailsEvent(it[position].eventId)
                             (activity as NavigationActivity).showEventDetailsDialogFragment()
                         }
 

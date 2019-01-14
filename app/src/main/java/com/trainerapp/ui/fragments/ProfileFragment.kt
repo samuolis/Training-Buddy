@@ -77,7 +77,7 @@ class ProfileFragment : Fragment() {
 
             profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(userEvents, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
                 override fun onItemClicked(position: Int) {
-                    eventViewModel.loadOneEventInUserProfile(position)
+                    eventViewModel.loadDetailsEvent(userEvents[position].eventId)
                     (activity as NavigationActivity).showEventDetailsDialogFragment()
                 }
 

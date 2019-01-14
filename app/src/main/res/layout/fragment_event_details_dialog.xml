@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.fragments.EventDetailsDialogFragment"
-    android:id="@+id/event_details_layout">
+    android:id="@+id/event_details_layout"
+    android:visibility="invisible">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
@@ -95,7 +96,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/event_details_distance_layout"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/event_details_location">
+                        app:layout_constraintTop_toBottomOf="@+id/event_location_layout">
 
                         <TextView
                             android:id="@+id/event_details_players_spot_left_title"
@@ -121,20 +122,44 @@
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/event_details_location"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/event_location_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:gravity="start"
-                        android:text="Location"
-                        android:textColor="@android:color/white"
-                        android:textSize="24sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/event_details_description" />
+                        app:layout_constraintTop_toBottomOf="@+id/event_details_description">
+
+                        <TextView
+                            android:id="@+id/event_details_location"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:gravity="start"
+                            android:text="Location"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:textColor="@android:color/white"
+                            android:textSize="24sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/textView"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="Go To Maps"
+                            android:textColor="@android:color/white"
+                            android:textSize="16sp"
+                            app:layout_constraintBottom_toBottomOf="@+id/event_details_location"
+                            app:layout_constraintEnd_toEndOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                     <LinearLayout
                         android:id="@+id/event_details_distance_layout"
@@ -160,7 +185,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:layout_marginEnd="8dp"
                             android:gravity="center_horizontal"
                             android:text="km far from you"
                             android:textColor="@android:color/white"

@@ -187,7 +187,8 @@ class AddEventDialogFragment : DialogFragment() {
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
                         (activity as NavigationActivity).backOnStack()
-                        eventViewModel?.loadEvents(true)
+                        eventViewModel?.loadDetailsEvent(eventId)
+                        eventViewModel?.loadEvents()
                     }
 
                 })

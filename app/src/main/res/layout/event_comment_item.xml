@@ -6,14 +6,16 @@
 
     <TextView
         android:id="@+id/message_user"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="Lukas Samuolis"
         android:textStyle="normal|bold"
+        app:layout_constraintEnd_toStartOf="@+id/message_time"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,9 +25,9 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/message_user"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:text="now"
-        app:layout_constraintStart_toEndOf="@+id/message_user"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/message_user" />
 
     <TextView

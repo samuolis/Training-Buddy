@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -67,7 +68,10 @@ class EventCommentsDialogFragment : DialogFragment() {
 
         rootView.post {
 
-            event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
+            var commentsLinearLayout = LinearLayoutManager(context)
+            commentsLinearLayout.orientation = RecyclerView.VERTICAL
+            commentsLinearLayout.reverseLayout = true
+            event_comments_recycler_view.layoutManager = commentsLinearLayout
             comment_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
 
             comment_edit_text.addTextChangedListener(object: TextWatcher {
@@ -84,6 +88,7 @@ class EventCommentsDialogFragment : DialogFragment() {
 
             eventViewModel.getEventComments()?.observe(this, androidx.lifecycle.Observer {
                 event_comments_recycler_view.adapter = CommentsDetailsRecyclerViewAdapter(it, context!!)
+                event_comments_recycler_view.smoothScrollToPosition(it.size - 5)
             })
 
             eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
@@ -121,7 +126,7 @@ class EventCommentsDialogFragment : DialogFragment() {
                         hideProgressBarComment()
                         comment_edit_text.text = SpannableStringBuilder("")
                         comment_edit_text.isEnabled = true
-                        eventViewModel.loadEventComments(true)
+                        eventViewModel.loadEventComments(eventId)
                     }
 
                 })

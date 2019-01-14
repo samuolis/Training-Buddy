@@ -29,8 +29,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification?.getBody());
-            sendNotification(remoteMessage.notification)
+            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification?.getBody())
+            var eventId = remoteMessage.notification?.tag
+            if (eventId == null) {
+                sendNotification(remoteMessage.notification)
+            } else{
+                NavigationActivity.updateComments(context = applicationContext, eventId = eventId)
+            }
         }
 
 

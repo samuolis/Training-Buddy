@@ -2,6 +2,9 @@ package com.trainerapp.ui.fragments
 
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.*
@@ -23,6 +26,7 @@ import com.trainerapp.web.webservice.EventWebService
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.trainerapp.db.entity.Event
 import com.trainerapp.models.CommentMessage
@@ -136,14 +140,19 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     private fun setupUI(){
         eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
-            eventViewModel.getStatusForDescription()?.observe(this, Observer { status ->
-                when (status) {
-                    0 -> setupDashboardUI(it)
-                    1 -> setupProfileUI(it)
-                    2 -> setupHomeUI(it)
-                }
-
-            })
+            if (userId == it.userId) {
+                setupHomeUI(it)
+            } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)){
+                setupProfileUI(it)
+            } else{
+                setupDashboardUI(it)
+            }
+//            when (status) {
+//                0 -> setupDashboardUI(it)
+//                1 -> setupProfileUI(it)
+//                2 -> setupHomeUI(it)
+//
+//            })
         })
     }
 
@@ -219,8 +228,15 @@ class EventDetailsDialogFragment : DialogFragment() {
     }
 
     private fun updateUI(event: Event){
-        eventViewModel.loadSignedUserList(event.eventSignedPlayers)
-        eventViewModel.loadEventComments()
+        event_location_layout.setOnClickListener {
+            var gmmIntentUri = Uri.parse("geo:" + event.eventLocationLatitude +"," +
+                    event.eventLocationLongitude + "?q=" + event.eventLocationLatitude +"," +
+                    event.eventLocationLongitude + "(" + event.eventName + ")")
+            var mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+            startActivity(mapIntent)
+
+        }
         event_details_title.text = SpannableStringBuilder(event.eventName)
         val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
         timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
@@ -245,6 +261,7 @@ class EventDetailsDialogFragment : DialogFragment() {
         event_details_players_spot_left.text = SpannableStringBuilder(spotsLeft.toString())
         event_details_location.text = SpannableStringBuilder(event.eventLocationName)
         event_details_submit_button.text = getString(R.string.event_description_negative_button)
+        event_details_layout.visibility = View.VISIBLE
     }
 
     private fun showProgressBar() {

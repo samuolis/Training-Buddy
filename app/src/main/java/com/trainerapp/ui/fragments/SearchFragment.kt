@@ -38,7 +38,6 @@ class SearchFragment : Fragment() {
                 if (events_radius_edit_text.text != null) {
                     editor?.putString(getString(R.string.user_prefered_distance_key), events_radius_edit_text.text.toString())
                     editor?.commit()
-                    eventViewModel?.loadDetailsOneEvent()
                     (activity as NavigationActivity).backOnStack()
                 } else{
                     Snackbar.make(it, "Some fields are missing", Snackbar.LENGTH_LONG)
