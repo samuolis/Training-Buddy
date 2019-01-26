@@ -26,16 +26,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
+        var eventId = remoteMessage.data["eventId"]
+        if (eventId != null) {
+            NavigationActivity.updateComments(context = applicationContext, eventId = eventId)
+        }
 
         // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
+        if (remoteMessage.getNotification() != null && eventId == null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.notification?.getBody())
-            var eventId = remoteMessage.notification?.tag
-            if (eventId == null) {
-                sendNotification(remoteMessage.notification)
-            } else{
-                NavigationActivity.updateComments(context = applicationContext, eventId = eventId)
-            }
+            sendNotification(remoteMessage.notification)
         }
 
 

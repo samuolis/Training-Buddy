@@ -30,6 +30,7 @@ import com.trainerapp.web.webservice.EventWebService
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.trainerapp.ui.customui.InputFilterMinMax
 import retrofit2.Call
@@ -189,6 +190,7 @@ class AddEventDialogFragment : DialogFragment() {
                         (activity as NavigationActivity).backOnStack()
                         eventViewModel?.loadDetailsEvent(eventId)
                         eventViewModel?.loadEvents()
+                        FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
                     }
 
                 })

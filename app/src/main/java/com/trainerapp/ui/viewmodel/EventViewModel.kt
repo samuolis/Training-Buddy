@@ -384,17 +384,14 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
                 Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-                loadingStatus?.value = 0
             }
 
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
                     signedUsersList?.value = response.body()
-                    loadingStatus?.value = 0
 
                 } else {
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-                    loadingStatus?.value = 0
                 }
             }
 
@@ -415,14 +412,17 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         eventWebService.getEventById(eventId).enqueue(object : Callback<Event>{
             override fun onFailure(call: Call<Event>, t: Throwable) {
                 Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
+                changeLoadStatus(0)
             }
 
             override fun onResponse(call: Call<Event>, response: Response<Event>) {
                 if (response.isSuccessful) {
                     querryComments(response.body())
 
+
                 } else {
                     Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
+                    changeLoadStatus(0)
                 }
             }
 
@@ -434,20 +434,24 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
             eventWebService.getEventCommentsByIds(event?.eventComments).enqueue(object : Callback<List<CommentMessage>> {
                 override fun onFailure(call: Call<List<CommentMessage>>, t: Throwable) {
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                    changeLoadStatus(0)
                 }
 
                 override fun onResponse(call: Call<List<CommentMessage>>, response: Response<List<CommentMessage>>) {
                     if (response.isSuccessful) {
                         eventComments?.value = response.body()
+                        changeLoadStatus(0)
 
                     } else {
                         Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                        changeLoadStatus(0)
                     }
                 }
 
             })
         } else{
             eventComments?.value = mutableListOf<CommentMessage>()
+            changeLoadStatus(0)
         }
     }
 

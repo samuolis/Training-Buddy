@@ -51,19 +51,17 @@ dependencies {
         exclude group: 'com.google.android.gms', module: 'play-services-basement'
     }
 
-    implementation 'com.jakewharton:butterknife:9.0.0-rc1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:9.0.0-rc1'
-    implementation 'com.facebook.android:facebook-core:4.38.1'
-    implementation 'com.facebook.android:facebook-login:4.38.1'
-    implementation 'com.facebook.android:facebook-share:4.38.1'
-    implementation 'com.facebook.android:facebook-places:4.38.1'
-    implementation 'com.facebook.android:facebook-messenger:4.38.1'
-    implementation 'com.facebook.android:facebook-applinks:4.38.1'
+    implementation 'com.facebook.android:facebook-core:4.40.0'
+    implementation 'com.facebook.android:facebook-login:4.40.0'
+    implementation 'com.facebook.android:facebook-share:4.40.0'
+    implementation 'com.facebook.android:facebook-places:4.40.0'
+    implementation 'com.facebook.android:facebook-messenger:4.40.0'
+    implementation 'com.facebook.android:facebook-applinks:4.40.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation "androidx.room:room-runtime:2.1.0-alpha03"
-    annotationProcessor "androidx.room:room-compiler:2.1.0-alpha03"
-    implementation "androidx.room:room-rxjava2:2.1.0-alpha03"
+    implementation "androidx.room:room-runtime:2.1.0-alpha04"
+    annotationProcessor "androidx.room:room-compiler:2.1.0-alpha04"
+    implementation "androidx.room:room-rxjava2:2.1.0-alpha04"
     implementation deps.room.rxjava2
 
     implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"

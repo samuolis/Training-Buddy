@@ -115,6 +115,8 @@ class EventDetailsDialogFragment : DialogFragment() {
                     commentsList.add(it[it.size - 1])
                 } else{
                     commentsList = it.toMutableList()
+                    commentsList.add(CommentMessage("Write Message", null, null,
+                            null, ""))
                 }
                 event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
                         object : EventCommentsRecyclerViewAdapter.MyClickListener{
@@ -190,6 +192,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                             (activity as NavigationActivity).backOnStack()
                             (activity as NavigationActivity).cleanCashedData()
                             eventViewModel?.loadEventsByLocation()
+                            FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
                         }
 
                     })
@@ -219,6 +222,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                             (activity as NavigationActivity).backOnStack()
                             (activity as NavigationActivity).cleanCashedData()
                             eventViewModel?.loadUserData()
+                            FirebaseMessaging.getInstance().unsubscribeFromTopic(event.eventId.toString())
                         }
 
                     })
@@ -261,7 +265,6 @@ class EventDetailsDialogFragment : DialogFragment() {
         event_details_players_spot_left.text = SpannableStringBuilder(spotsLeft.toString())
         event_details_location.text = SpannableStringBuilder(event.eventLocationName)
         event_details_submit_button.text = getString(R.string.event_description_negative_button)
-        event_details_layout.visibility = View.VISIBLE
     }
 
     private fun showProgressBar() {
@@ -272,6 +275,8 @@ class EventDetailsDialogFragment : DialogFragment() {
     private fun hideProgressBar() {
         progress_bar_background_event_details.setVisibility(View.GONE)
         login_progress_event_details.setVisibility(View.GONE)
+        nestedScrollView.visibility = View.VISIBLE
+        event_details_submit_button_layout.visibility = View.VISIBLE
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -294,6 +299,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).getBackOnStackToMainMenu()
                             eventViewModel?.loadEvents()
+                            FirebaseMessaging.getInstance().unsubscribeFromTopic(eventId.toString())
                         }
 
                     })
