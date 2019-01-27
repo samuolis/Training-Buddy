@@ -142,12 +142,14 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     private fun setupUI(){
         eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
-            if (userId == it.userId) {
-                setupHomeUI(it)
-            } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)){
-                setupProfileUI(it)
-            } else{
-                setupDashboardUI(it)
+            if (it != null) {
+                if (userId == it.userId) {
+                    setupHomeUI(it)
+                } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)) {
+                    setupProfileUI(it)
+                } else {
+                    setupDashboardUI(it)
+                }
             }
 //            when (status) {
 //                0 -> setupDashboardUI(it)

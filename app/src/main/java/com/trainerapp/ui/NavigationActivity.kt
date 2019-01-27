@@ -28,6 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.iid.FirebaseInstanceId
 
 
 class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
@@ -41,22 +42,20 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     companion object {
         var permisionsResult: Boolean = false
 
-        val EVENTIDINTENT: String = "EVENTID"
-        // This function will create an intent. This intent must take as parameter the "unique_name" that you registered your activity with
-        fun updateMyActivity(context: Context) {
+        val NOTIFICATION_EVENT_KEY = "notification_event"
+
+        val NOTIFICATION_EVENT_COMMENT_VALUE = "comment"
+
+        val NOTIFICATION_EVENT_REFRESH_VALUE = "refresh"
+
+        val EVENT_ID_INTENT: String = "EVENTID"
+
+        fun refreshData(context: Context, eventKey: String, eventId: String) {
 
             val intent = Intent("refresh")
-            intent.putExtra(EVENTIDINTENT, "")
+            intent.putExtra(EVENT_ID_INTENT, eventId)
+            intent.putExtra(NOTIFICATION_EVENT_KEY, eventKey)
 
-            //send broadcast
-            context.sendBroadcast(intent)
-        }
-
-        fun updateComments(context: Context, eventId: String) {
-
-            val intent = Intent("refresh")
-            intent.putExtra(EVENTIDINTENT, eventId)
-            //send broadcast
             context.sendBroadcast(intent)
         }
     }
@@ -243,6 +242,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         for (fragment in supportFragmentManager.fragments) {
             supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
+        FirebaseInstanceId.getInstance().deleteInstanceId()
         FirebaseAuth.getInstance().signOut()
         googleSignInClient.signOut().addOnCompleteListener {
             logoutIntent = Intent(this@NavigationActivity, LoginActivity::class.java)
@@ -386,15 +386,26 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     //This is the handler that will manager to process the broadcast intent
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            var eventId = intent.getStringExtra(EVENTIDINTENT)
-            if (eventId == "") {
-                eventViewModel.loadEvents()
-            } else {
-                if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
-                    eventViewModel.loadEventComments(eventId.toLong())
-                    eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
+            var eventKey = intent.getStringExtra(NOTIFICATION_EVENT_KEY)
+            when (eventKey){
+                NOTIFICATION_EVENT_COMMENT_VALUE -> {
+                    var eventId = intent.getStringExtra(EVENT_ID_INTENT)
+                    if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
+                        eventViewModel.loadEventComments(eventId.toLong())
+                        eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
+                    }
+                    eventViewModel.loadUserEventsByIds()
                 }
-                eventViewModel.loadUserEventsByIds()
+                NOTIFICATION_EVENT_REFRESH_VALUE -> {
+                    var eventId = intent.getStringExtra(EVENT_ID_INTENT)
+                    eventViewModel.loadEvents()
+                    eventViewModel.loadEventsByLocation()
+                    eventViewModel.loadUserEventsByIds()
+                    if (eventId != "" && eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
+                        eventViewModel.loadEventComments(eventId.toLong())
+                        eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
+                    }
+                }
             }
         }
     }

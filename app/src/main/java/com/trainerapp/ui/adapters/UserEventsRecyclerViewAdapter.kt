@@ -49,6 +49,24 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, 
                 holder.eventsDistance.text = DecimalFormat("##.##").format(eventList!![position].eventDistance)
             }
             holder.listContentLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
+            var eventDate = eventList!![position].eventDate!!.time
+            var oneDayTime = System.currentTimeMillis() + 1000 * 3600 * 26
+            var twoHoursTime = System.currentTimeMillis() + 1000 * 3600 * 4
+            var nowTime = System.currentTimeMillis() + 1000 * 3600 * 2
+            when {
+                eventDate > oneDayTime -> {
+                    holder.listContentLayout.setBackgroundResource(R.color.event_by_date_green)
+                }
+                eventDate in twoHoursTime..oneDayTime -> {
+                    holder.listContentLayout.setBackgroundResource(R.color.event_by_date_yellow)
+                }
+                eventDate in nowTime..twoHoursTime -> {
+                    holder.listContentLayout.setBackgroundResource(R.color.event_by_date_red)
+                }
+                else -> {
+                    holder.listContentLayout.setBackgroundResource(R.color.event_by_date_grey)
+                }
+            }
         }
     }
 

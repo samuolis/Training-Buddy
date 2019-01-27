@@ -97,8 +97,8 @@ class AddEventDialogFragment : DialogFragment() {
             event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
             event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
 
-            event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener({ view: View, b: Boolean ->
-                if (b == true) {
+            event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener { view: View, b: Boolean ->
+                if (b) {
                     try {
                         val intent = PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
                                 .build(activity)
@@ -109,7 +109,7 @@ class AddEventDialogFragment : DialogFragment() {
                         // TODO: Handle the error.
                     }
                 }
-            })
+            }
 
             event_fab.setOnClickListener { view ->
                 saveEvent(view)

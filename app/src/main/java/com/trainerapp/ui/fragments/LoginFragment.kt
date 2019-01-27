@@ -40,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.fragment_login.*
 import java.util.*
 
@@ -122,13 +123,6 @@ class LoginFragment : Fragment() {
         userSharedPref = activity!!.getSharedPreferences(context
                 ?.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         editor = userSharedPref?.edit()
-        mDb = AppDatabase.getInstance(context)
-        AppExecutors.getInstance().diskIO().execute {
-            val user = mDb!!.userDao().simpleUser
-            if (user != null) {
-                (activity as LoginActivity).GoToNavigationActivity()
-            }
-        }
 
         rootView.post {
 
@@ -242,10 +236,8 @@ class LoginFragment : Fragment() {
                                                 user!!.userFcmToken = token
                                                 userWebService!!.postUser(user!!).enqueue(object : Callback<User> {
                                                     override fun onResponse(call: Call<User>, response: Response<User>) {
-                                                        AppExecutors.getInstance().diskIO().execute {
-                                                            mDb!!.userDao().insertUser(response.body()!!)
-                                                            (activity as LoginActivity).GoToNavigationActivity()
-                                                        }
+                                                        subscribeToAllUserEvents(response.body()!!)
+                                                        onSuccesfullLogin()
                                                     }
                                                     override fun onFailure(call: Call<User>, t: Throwable) {
                                                         hideProgressBar()
@@ -253,7 +245,8 @@ class LoginFragment : Fragment() {
                                                     }
                                                 })
                                             } else{
-                                                (activity as LoginActivity).GoToNavigationActivity()
+                                                subscribeToAllUserEvents(response.body()!!)
+                                                onSuccesfullLogin()
                                             }
                                         }
                                     } else {
@@ -262,10 +255,8 @@ class LoginFragment : Fragment() {
                                                 null, null, task.result!!.token)
                                         userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
                                             override fun onResponse(call: Call<User>, response: Response<User>) {
-                                                AppExecutors.getInstance().diskIO().execute {
-                                                    mDb!!.userDao().insertUser(newUser)
-                                                    (activity as LoginActivity).GoToNavigationActivity()
-                                                }
+                                                subscribeToAllUserEvents(response.body()!!)
+                                                onSuccesfullLogin()
                                             }
                                             override fun onFailure(call: Call<User>, t: Throwable) {
                                                 hideProgressBar()
@@ -281,10 +272,8 @@ class LoginFragment : Fragment() {
                                             null, null, task.result!!.token)
                                     userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
                                         override fun onResponse(call: Call<User>, response: Response<User>) {
-                                            AppExecutors.getInstance().diskIO().execute {
-                                                mDb!!.userDao().insertUser(newUser)
-                                                (activity as LoginActivity).GoToNavigationActivity()
-                                            }
+                                            subscribeToAllUserEvents(response.body()!!)
+                                            onSuccesfullLogin()
                                         }
                                         override fun onFailure(call: Call<User>, t: Throwable) {
                                             hideProgressBar()
@@ -312,7 +301,21 @@ class LoginFragment : Fragment() {
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         if (currentUser?.uid != null){
-            (activity as LoginActivity).GoToNavigationActivity()
+            onSuccesfullLogin()
+        }
+    }
+
+    fun onSuccesfullLogin(){
+        (activity as LoginActivity).GoToNavigationActivity()
+        FirebaseMessaging.getInstance().subscribeToTopic("all")
+    }
+
+    fun subscribeToAllUserEvents(user: User){
+        var signedEvents = user.signedEventsList
+        if (signedEvents != null) {
+            signedEvents.forEach {
+                FirebaseMessaging.getInstance().subscribeToTopic(it.toString())
+            }
         }
     }
 

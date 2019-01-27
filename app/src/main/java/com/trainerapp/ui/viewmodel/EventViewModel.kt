@@ -35,8 +35,6 @@ import java.util.*
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
-    var oneEventInHome: MutableLiveData<Event>? = MutableLiveData<Event>()
-    var oneEventDashboard: MutableLiveData<Event>? = MutableLiveData<Event>()
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
     var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
@@ -50,8 +48,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var userEvents: MutableLiveData<List<Event>>? = null
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
-
-    var userEventInProfile: MutableLiveData<Event>? = MutableLiveData<Event>()
 
     var userWeb: MutableLiveData<User>? = null
 
@@ -96,57 +92,9 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return detailsOneEvent
     }
 
-//    fun loadDetailsOneEvent(){
-//        when (descriptionStatus?.value) {
-//            0 -> loadOneEventInDashboard()
-//            1 -> loadOneEventInUserProfile()
-//            2 -> loadOneEventInHome()
-//        }
-//        loadEventComments()
-//    }
-
-    // 0 -> Dashboard
-    // 1 -> Profile
-    // 2 -> Home
     fun setDescriptionStatus(status: Int){
         descriptionStatus?.value = status
     }
-
-//    fun getOneEventInHome(): LiveData<Event>?{
-//        return oneEventInHome
-//    }
-//
-//    fun loadOneEventInHome(position: Int? = null){
-//        if (myEventPosition != null){
-//            var value = events?.value!![myEventPosition!!]
-//            detailsOneEvent?.value = value
-//            return
-//        } else if (position == null){
-//            detailsOneEvent?.value = null
-//            return
-//        }
-//        myEventPosition = position
-//        var value = events?.value!![position!!]
-//        detailsOneEvent?.value = value
-//    }
-
-//    fun getEventInDashboard(): LiveData<Event>?{
-//        return oneEventDashboard
-//    }
-//
-//    fun loadOneEventInDashboard(position: Int? = null){
-//        if (myEventPosition != null){
-//            var value = eventsByLocation?.value!![myEventPosition!!]
-//            detailsOneEvent?.value = value
-//            return
-//        } else if (position == null){
-//            detailsOneEvent?.value = null
-//            return
-//        }
-//        myEventPosition = position
-//        var value = eventsByLocation?.value!![position]
-//        detailsOneEvent?.value = value
-//    }
 
     fun loadDetailsEvent(eventId: Long? = null){
         if (eventId == null){
@@ -173,24 +121,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
         })
     }
-
-//    fun getEventInProfile(): LiveData<Event>?{
-//        return userEventInProfile
-//    }
-//
-//    fun loadOneEventInUserProfile(position: Int? = null){
-//        if (myEventPosition != null){
-//            var value = userEvents?.value!![myEventPosition!!]
-//            detailsOneEvent?.value = value
-//            return
-//        } else if (position == null){
-//            detailsOneEvent?.value = null
-//            return
-//        }
-//        myEventPosition = position
-//        var value = userEvents?.value!![position]
-//        detailsOneEvent?.value = value
-//    }
 
     fun getEventsOfLocation(): LiveData<List<Event>>? {
         if (eventsByLocation == null) {
@@ -254,8 +184,27 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
             override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
                 if (response.isSuccessful()){
-                    events?.value = response.body()
-                    refreshStatus?.value = 0
+                    getDataFromLocation { deviceLocation, deviceCountryCode ->
+                        if (deviceLocation == null || deviceCountryCode == null) {
+                            events?.value = response.body()
+                            refreshStatus?.value = 0
+                        } else {
+                            var userEventsList = response.body()
+                            var newUserEventList = mutableListOf<Event>()
+                            userEventsList?.forEach {
+                                var newEvent = it
+                                var eventLoacation = Location("Event")
+                                eventLoacation.longitude = newEvent.eventLocationLongitude!!
+                                eventLoacation.latitude = newEvent.eventLocationLatitude!!
+                                var distance = eventLoacation.distanceTo(deviceLocation) / 1000
+                                newEvent.eventDistance = distance
+                                newUserEventList.add(newEvent)
+                            }
+
+                            events?.value = newUserEventList
+                            refreshStatus?.value = 0
+                        }
+                    }
                 } else{
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
                 }
@@ -269,13 +218,15 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                         Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
-                        if (location != null)
-                        {
+                        if (location != null) {
                             var geocoder = Geocoder(myApplication, Locale.getDefault())
                             var adresses = geocoder.getFromLocation(location.latitude,
                                     location.longitude, 1)
                             var address = adresses[0]
                             callback(location, address.countryCode)
+                        } else {
+                            Toast.makeText(myApplication, "Your location is null", Toast.LENGTH_LONG).show()
+                            callback(null, null)
                         }
                     }
                     .addOnFailureListener {exception ->
@@ -342,24 +293,24 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                         if (response.isSuccessful) {
                             getDataFromLocation { deviceLocation, deviceCountryCode ->
                                 if (deviceLocation == null || deviceCountryCode == null) {
-                                    eventsByLocation = null
+                                    userEvents?.value = response.body()
                                     refreshStatus?.value = 0
-                                    return@getDataFromLocation
-                                }
-                                var userEventsList = response.body()
-                                var newUserEventList = mutableListOf<Event>()
-                                userEventsList?.forEach {
-                                    var newEvent = it
-                                    var eventLoacation = Location("Event")
-                                    eventLoacation.longitude = newEvent.eventLocationLongitude!!
-                                    eventLoacation.latitude = newEvent.eventLocationLatitude!!
-                                    var distance = eventLoacation.distanceTo(deviceLocation)/1000
-                                    newEvent.eventDistance = distance
-                                    newUserEventList.add(newEvent)
-                                }
+                                } else {
+                                    var userEventsList = response.body()
+                                    var newUserEventList = mutableListOf<Event>()
+                                    userEventsList?.forEach {
+                                        var newEvent = it
+                                        var eventLoacation = Location("Event")
+                                        eventLoacation.longitude = newEvent.eventLocationLongitude!!
+                                        eventLoacation.latitude = newEvent.eventLocationLatitude!!
+                                        var distance = eventLoacation.distanceTo(deviceLocation) / 1000
+                                        newEvent.eventDistance = distance
+                                        newUserEventList.add(newEvent)
+                                    }
 
-                                userEvents?.value = newUserEventList
-                                refreshStatus?.value = 0
+                                    userEvents?.value = newUserEventList
+                                    refreshStatus?.value = 0
+                                }
                             }
 
                         } else {

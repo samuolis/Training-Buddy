@@ -22,24 +22,43 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private val TAG = "MyFirebaseMsgService"
 
+    private val NOTIFICATION_EVENT_KEY = "notification_event"
+
+    private val EVENT_ID_KEY = "event_id"
+
+    private val NOTIFICATION_EVENT_COMMENT_VALUE = "comment"
+
+    private val NOTIFICATION_EVENT_REFRESH_VALUE = "refresh"
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
 
-        // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
-        var eventId = remoteMessage.data["eventId"]
-        if (eventId != null) {
-            NavigationActivity.updateComments(context = applicationContext, eventId = eventId)
+        Log.d(TAG, "From: " + remoteMessage.getFrom())
+        var notificationEvent = remoteMessage.data[NOTIFICATION_EVENT_KEY]
+        when (notificationEvent){
+            NOTIFICATION_EVENT_COMMENT_VALUE -> {
+                var eventId = remoteMessage.data[EVENT_ID_KEY]
+                if (eventId != null) {
+                    NavigationActivity.refreshData(context = applicationContext,
+                            eventKey = NOTIFICATION_EVENT_COMMENT_VALUE, eventId = eventId)
+                }
+            }
+            NOTIFICATION_EVENT_REFRESH_VALUE -> {
+                var eventId = remoteMessage.data[EVENT_ID_KEY]
+                if (eventId != null) {
+                    NavigationActivity.refreshData(context = applicationContext,
+                            eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = eventId)
+                } else {
+                    NavigationActivity.refreshData(context = applicationContext,
+                            eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = "")
+                }
+            }
         }
 
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null && eventId == null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification?.getBody())
-            sendNotification(remoteMessage.notification)
-        }
+//        if (remoteMessage.getNotification() != null) {
+//            Log.d(TAG, "Message Notification Body: " + remoteMessage.notification?.getBody())
+//            sendNotification(remoteMessage.notification)
+//        }
 
-
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
 
     /**
@@ -75,7 +94,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(remoteMessage: RemoteMessage.Notification?) {
-        NavigationActivity.updateMyActivity(context = applicationContext)
         val intent = Intent(this, NavigationActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
