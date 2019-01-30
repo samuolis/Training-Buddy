@@ -37,6 +37,10 @@ class HomeFragment : Fragment() {
             }
             swipe_container.setColorSchemeResources(R.color.colorAccent)
             loadUi()
+
+            expired_event_layout.setOnClickListener {
+                (activity as NavigationActivity).showArchivedEventsDialogFragment()
+            }
         }
         return rootView
     }
@@ -56,12 +60,14 @@ class HomeFragment : Fragment() {
                     }
             )
         })
+        eventViewModel.getArchivedEvents()?.observe(this, Observer {
+            if (it != null) {
+                expired_event_count.text = it.size.toString()
+                expired_event_layout.visibility = View.VISIBLE
+            }
+        })
         eventViewModel.getStatus()?.observe(this, Observer {
             swipe_container.isRefreshing = !(it == 0)
         })
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 }

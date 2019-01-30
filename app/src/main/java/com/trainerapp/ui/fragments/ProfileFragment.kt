@@ -35,9 +35,9 @@ class ProfileFragment : Fragment() {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_profile, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        rootView.post({
+        rootView.post {
             setupInfo()
-        })
+        }
         return rootView
     }
 
@@ -46,6 +46,9 @@ class ProfileFragment : Fragment() {
         eventViewModel.getStatus()?.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
         })
+        expired_event_layout.setOnClickListener {
+            (activity as NavigationActivity).showArchivedEventsDialogFragment()
+        }
         profile_swipe_container.setOnRefreshListener {
             eventViewModel.loadUserData()
         }
@@ -63,12 +66,12 @@ class ProfileFragment : Fragment() {
             eventViewModel.loadUserEventsByIds()
 
         })
-        user_full_name_text_view.setOnClickListener({
+        user_full_name_text_view.setOnClickListener {
             (activity as NavigationActivity).showAccountEditDialogFragment()
-        })
-        user_email_text_view.setOnClickListener({
+        }
+        user_email_text_view.setOnClickListener {
             (activity as NavigationActivity).showAccountEditDialogFragment()
-        })
+        }
         initials_image_view.setOnClickListener {
             (activity as NavigationActivity).showAccountEditDialogFragment()
         }
@@ -82,6 +85,13 @@ class ProfileFragment : Fragment() {
                 }
 
             })
+        })
+
+        eventViewModel.getArchivedEvents()?.observe(this, Observer {
+            if (it != null) {
+                expired_event_count.text = it.size.toString()
+                expired_event_layout.visibility = View.VISIBLE
+            }
         })
 
     }

@@ -35,6 +35,7 @@ import java.util.*
 class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var events: MutableLiveData<List<Event>>? = null
+    var archivedEvents: MutableLiveData<List<Event>>? = null
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
     var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
@@ -174,6 +175,14 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         return descriptionStatus
     }
 
+    fun getArchivedEvents(): LiveData<List<Event>>? {
+        if (archivedEvents == null) {
+            archivedEvents = MutableLiveData<List<Event>>()
+            loadEvents()
+        }
+        return archivedEvents
+    }
+
     fun loadEvents() {
         refreshStatus?.value = 1
         eventWebService.getEventsByUserId(userId = userId).enqueue(object : Callback<List<Event>>{
@@ -185,12 +194,11 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
             override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
                 if (response.isSuccessful()){
                     getDataFromLocation { deviceLocation, deviceCountryCode ->
+                        var newUserEventList = mutableListOf<Event>()
                         if (deviceLocation == null || deviceCountryCode == null) {
-                            events?.value = response.body()
-                            refreshStatus?.value = 0
+                            newUserEventList = response.body()!!.toMutableList()
                         } else {
                             var userEventsList = response.body()
-                            var newUserEventList = mutableListOf<Event>()
                             userEventsList?.forEach {
                                 var newEvent = it
                                 var eventLoacation = Location("Event")
@@ -200,10 +208,16 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                                 newEvent.eventDistance = distance
                                 newUserEventList.add(newEvent)
                             }
-
-                            events?.value = newUserEventList
-                            refreshStatus?.value = 0
                         }
+                        var validDateEventList = newUserEventList.filter {
+                            it.eventDate!!.after(Date(System.currentTimeMillis()))
+                        }
+                        var archivedEventList = newUserEventList.filter {
+                            it.eventDate!!.before(Date(System.currentTimeMillis()))
+                        }
+                        events?.value = validDateEventList
+                        archivedEvents?.value = archivedEventList
+                        refreshStatus?.value = 0
                     }
                 } else{
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
@@ -292,12 +306,11 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                     override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
                         if (response.isSuccessful) {
                             getDataFromLocation { deviceLocation, deviceCountryCode ->
+                                var newUserEventList = mutableListOf<Event>()
                                 if (deviceLocation == null || deviceCountryCode == null) {
-                                    userEvents?.value = response.body()
-                                    refreshStatus?.value = 0
+                                    newUserEventList = response.body()!!.toMutableList()
                                 } else {
                                     var userEventsList = response.body()
-                                    var newUserEventList = mutableListOf<Event>()
                                     userEventsList?.forEach {
                                         var newEvent = it
                                         var eventLoacation = Location("Event")
@@ -307,10 +320,16 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                                         newEvent.eventDistance = distance
                                         newUserEventList.add(newEvent)
                                     }
-
-                                    userEvents?.value = newUserEventList
-                                    refreshStatus?.value = 0
                                 }
+                                var validDateEventList = newUserEventList.filter {
+                                    it.eventDate!!.after(Date(System.currentTimeMillis()))
+                                }
+                                var archivedEventList = newUserEventList.filter {
+                                    it.eventDate!!.before(Date(System.currentTimeMillis()))
+                                }
+                                userEvents?.value = validDateEventList
+                                archivedEvents?.value = archivedEventList
+                                refreshStatus?.value = 0
                             }
 
                         } else {

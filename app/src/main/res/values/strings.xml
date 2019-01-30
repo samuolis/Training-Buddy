@@ -72,5 +72,6 @@
     <string name="comment_hint_your_message">Your message</string>
     <string name="signed_user_list_title">Signed Users List</string>
     <string name="event_comments">Comments</string>
+    <string name="archived_events">Archived Events</string>
 
 </resources>
