@@ -91,7 +91,7 @@ class EventCommentsDialogFragment : DialogFragment() {
                 event_comments_recycler_view.smoothScrollToPosition(it.size - 5)
             })
 
-            eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+            eventViewModel.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
                 confirm_message_submit_text_view.setOnClickListener { view ->
                     if (comment_edit_text.text.toString().length <= 100){
                         comment_edit_text.isEnabled = false

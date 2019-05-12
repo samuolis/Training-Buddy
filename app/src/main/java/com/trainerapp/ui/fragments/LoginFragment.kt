@@ -111,7 +111,7 @@ class LoginFragment : Fragment() {
         userWebService = retrofit.create(UserWebService::class.java)
         userSharedPref = activity!!.getSharedPreferences(context
                 ?.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-        editor = userSharedPref?.edit()
+        editor = userSharedPref.edit()
 
         rootView.post {
 

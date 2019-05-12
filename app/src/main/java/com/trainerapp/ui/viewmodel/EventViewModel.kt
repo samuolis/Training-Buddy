@@ -50,14 +50,14 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     var userWeb: MutableLiveData<User>? = null
 
-    lateinit var eventWebService: EventWebService
-    lateinit var userWebService: UserWebService
+    var eventWebService: EventWebService
+    var userWebService: UserWebService
     val BASE_URL = "https://training-222106.appspot.com/"
     var userPreferedDistance: String? = "30"
     var user: User? = null
     var userId: String? = null
     private var myApplication = application
-    lateinit var userSharedPref: SharedPreferences
+    var userSharedPref: SharedPreferences
 
     init {
         userSharedPref = myApplication?.getSharedPreferences(myApplication

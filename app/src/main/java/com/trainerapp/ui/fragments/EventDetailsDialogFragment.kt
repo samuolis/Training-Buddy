@@ -49,13 +49,13 @@ class EventDetailsDialogFragment : DialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        var rootView = inflater.inflate(R.layout.fragment_event_details_dialog, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_event_details_dialog, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
 
         auth = FirebaseAuth.getInstance()
         currentUser = auth.currentUser
 
-        var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
+        val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0") ?: "0"
         val gson = GsonBuilder()
                 .setLenient()
@@ -63,7 +63,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                 .create()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel?.BASE_URL)
+                .baseUrl(eventViewModel.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
@@ -138,7 +138,7 @@ class EventDetailsDialogFragment : DialogFragment() {
     }
 
     private fun setupUI(){
-        eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+        eventViewModel.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
             if (it != null) {
                 if (userId == it.userId) {
                     setupHomeUI(it)
@@ -179,7 +179,7 @@ class EventDetailsDialogFragment : DialogFragment() {
             showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
-                    var token = task.getResult()?.getToken()
+                    val token = task.getResult()?.getToken()
                     eventWebService.signEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
@@ -190,7 +190,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
                             (activity as NavigationActivity).cleanCashedData()
-                            eventViewModel?.loadEventsByLocation()
+                            eventViewModel.loadEventsByLocation()
                             FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
                         }
 
@@ -209,7 +209,7 @@ class EventDetailsDialogFragment : DialogFragment() {
             showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
-                    var token = task.getResult()?.getToken()
+                    val token = task.getResult()?.getToken()
                     eventWebService.unsignEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
@@ -220,7 +220,7 @@ class EventDetailsDialogFragment : DialogFragment() {
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
                             (activity as NavigationActivity).cleanCashedData()
-                            eventViewModel?.loadUserData()
+                            eventViewModel.loadUserData()
                             FirebaseMessaging.getInstance().unsubscribeFromTopic(event.eventId.toString())
                         }
 
@@ -232,10 +232,10 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     private fun updateUI(event: Event){
         event_location_layout.setOnClickListener {
-            var gmmIntentUri = Uri.parse("geo:" + event.eventLocationLatitude +"," +
+            val gmmIntentUri = Uri.parse("geo:" + event.eventLocationLatitude + "," +
                     event.eventLocationLongitude + "?q=" + event.eventLocationLatitude +"," +
                     event.eventLocationLongitude + "(" + event.eventName + ")")
-            var mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapIntent.setPackage("com.google.android.apps.maps")
             startActivity(mapIntent)
 
@@ -289,15 +289,16 @@ class EventDetailsDialogFragment : DialogFragment() {
 
             currentUser?.getIdToken(true)?.addOnCompleteListener{
                 if (it.isSuccessful()) {
-                    var token = it.getResult()?.getToken();
+                    val token = it.getResult()?.getToken();
                     eventWebService.deleteEventById(eventId, token).enqueue(object : Callback<Void>{
                         override fun onFailure(call: Call<Void>, t: Throwable) {
                             Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
+                                    .show()
                         }
 
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).getBackOnStackToMainMenu()
-                            eventViewModel?.loadEvents()
+                            eventViewModel.loadEvents()
                             FirebaseMessaging.getInstance().unsubscribeFromTopic(eventId.toString())
                         }
 

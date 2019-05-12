@@ -2,12 +2,10 @@ package com.trainerapp.ui.customui
 
 import android.annotation.TargetApi
 import android.content.Context
-import android.content.res.TypedArray
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ScrollView
-
 import com.trainerapp.R
 
 class MaxHeightScrollView : ScrollView {
@@ -37,8 +35,7 @@ class MaxHeightScrollView : ScrollView {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        var heightMeasureSpec = heightMeasureSpec
-        heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(maxHeight, View.MeasureSpec.AT_MOST)
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        var newHeightMeasureSpec = View.MeasureSpec.makeMeasureSpec(maxHeight, View.MeasureSpec.AT_MOST)
+        super.onMeasure(widthMeasureSpec, newHeightMeasureSpec)
     }
 }

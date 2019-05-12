@@ -79,7 +79,7 @@ class AddEventDialogFragment : DialogFragment() {
                 .create()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel?.BASE_URL)
+                .baseUrl(eventViewModel?.BASE_URL ?: "")
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
@@ -153,11 +153,10 @@ class AddEventDialogFragment : DialogFragment() {
             return
         }
 
-        var eventPlayersNumber: Int? = null
-        if (event_players_edit_text.text.toString() == "") {
-            eventPlayersNumber = 1
+        val eventPlayersNumber: Int? = if (event_players_edit_text.text.toString() == "") {
+            1
         } else{
-            eventPlayersNumber = event_players_edit_text.text?.toString()?.toInt()
+            event_players_edit_text.text?.toString()?.toInt()
         }
         val gson = GsonBuilder()
                 .setLenient()
@@ -165,12 +164,12 @@ class AddEventDialogFragment : DialogFragment() {
                 .create()
 
         val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel?.BASE_URL)
+                .baseUrl(eventViewModel?.BASE_URL ?: "")
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
 
         val eventWebService = retrofit.create(EventWebService::class.java)
-        var event : Event
+        val event: Event
 
         event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
                 selectedLocationName, selectedLocationLatitude,
@@ -181,10 +180,11 @@ class AddEventDialogFragment : DialogFragment() {
         val currentUser = auth.currentUser
         currentUser?.getIdToken(true)?.addOnCompleteListener {
             if (it.isSuccessful()) {
-                var token = it.getResult()?.getToken();
+                val token = it.getResult()?.getToken();
                 eventWebService.createEvent(event, token).enqueue(object : Callback<Event> {
                     override fun onFailure(call: Call<Event>, t: Throwable) {
                         Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
+                                .show()
                     }
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
@@ -207,10 +207,10 @@ class AddEventDialogFragment : DialogFragment() {
                 selectedLocationLongitude = place.latLng.longitude
                 selectedLocationName = place.name.toString()
 
-                var geocoder = Geocoder(context, Locale.getDefault())
-                var adresses = geocoder.getFromLocation(place.latLng.latitude,
+                val geocoder = Geocoder(context, Locale.getDefault())
+                val adresses = geocoder.getFromLocation(place.latLng.latitude,
                         place.latLng.longitude, 1)
-                var address = adresses[0]
+                val address = adresses[0]
                 selectedLocationCountryCode = address.getCountryCode()
                 event_location_edit_text.text = SpannableStringBuilder(place.address)
                 Log.i(TAG, "Place: " + place.name)
@@ -232,7 +232,7 @@ class AddEventDialogFragment : DialogFragment() {
         mMonth = c.get(Calendar.MONTH)
         mDay = c.get(Calendar.DAY_OF_MONTH)
 
-        val datePickerDialog = DatePickerDialog(context,
+        val datePickerDialog = DatePickerDialog(context!!,
                 DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                     date_time = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
                     c.set(year, monthOfYear, dayOfMonth)
@@ -251,7 +251,6 @@ class AddEventDialogFragment : DialogFragment() {
         // Launch Time Picker Dialog
         val timePickerDialog = TimePickerDialog(context,
                 TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
-                    var time = String.format("%02d:%02d", hourOfDay, minute)
                     c.set(Calendar.HOUR_OF_DAY, hourOfDay)
                     c.set(Calendar.MINUTE, minute)
                     selectedDateAndTime = c.time

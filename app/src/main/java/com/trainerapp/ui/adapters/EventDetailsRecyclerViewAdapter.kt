@@ -36,7 +36,7 @@ class EventDetailsRecyclerViewAdapter(usersList: List<User>?, context: Context, 
             } else{
                 holder.userIcon.setImageResource(ProfilePicture.values()[usersList[position].profilePictureIndex!!].drawableId)
             }
-            holder.userIconLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
+            holder.userIconLayout.setOnClickListener { myClickListener.onItemClicked(position) }
         }
     }
 
