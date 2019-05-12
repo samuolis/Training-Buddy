@@ -6,11 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.trainerapp.R
-import com.trainerapp.db.entity.User
 import com.trainerapp.enums.ProfilePicture
+import com.trainerapp.models.User
 import com.trainerapp.utils.DrawableUtils
 import kotlinx.android.synthetic.main.event_details_recyclerview_item.view.*
-import kotlinx.android.synthetic.main.fragment_event_details_dialog.view.*
 
 class EventDetailsRecyclerViewAdapter(usersList: List<User>?, context: Context, onClickListener: MyClickListener): RecyclerView.Adapter<EventDetailsRecyclerViewAdapter.ViewHolder>() {
 

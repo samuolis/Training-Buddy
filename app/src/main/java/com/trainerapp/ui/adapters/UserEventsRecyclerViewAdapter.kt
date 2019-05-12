@@ -6,11 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.trainerapp.R
-import com.trainerapp.db.entity.Event
+import com.trainerapp.models.Event
 import kotlinx.android.synthetic.main.event_list_recyclerview_item.view.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter.MyClickListener
 import java.util.*
 
 

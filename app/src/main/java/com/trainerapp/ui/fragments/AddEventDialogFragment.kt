@@ -4,41 +4,42 @@ package com.trainerapp.ui.fragments
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.app.DatePickerDialog
-import android.os.Bundle
-import androidx.fragment.app.DialogFragment
-
-import com.trainerapp.R
-import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
-import java.util.*
 import android.app.TimePickerDialog
 import android.content.ContentValues.TAG
 import android.content.Context
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException
-import com.google.android.gms.common.GooglePlayServicesRepairableException
 import android.content.Intent
 import android.location.Geocoder
+import android.os.Bundle
 import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
-import com.trainerapp.db.entity.Event
-import com.trainerapp.ui.viewmodel.EventViewModel
-import com.trainerapp.ui.NavigationActivity
-import com.trainerapp.web.webservice.EventWebService
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
+import com.trainerapp.R
+import com.trainerapp.models.Event
+import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
+import com.trainerapp.ui.viewmodel.EventViewModel
+import com.trainerapp.web.webservice.EventWebService
+import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
+import java.util.*
 
 
 class AddEventDialogFragment : DialogFragment() {

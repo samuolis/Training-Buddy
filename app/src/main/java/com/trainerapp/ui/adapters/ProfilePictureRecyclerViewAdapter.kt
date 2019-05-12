@@ -4,10 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.trainerapp.AppExecutors
 import com.trainerapp.R
-import com.trainerapp.db.AppDatabase
-import com.trainerapp.db.entity.User
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.ui.NavigationActivity
 

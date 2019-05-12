@@ -1,7 +1,7 @@
 package com.trainerapp.web.webservice
 
-import com.trainerapp.db.entity.Event
 import com.trainerapp.models.CommentMessage
+import com.trainerapp.models.Event
 import retrofit2.Call
 import retrofit2.http.*
 

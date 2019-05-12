@@ -1,47 +1,37 @@
 package com.trainerapp.ui
 
-import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AppCompatActivity
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-
 import android.view.MenuItem
 import android.view.Window
-
-
-import com.trainerapp.R
-import com.trainerapp.ui.fragments.LoginFragment
-import com.facebook.CallbackManager
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+import androidx.appcompat.app.ActionBar
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.trainerapp.R
+import com.trainerapp.base.BaseActivity
+import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.ui.fragments.LoginFragment
+import javax.inject.Inject
 
 /**
  * A login screen that offers login via email/password.
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
 
-    private val callbackManager: CallbackManager? = null
     private var actionBar: ActionBar? = null
-    private lateinit var googleSignInClient: GoogleSignInClient
+    @Inject
+    lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.requestFeature(Window.FEATURE_ACTION_BAR)
         actionBar = supportActionBar
         actionBar!!.setTitle(R.string.app_name)
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
         setContentView(R.layout.activity_login)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create channel to show notifications.
@@ -60,6 +50,10 @@ class LoginActivity : AppCompatActivity() {
         // Replace the contents of the container with the new fragment
         //ft.replace(R.id.fragment_frame, new LoginFragment());
 
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        activityComponent.inject(this)
     }
 
     fun GoToNavigationActivity() {

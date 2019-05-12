@@ -1,6 +1,6 @@
 package com.trainerapp.web.webservice
 
-import com.trainerapp.db.entity.User
+import com.trainerapp.models.User
 
 import retrofit2.Call
 import retrofit2.http.Body

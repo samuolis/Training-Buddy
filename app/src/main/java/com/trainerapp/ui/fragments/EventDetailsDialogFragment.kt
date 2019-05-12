@@ -3,40 +3,37 @@ package com.trainerapp.ui.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.*
 import android.widget.Toast
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-
-import com.trainerapp.R
-import com.trainerapp.ui.viewmodel.EventViewModel
-import kotlinx.android.synthetic.main.fragment_event_details_dialog.*
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.trainerapp.ui.NavigationActivity
-import com.trainerapp.ui.adapters.EventDetailsRecyclerViewAdapter
-import com.trainerapp.web.webservice.EventWebService
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
-import com.trainerapp.db.entity.Event
+import com.trainerapp.R
 import com.trainerapp.models.CommentMessage
-import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
+import com.trainerapp.models.Event
+import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.EventCommentsRecyclerViewAdapter
+import com.trainerapp.ui.adapters.EventDetailsRecyclerViewAdapter
+import com.trainerapp.ui.viewmodel.EventViewModel
+import com.trainerapp.web.webservice.EventWebService
+import kotlinx.android.synthetic.main.fragment_event_details_dialog.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 

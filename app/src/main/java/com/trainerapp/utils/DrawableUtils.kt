@@ -2,10 +2,7 @@ package com.trainerapp.utils
 
 import android.graphics.*
 import android.widget.ImageView
-import androidx.lifecycle.Observer
-import com.trainerapp.R.id.initials_image_view
-import com.trainerapp.db.entity.User
-import kotlinx.android.synthetic.main.fragment_profile.*
+import com.trainerapp.models.User
 import java.io.ByteArrayOutputStream
 
 class DrawableUtils {

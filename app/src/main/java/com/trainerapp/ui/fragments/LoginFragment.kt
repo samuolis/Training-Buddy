@@ -4,32 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-
-import androidx.fragment.app.Fragment
-
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-import com.trainerapp.AppExecutors
-import com.trainerapp.ui.LoginActivity
-import com.trainerapp.R
-import com.trainerapp.db.AppDatabase
-import com.trainerapp.db.entity.User
-import com.trainerapp.web.webservice.UserWebService
-import com.facebook.CallbackManager
-import com.google.firebase.iid.FirebaseInstanceId
-import com.google.gson.GsonBuilder
-
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import com.trainerapp.ui.viewmodel.EventViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -40,16 +20,25 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.GsonBuilder
+import com.trainerapp.R
+import com.trainerapp.models.User
+import com.trainerapp.ui.LoginActivity
+import com.trainerapp.ui.viewmodel.EventViewModel
+import com.trainerapp.web.webservice.UserWebService
 import kotlinx.android.synthetic.main.fragment_login.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
 
 class LoginFragment : Fragment() {
 
-    private var callbackManager: CallbackManager? = null
-
-    private var mDb: AppDatabase? = null
     private var userWebService: UserWebService? = null
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth

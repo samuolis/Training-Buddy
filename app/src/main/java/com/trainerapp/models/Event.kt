@@ -1,13 +1,7 @@
-package com.trainerapp.db.entity
+package com.trainerapp.models
 
-import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import com.trainerapp.db.converter.DateConverter
-import com.trainerapp.db.converter.UriConverter
-
-import java.util.Date
+import java.util.*
 
 data class Event(@PrimaryKey(autoGenerate = true) val eventId: Long?, val userId: String?, val eventName: String?,
                  val eventDescription: String?, val eventLocationName: String?,

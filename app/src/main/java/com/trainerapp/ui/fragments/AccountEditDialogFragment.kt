@@ -4,7 +4,6 @@ package com.trainerapp.ui.fragments
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.SpannableStringBuilder
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,16 +11,14 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.trainerapp.AppExecutors
+import com.google.gson.GsonBuilder
 import com.trainerapp.R
-import com.trainerapp.db.AppDatabase
-import com.trainerapp.db.entity.User
 import com.trainerapp.enums.ProfilePicture
-import com.trainerapp.web.webservice.UserWebService
+import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
-import com.google.gson.GsonBuilder
+import com.trainerapp.web.webservice.UserWebService
 import kotlinx.android.synthetic.main.fragment_account_edit.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,7 +30,6 @@ import java.util.*
 class AccountEditDialogFragment : DialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
-    lateinit var mDb: AppDatabase
     var userId: String? = null
     var databaseId: Long = 0
     var profileInt: Int? = null
@@ -47,7 +43,6 @@ class AccountEditDialogFragment : DialogFragment() {
             savedInstanceState: Bundle?): View {
         // Inflate the layout to use as dialog or embedded fragment
         var rootView = inflater.inflate(R.layout.fragment_account_edit, container, false)
-        mDb = AppDatabase.getInstance(activity)
         rootView.post {
             name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(100))
             eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
@@ -117,9 +112,6 @@ class AccountEditDialogFragment : DialogFragment() {
 
             userWebService.postUser(user).enqueue(object : Callback<User> {
                 override fun onResponse(call: Call<User>, response: Response<User>) {
-                    AppExecutors.getInstance().diskIO().execute {
-                        mDb.userDao().insertUser(user)
-                    }
                     eventViewModel.loadUserData()
                     (activity as NavigationActivity).backOnStack()
                 }

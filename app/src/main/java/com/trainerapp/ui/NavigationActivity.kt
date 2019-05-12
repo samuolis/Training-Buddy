@@ -1,37 +1,36 @@
 package com.trainerapp.ui
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.iid.FirebaseInstanceId
 import com.trainerapp.AppExecutors
 import com.trainerapp.R
-import com.trainerapp.db.AppDatabase
+import com.trainerapp.base.BaseActivity
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.IntentFilter
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.iid.FirebaseInstanceId
+import javax.inject.Inject
 
 
-class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChangedListener {
+class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener {
 
     var profileFragment = ProfileFragment()
     var homeFragment = HomeFragment()
@@ -96,13 +95,15 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
     private var doubleBackToExitPressedOnce = false
     lateinit var eventViewModel: EventViewModel
     lateinit var logoutIntent : Intent
-    private lateinit var googleSignInClient: GoogleSignInClient
+    @Inject
+    lateinit var googleSignInClient: GoogleSignInClient
     var fragmentAdded : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         eventViewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
+
         supportActionBar?.title = getString(R.string.app_name)
         //Listen for changes in the back stack
         getSupportFragmentManager().addOnBackStackChangedListener(this);
@@ -121,14 +122,11 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
                     .commit()
             eventViewModel.loadEvents()
         }
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
-        // [END config_signin]
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        activityComponent.inject(this)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -193,9 +191,7 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
 
     override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
         R.id.action_logout -> {
-            var database = AppDatabase.getInstance(this.application)
             AppExecutors.getInstance().diskIO().execute {
-                database.userDao().deleteAllUsers()
                 Logout()
             }
             true
@@ -398,7 +394,6 @@ class NavigationActivity : AppCompatActivity(), FragmentManager.OnBackStackChang
         super.onPause()
         unregisterReceiver(mMessageReceiver)
     }
-
 
     //This is the handler that will manager to process the broadcast intent
     private val mMessageReceiver = object : BroadcastReceiver() {

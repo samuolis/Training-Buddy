@@ -7,28 +7,26 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
-import com.trainerapp.R
-import com.trainerapp.db.AppDatabase
-import com.trainerapp.db.entity.Event
-import com.trainerapp.web.webservice.EventWebService
+import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.gson.GsonBuilder
+import com.trainerapp.R
+import com.trainerapp.models.CommentMessage
+import com.trainerapp.models.Event
+import com.trainerapp.models.User
+import com.trainerapp.web.webservice.EventWebService
+import com.trainerapp.web.webservice.UserWebService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import android.widget.Toast
-import androidx.core.content.ContextCompat
-import com.facebook.internal.BoltsMeasurementEventListener
-import com.trainerapp.db.entity.User
-import com.trainerapp.web.webservice.UserWebService
-import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.trainerapp.models.CommentMessage
 import java.util.*
 
 
@@ -54,7 +52,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
 
     lateinit var eventWebService: EventWebService
     lateinit var userWebService: UserWebService
-    lateinit var mDb: AppDatabase
     val BASE_URL = "https://training-222106.appspot.com/"
     var userPreferedDistance: String? = "30"
     var user: User? = null
@@ -66,7 +63,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
         userSharedPref = myApplication?.getSharedPreferences(myApplication
                 .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
-        mDb = AppDatabase.getInstance(this.getApplication())
         loggedUser = FirebaseAuth.getInstance().currentUser
         val gson = GsonBuilder()
                 .setLenient()

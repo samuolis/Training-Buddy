@@ -10,10 +10,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.R
-import com.trainerapp.db.entity.User
 import com.trainerapp.enums.ProfilePicture
+import com.trainerapp.models.User
+import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
