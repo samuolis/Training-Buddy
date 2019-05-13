@@ -20,13 +20,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.iid.FirebaseInstanceId
-import com.trainerapp.AppExecutors
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -94,10 +96,10 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
     private var doubleBackToExitPressedOnce = false
     lateinit var eventViewModel: EventViewModel
-    lateinit var logoutIntent : Intent
+    lateinit var logoutIntent: Intent
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
-    var fragmentAdded : Boolean = false
+    var fragmentAdded: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -147,16 +149,16 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
     override fun onBackStackChanged() {
         fragmentAdded = supportFragmentManager.backStackEntryCount > 0
-        if (!fragmentAdded){
+        if (!fragmentAdded) {
             supportActionBar!!.title = getString(R.string.app_name)
         }
         shouldDisplayHomeUp()
         invalidateOptionsMenu()
     }
 
-    fun getBackOnStackToMainMenu(){
+    fun getBackOnStackToMainMenu() {
         var fragmentSize = supportFragmentManager.backStackEntryCount
-        while (fragmentSize > 0){
+        while (fragmentSize > 0) {
             supportFragmentManager.popBackStack()
             fragmentSize -= 1
         }
@@ -189,9 +191,9 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         return true;
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when(item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_logout -> {
-            AppExecutors.getInstance().diskIO().execute {
+            CoroutineScope(Dispatchers.IO).launch {
                 Logout()
             }
             true
@@ -205,7 +207,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
     override fun onBackPressed() {
 
-        if (supportFragmentManager.backStackEntryCount > 0){
+        if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()
             if (supportFragmentManager.backStackEntryCount < 2) {
                 cleanCashedData()
@@ -225,7 +227,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         }
     }
 
-    fun cleanCashedData(){
+    fun cleanCashedData() {
         if (eventViewModel.myEventPosition != null) {
             eventViewModel.myEventPosition = null
         }
@@ -234,7 +236,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         }
     }
 
-    fun Logout(){
+    fun Logout() {
         for (fragment in supportFragmentManager.fragments) {
             supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
@@ -347,7 +349,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 .commit()
     }
 
-    fun showEventDetailsDialogFragment(){
+    fun showEventDetailsDialogFragment() {
         val fragmentManager = supportFragmentManager
         val newFragment = EventDetailsDialogFragment()
         // The device is smaller, so show the fragment fullscreen
@@ -362,7 +364,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 .commit()
     }
 
-    fun showArchivedEventsDialogFragment(){
+    fun showArchivedEventsDialogFragment() {
         val fragmentManager = supportFragmentManager
         val newFragment = ArchivedEventsDIalogFragment()
         // The device is smaller, so show the fragment fullscreen
@@ -379,7 +381,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         supportActionBar!!.title = getString(R.string.archived_events)
     }
 
-    fun backOnStack(){
+    fun backOnStack() {
         supportFragmentManager.popBackStack()
     }
 
@@ -399,7 +401,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             var eventKey = intent.getStringExtra(NOTIFICATION_EVENT_KEY)
-            when (eventKey){
+            when (eventKey) {
                 NOTIFICATION_EVENT_COMMENT_VALUE -> {
                     var eventId = intent.getStringExtra(EVENT_ID_INTENT)
                     if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
