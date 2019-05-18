@@ -88,7 +88,6 @@ class EventCommentsDialogFragment : DialogFragment() {
 
             eventViewModel.getEventComments()?.observe(this, androidx.lifecycle.Observer {
                 event_comments_recycler_view.adapter = CommentsDetailsRecyclerViewAdapter(it, context!!)
-                event_comments_recycler_view.smoothScrollToPosition(it.size - 5)
             })
 
             eventViewModel.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {

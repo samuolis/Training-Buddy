@@ -49,7 +49,7 @@ class AddEventDialogFragment : DialogFragment() {
     var mYear: Int = 0
     var mMonth: Int = 0
     var mDay: Int = 0
-    var selectedLocationName: String? =  null
+    var selectedLocationName: String? = null
     var selectedLocationLatitude: Double? = null
     var selectedLocationLongitude: Double? = null
     var selectedLocationCountryCode: String? = null
@@ -142,12 +142,12 @@ class AddEventDialogFragment : DialogFragment() {
     }
 
     private fun saveEvent(view: View) {
-        if(selectedLocationName == null || event_name_edit_text.text == null || selectedDateAndTime == null){
+        if (selectedLocationName == null || event_name_edit_text.text == null || selectedDateAndTime == null) {
             Snackbar.make(view, "Some fields are missing", Snackbar.LENGTH_LONG)
                     .show()
             return
         }
-        if(event_players_edit_text.text.toString().toInt() < 1){
+        if (event_players_edit_text.text.toString().toInt() < 1) {
             Snackbar.make(view, "Some fields are incorrect", Snackbar.LENGTH_LONG)
                     .show()
             return
@@ -155,7 +155,7 @@ class AddEventDialogFragment : DialogFragment() {
 
         val eventPlayersNumber: Int? = if (event_players_edit_text.text.toString() == "") {
             1
-        } else{
+        } else {
             event_players_edit_text.text?.toString()?.toInt()
         }
         val gson = GsonBuilder()
@@ -188,10 +188,17 @@ class AddEventDialogFragment : DialogFragment() {
                     }
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                        (activity as NavigationActivity).backOnStack()
+                        (activity as NavigationActivity).let {
+                            it.backOnStack()
+                        }
                         eventViewModel?.loadDetailsEvent(eventId)
                         eventViewModel?.loadEvents()
-                        FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
+                        FirebaseMessaging
+                                .getInstance()
+                                .subscribeToTopic(event.eventId.toString())
+                        FirebaseMessaging
+                                .getInstance()
+                                .subscribeToTopic("subscribeEventSignIn-" + event.eventId)
                     }
 
                 })
