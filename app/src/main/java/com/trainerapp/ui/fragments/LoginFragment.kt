@@ -44,36 +44,10 @@ class LoginFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     lateinit var userSharedPref: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
-    lateinit var  eventViewModel: EventViewModel
-
-    fun LoginFragment(){
-        // Required empty public constructor
-    }
+    lateinit var eventViewModel: EventViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        callbackManager = CallbackManager.Factory.create()
-
-//        val permissionsList = mutableListOf<String>("email", "public_profile")
-//        LoginManager.getInstance().logInWithReadPermissions(activity, permissionsList)
-//        LoginManager.getInstance().registerCallback(callbackManager,
-//                object : FacebookCallback<LoginResult> {
-//            override fun onSuccess(loginResult: LoginResult) {
-//                Log.d(TAG, "facebook:onSuccess:$loginResult")
-//                handleFacebookAccessToken(loginResult.accessToken)
-//            }
-//
-//            override fun onCancel() {
-//                Log.d(TAG, "facebook:onCancel")
-//                // ...
-//            }
-//
-//            override fun onError(error: FacebookException) {
-//                Log.d(TAG, "facebook:onError", error)
-//                // ...
-//            }
-//
-//        })
 
         // Configure Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -129,8 +103,6 @@ class LoginFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-//        callbackManager?.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
@@ -147,7 +119,6 @@ class LoginFragment : Fragment() {
         } else {
             hideProgressBar()
         }
-
 
 
     }
@@ -180,32 +151,7 @@ class LoginFragment : Fragment() {
                 }
     }
 
-//    private fun handleFacebookAccessToken(token: AccessToken) {
-//        Log.d(TAG, "handleFacebookAccessToken:$token")
-//        // [START_EXCLUDE silent]
-//        showProgressBar()
-//        // [END_EXCLUDE]
-//
-//        val credential = FacebookAuthProvider.getCredential(token.token)
-//        auth.signInWithCredential(credential)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        // Sign in success, update UI with the signed-in user's information
-//                        Log.d(TAG, "signInWithCredential:success")
-//                        val user = auth.currentUser
-//                    } else {
-//                        // If sign in fails, display a message to the user.
-//                        Log.w(TAG, "signInWithCredential:failure", task.exception)
-//                        Toast.makeText(context, "Authentication failed.",
-//                                Toast.LENGTH_SHORT).show()
-//
-//                    }
-//
-//                    hideProgressBar()
-//                }
-//    }
-
-    fun getUser(gotUser: FirebaseUser) {
+    private fun getUser(gotUser: FirebaseUser) {
         FirebaseInstanceId.getInstance().instanceId
                 .addOnCompleteListener { task ->
                     userWebService!!.getExistantUser(gotUser.uid)
@@ -217,61 +163,34 @@ class LoginFragment : Fragment() {
                                             Log.w("LoginFragment", "getInstanceId failed",
                                                     task.exception)
                                         } else {
-                                            val user = response.body()
-
-                                            // Get new Instance ID token
-                                            val token = task.result!!.token
-                                            if (user!!.userFcmToken != token) {
-                                                user!!.userFcmToken = token
-                                                userWebService!!.postUser(user!!).enqueue(object : Callback<User> {
-                                                    override fun onResponse(call: Call<User>, response: Response<User>) {
-                                                        subscribeToAllUserEvents(response.body()!!)
-                                                        onSuccesfullLogin()
-                                                    }
-                                                    override fun onFailure(call: Call<User>, t: Throwable) {
-                                                        hideProgressBar()
-                                                        Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
-                                                    }
-                                                })
-                                            } else{
-                                                subscribeToAllUserEvents(response.body()!!)
-                                                onSuccesfullLogin()
-                                            }
+                                            subscribeToAllUserEvents(response.body()!!)
+                                            onSuccesfullLogin()
                                         }
                                     } else {
-                                        var newUser = User(gotUser.uid, gotUser.displayName,
-                                                gotUser.email, Calendar.getInstance().time,
-                                                null, null, task.result!!.token)
-                                        userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
-                                            override fun onResponse(call: Call<User>, response: Response<User>) {
-                                                subscribeToAllUserEvents(response.body()!!)
-                                                onSuccesfullLogin()
-                                            }
-                                            override fun onFailure(call: Call<User>, t: Throwable) {
-                                                hideProgressBar()
-                                                Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
-                                            }
-                                        })
+                                        newUserCreation(gotUser)
                                     }
                                 }
 
                                 override fun onFailure(call: Call<User>, t: Throwable) {
-                                    var newUser = User(gotUser.uid, gotUser.displayName,
-                                            gotUser.email, Calendar.getInstance().time,
-                                            null, null, task.result!!.token)
-                                    userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
-                                        override fun onResponse(call: Call<User>, response: Response<User>) {
-                                            subscribeToAllUserEvents(response.body()!!)
-                                            onSuccesfullLogin()
-                                        }
-                                        override fun onFailure(call: Call<User>, t: Throwable) {
-                                            hideProgressBar()
-                                            Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
-                                        }
-                                    })
+                                    newUserCreation(gotUser)
                                 }
                             })
                 }
+    }
+
+    private fun newUserCreation(user: FirebaseUser) {
+        val newUser = User(user.uid, user.displayName, Calendar.getInstance().time,
+                null, null)
+        userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                onSuccesfullLogin()
+            }
+
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                hideProgressBar()
+                Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
+            }
+        })
     }
 
 
@@ -289,18 +208,18 @@ class LoginFragment : Fragment() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
-        if (currentUser?.uid != null){
+        if (currentUser?.uid != null) {
             onSuccesfullLogin()
         }
     }
 
-    fun onSuccesfullLogin(){
+    fun onSuccesfullLogin() {
         (activity as LoginActivity).GoToNavigationActivity()
         FirebaseMessaging.getInstance().subscribeToTopic("all")
     }
 
-    fun subscribeToAllUserEvents(user: User){
-        var signedEvents = user.signedEventsList
+    fun subscribeToAllUserEvents(user: User) {
+        val signedEvents = user.signedEventsList
         if (signedEvents != null) {
             signedEvents.forEach {
                 FirebaseMessaging.getInstance().subscribeToTopic(it.toString())
@@ -310,17 +229,9 @@ class LoginFragment : Fragment() {
 
     companion object {
 
-        private val APP_REQUEST_CODE = 10
-
         private val RC_SIGN_IN = 11
-
-        /**
-         * Keep track of the login task to ensure we can cancel it if requested.
-         */
-
-        private val EMAIL = "email"
 
         private val TAG = LoginFragment::class.java.simpleName
     }
 
-}// Required empty public constructor
+}

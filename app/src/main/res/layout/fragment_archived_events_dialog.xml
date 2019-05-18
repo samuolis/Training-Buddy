@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.ArchivedEventsDIalogFragment"
+    tools:context=".ui.fragments.ArchivedEventsDialogFragment"
     android:background="@android:color/white">
 
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

@@ -180,7 +180,7 @@ class AddEventDialogFragment : DialogFragment() {
         val currentUser = auth.currentUser
         currentUser?.getIdToken(true)?.addOnCompleteListener {
             if (it.isSuccessful()) {
-                val token = it.getResult()?.getToken();
+                val token = it.getResult()?.getToken()
                 eventWebService.createEvent(event, token).enqueue(object : Callback<Event> {
                     override fun onFailure(call: Call<Event>, t: Throwable) {
                         Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)

@@ -28,20 +28,19 @@ import kotlinx.android.synthetic.main.fragment_profile.*
  */
 class ProfileFragment : Fragment() {
 
-    lateinit var eventViewModel: EventViewModel
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        var rootView = inflater.inflate(R.layout.fragment_profile, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        rootView.post {
-            setupInfo()
-        }
-        return rootView
+        return inflater.inflate(R.layout.fragment_profile, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupInfo()
     }
 
     private fun setupInfo(){
+        val eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.getStatus()?.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
@@ -60,16 +59,12 @@ class ProfileFragment : Fragment() {
                 initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
             }
             user_full_name_text_view.text = user.fullName
-            user_email_text_view.text = user.email
             profile_linear_layout.visibility = View.VISIBLE
 
             eventViewModel.loadUserEventsByIds()
 
         })
         user_full_name_text_view.setOnClickListener {
-            (activity as NavigationActivity).showAccountEditDialogFragment()
-        }
-        user_email_text_view.setOnClickListener {
             (activity as NavigationActivity).showAccountEditDialogFragment()
         }
         initials_image_view.setOnClickListener {

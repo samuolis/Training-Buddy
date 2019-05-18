@@ -108,7 +108,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
         supportActionBar?.title = getString(R.string.app_name)
         //Listen for changes in the back stack
-        getSupportFragmentManager().addOnBackStackChangedListener(this);
+        supportFragmentManager.addOnBackStackChangedListener(this);
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -236,7 +236,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         }
     }
 
-    fun Logout() {
+    private fun Logout() {
         for (fragment in supportFragmentManager.fragments) {
             supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
@@ -366,7 +366,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
     fun showArchivedEventsDialogFragment() {
         val fragmentManager = supportFragmentManager
-        val newFragment = ArchivedEventsDIalogFragment()
+        val newFragment = ArchivedEventsDialogFragment()
         // The device is smaller, so show the fragment fullscreen
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation
