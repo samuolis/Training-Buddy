@@ -9,15 +9,15 @@ import android.text.SpannableStringBuilder
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.gson.GsonBuilder
 import com.trainerapp.R
+import com.trainerapp.base.BaseDialogFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
@@ -30,16 +30,16 @@ import kotlinx.android.synthetic.main.fragment_event_details_dialog.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 
-class EventDetailsDialogFragment : DialogFragment() {
+class EventDetailsDialogFragment : BaseDialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
+    @Inject
     lateinit var eventWebService: EventWebService
     lateinit var userId: String
     lateinit var auth: FirebaseAuth
@@ -60,17 +60,6 @@ class EventDetailsDialogFragment : DialogFragment() {
 
         val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0") ?: "0"
-        val gson = GsonBuilder()
-                .setLenient()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .create()
-
-        val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
-        eventWebService = retrofit.create(EventWebService::class.java)
 
         val actionBar = (activity as AppCompatActivity).supportActionBar
         if (actionBar != null) {
@@ -80,6 +69,11 @@ class EventDetailsDialogFragment : DialogFragment() {
             actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
         }
         return rootView
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,7 +161,7 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     }
 
-    fun setupDashboardUI(event: Event) {
+    private fun setupDashboardUI(event: Event) {
         updateUI(event)
         event_details_submit_button.text = getString(R.string.event_description_positive_button)
         event_details_submit_button.setOnClickListener { view ->

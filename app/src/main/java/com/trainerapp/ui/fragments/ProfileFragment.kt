@@ -53,10 +53,12 @@ class ProfileFragment : Fragment() {
         }
         profile_swipe_container.setColorSchemeResources(R.color.colorAccent)
         eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
-            if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
-                DrawableUtils.setupInitials(initials_image_view, user)
-            } else {
-                initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
+            initials_image_view.post {
+                if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
+                    DrawableUtils.setupInitials(initials_image_view, user)
+                } else {
+                    initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
+                }
             }
             user_full_name_text_view.text = user.fullName
             profile_linear_layout.visibility = View.VISIBLE

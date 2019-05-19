@@ -17,7 +17,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
@@ -25,8 +24,9 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.gson.GsonBuilder
 import com.trainerapp.R
+import com.trainerapp.base.BaseDialogFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.models.Event
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
@@ -36,13 +36,12 @@ import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 
-class AddEventDialogFragment : DialogFragment() {
+class AddEventDialogFragment : BaseDialogFragment() {
 
     val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
     var date_time = ""
@@ -63,7 +62,10 @@ class AddEventDialogFragment : DialogFragment() {
     var mHour: Int = 0
     var mMinute: Int = 0
     val c = Calendar.getInstance()
-    lateinit var auth: FirebaseAuth
+    private val auth: FirebaseAuth by lazy {
+        FirebaseAuth.getInstance()
+    }
+    @Inject
     lateinit var eventWebService: EventWebService
 
 
@@ -73,72 +75,65 @@ class AddEventDialogFragment : DialogFragment() {
         var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
 
-        val gson = GsonBuilder()
-                .setLenient()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .create()
-
-        val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel?.BASE_URL ?: "")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
-
-        eventWebService = retrofit.create(EventWebService::class.java)
         var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
-        auth = FirebaseAuth.getInstance()
 
-        rootView.post {
-            event_date_time_text_view.setOnClickListener {
-                datePicker()
-            }
-
-            event_players_edit_text.filters = arrayOf<InputFilter>(InputFilterMinMax("1", "1000"))
-            event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
-            event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
-
-            event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener { view: View, b: Boolean ->
-                if (b) {
-                    try {
-                        val intent = PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                                .build(activity)
-                        startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE)
-                    } catch (e: GooglePlayServicesRepairableException) {
-                        // TODO: Handle the error.
-                    } catch (e: GooglePlayServicesNotAvailableException) {
-                        // TODO: Handle the error.
-                    }
-                }
-            }
-
-            event_fab.setOnClickListener { view ->
-                saveEvent(view)
-            }
-
-            eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
-                if (it != null) {
-                    event_name_edit_text.text = SpannableStringBuilder(it.eventName)
-                    event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
-                    event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
-                    selectedLocationCountryCode = it.eventLocationCountryCode
-                    selectedLocationLongitude = it.eventLocationLongitude
-                    selectedLocationLatitude = it.eventLocationLatitude
-                    selectedLocationName = it.eventLocationName
-                    event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
-                    eventId = it.eventId
-                    userId = it.userId
-                    val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                    timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
-                    event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
-                    selectedDateAndTime = it.eventDate
-                    eventSignedPlayers = it.eventSignedPlayers
-                    eventCommentMessage = it.eventComments
-                }
-            })
-
-        }
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        event_date_time_text_view.setOnClickListener {
+            datePicker()
+        }
+
+        event_players_edit_text.filters = arrayOf<InputFilter>(InputFilterMinMax("1", "1000"))
+        event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
+        event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
+
+        event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener { view: View, b: Boolean ->
+            if (b) {
+                try {
+                    val intent = PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                            .build(activity)
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE)
+                } catch (e: GooglePlayServicesRepairableException) {
+                    // TODO: Handle the error.
+                } catch (e: GooglePlayServicesNotAvailableException) {
+                    // TODO: Handle the error.
+                }
+            }
+        }
+
+        event_fab.setOnClickListener { view ->
+            saveEvent(view)
+        }
+
+        eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+            if (it != null) {
+                event_name_edit_text.text = SpannableStringBuilder(it.eventName)
+                event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
+                event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
+                selectedLocationCountryCode = it.eventLocationCountryCode
+                selectedLocationLongitude = it.eventLocationLongitude
+                selectedLocationLatitude = it.eventLocationLatitude
+                selectedLocationName = it.eventLocationName
+                event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
+                eventId = it.eventId
+                userId = it.userId
+                val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+                timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
+                event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
+                selectedDateAndTime = it.eventDate
+                eventSignedPlayers = it.eventSignedPlayers
+                eventCommentMessage = it.eventComments
+            }
+        })
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 
     private fun saveEvent(view: View) {
@@ -158,17 +153,6 @@ class AddEventDialogFragment : DialogFragment() {
         } else {
             event_players_edit_text.text?.toString()?.toInt()
         }
-        val gson = GsonBuilder()
-                .setLenient()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .create()
-
-        val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel?.BASE_URL ?: "")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
-        val eventWebService = retrofit.create(EventWebService::class.java)
         val event: Event
 
         event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),

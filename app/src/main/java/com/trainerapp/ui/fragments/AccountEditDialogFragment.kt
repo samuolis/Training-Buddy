@@ -8,11 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.gson.GsonBuilder
 import com.trainerapp.R
+import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
@@ -27,7 +27,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
-class AccountEditDialogFragment : DialogFragment() {
+class AccountEditDialogFragment : BaseDialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
     var userId: String? = null

@@ -8,13 +8,19 @@ import com.trainerapp.di.module.ActivityModule
 
 open class BaseActivity : AppCompatActivity() {
 
+    private var _component: ActivityComponent? = null
+
+    open val component: ActivityComponent
+        get() {
+            return _component!!
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val activityComponent: ActivityComponent =
-                DaggerActivityComponent.builder()
+        _component = DaggerActivityComponent.builder()
                         .activityModule(ActivityModule(this))
                         .build()
-        onInject(activityComponent)
+        onInject(component)
     }
 
     open fun onInject(activityComponent: ActivityComponent) {
