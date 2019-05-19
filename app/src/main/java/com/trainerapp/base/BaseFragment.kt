@@ -6,8 +6,8 @@ import com.trainerapp.di.component.ActivityComponent
 
 open class BaseFragment : Fragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         onInject(activityComponent = (activity as BaseActivity).component)
     }
 
