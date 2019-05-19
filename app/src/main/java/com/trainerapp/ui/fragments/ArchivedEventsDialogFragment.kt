@@ -25,7 +25,7 @@ class ArchivedEventsDialogFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        var eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+        val eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         super.onViewCreated(view, savedInstanceState)
         archived_events_swipe_container.setOnRefreshListener {
             eventViewModel.loadEvents()
@@ -34,17 +34,14 @@ class ArchivedEventsDialogFragment : Fragment() {
         archived_events_recyclerview.layoutManager = LinearLayoutManager(context)
         eventViewModel.getArchivedEvents()?.observe(this, Observer {
             archived_events_recyclerview.adapter = null
-            var list = it
+            val list = it
             archived_events_recyclerview.adapter = UserEventsRecyclerViewAdapter(
                     list,
-                    context!!,
-                    object : UserEventsRecyclerViewAdapter.MyClickListener {
-                        override fun onItemClicked(position: Int) {
-                            eventViewModel.loadDetailsEvent(it[position].eventId)
-                            (activity as NavigationActivity).showEventDetailsDialogFragment()
-                        }
-                    }
-            )
+                    context!!
+            ) { position ->
+                (activity as NavigationActivity)
+                        .showEventDetailsDialogFragment(it[position].eventId!!)
+            }
         })
 
         eventViewModel.getStatus()?.observe(this, Observer {

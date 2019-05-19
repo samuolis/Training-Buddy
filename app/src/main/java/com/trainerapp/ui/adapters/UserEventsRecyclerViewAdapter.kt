@@ -13,16 +13,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, onClickListener: MyClickListener?) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
+class UserEventsRecyclerViewAdapter(
+        val eventList: List<Event>?,
+        val context: Context,
+        val onClick: (position: Int) -> Unit
+) : RecyclerView.Adapter<UserEventsRecyclerViewAdapter.ViewHolder>() {
 
-    var eventList = eventsList
     var layoutInflater: LayoutInflater = LayoutInflater.from(context)
-    val context = context
-    var myClickListener = onClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // create a new view
-        var view: View = layoutInflater.inflate(R.layout.event_list_recyclerview_item, parent, false)
+        val view: View = layoutInflater.inflate(R.layout.event_list_recyclerview_item, parent, false)
         // set the view's size, margins, paddings and layout parameters
         return ViewHolder(view)
     }
@@ -33,25 +34,25 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (eventList != null) {
-            holder.eventName.text = eventList!![position].eventName
+            holder.eventName.text = eventList[position].eventName
             val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
             timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
-            val dateStr = timeStampFormat.format(eventList!![position].eventDate)
+            val dateStr = timeStampFormat.format(eventList[position].eventDate)
             holder.eventDate.text = dateStr
-            holder.eventPlaceName.text = eventList!![position].eventLocationName
-            var signedUsersCount = eventList!![position].eventSignedPlayers?.size ?: 0
+            holder.eventPlaceName.text = eventList[position].eventLocationName
+            val signedUsersCount = eventList[position].eventSignedPlayers?.size ?: 0
             holder.eventPlayersCount.text = signedUsersCount.toString() + " of " + eventList!![position].eventPlayers.toString()
-            if (eventList!![position].eventDistance == null) {
+            if (eventList[position].eventDistance == null) {
                 holder.eventsDistanceLinearLAyout.visibility = View.INVISIBLE
             } else {
                 holder.eventsDistanceLinearLAyout.visibility = View.VISIBLE
-                holder.eventsDistance.text = DecimalFormat("##.##").format(eventList!![position].eventDistance)
+                holder.eventsDistance.text = DecimalFormat("##.##").format(eventList[position].eventDistance)
             }
-            holder.listContentLayout.setOnClickListener { myClickListener?.onItemClicked(position) }
-            var eventDate = eventList!![position].eventDate!!.time
-            var oneDayTime = System.currentTimeMillis() + 1000 * 3600 * 26
-            var twoHoursTime = System.currentTimeMillis() + 1000 * 3600 * 4
-            var nowTime = System.currentTimeMillis() + 1000 * 3600 * 2
+            holder.listContentLayout.setOnClickListener { onClick(position) }
+            val eventDate = eventList[position].eventDate!!.time
+            val oneDayTime = System.currentTimeMillis() + 1000 * 3600 * 26
+            val twoHoursTime = System.currentTimeMillis() + 1000 * 3600 * 4
+            val nowTime = System.currentTimeMillis() + 1000 * 3600 * 2
             when {
                 eventDate > oneDayTime -> {
                     holder.listContentLayout.setBackgroundResource(R.color.event_by_date_green)
@@ -77,10 +78,6 @@ class UserEventsRecyclerViewAdapter(eventsList: List<Event>?, context: Context, 
         val eventsDistance = view.event_distance_text_view
         val eventsDistanceLinearLAyout = view.distance_linear_layout
         val listContentLayout = view.list_content_layout
-    }
-
-    interface MyClickListener {
-        fun onItemClicked(position: Int)
     }
 
 }

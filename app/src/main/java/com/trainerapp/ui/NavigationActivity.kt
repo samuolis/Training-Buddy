@@ -349,9 +349,9 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 .commit()
     }
 
-    fun showEventDetailsDialogFragment() {
+    fun showEventDetailsDialogFragment(eventId: Long) {
         val fragmentManager = supportFragmentManager
-        val newFragment = EventDetailsDialogFragment()
+        val newFragment = EventDetailsDialogFragment.newInstance(eventId)
         // The device is smaller, so show the fragment fullscreen
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation
@@ -400,10 +400,10 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     //This is the handler that will manager to process the broadcast intent
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            var eventKey = intent.getStringExtra(NOTIFICATION_EVENT_KEY)
+            val eventKey = intent.getStringExtra(NOTIFICATION_EVENT_KEY)
             when (eventKey) {
                 NOTIFICATION_EVENT_COMMENT_VALUE -> {
-                    var eventId = intent.getStringExtra(EVENT_ID_INTENT)
+                    val eventId = intent.getStringExtra(EVENT_ID_INTENT)
                     if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
                         eventViewModel.loadEventComments(eventId.toLong())
                         eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
@@ -411,7 +411,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                     eventViewModel.loadUserEventsByIds()
                 }
                 NOTIFICATION_EVENT_REFRESH_VALUE -> {
-                    var eventId = intent.getStringExtra(EVENT_ID_INTENT)
+                    val eventId = intent.getStringExtra(EVENT_ID_INTENT)
                     eventViewModel.loadEvents()
                     eventViewModel.loadEventsByLocation()
                     eventViewModel.loadUserEventsByIds()

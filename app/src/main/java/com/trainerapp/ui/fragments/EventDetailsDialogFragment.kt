@@ -10,7 +10,6 @@ import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -19,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.trainerapp.R
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.ui.NavigationActivity
@@ -43,8 +43,11 @@ class EventDetailsDialogFragment : DialogFragment() {
     lateinit var eventWebService: EventWebService
     lateinit var userId: String
     lateinit var auth: FirebaseAuth
-    var eventId: Long? = 0
-    var currentUser: FirebaseUser? = null
+    private var currentUser: FirebaseUser? = null
+
+    private val eventId: Long by lazy {
+        arguments!!.getLong(ARG_EVENT_ID)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -69,64 +72,6 @@ class EventDetailsDialogFragment : DialogFragment() {
 
         eventWebService = retrofit.create(EventWebService::class.java)
 
-        rootView.post {
-            event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
-
-            signed_users_layout.setOnClickListener {
-                (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
-            }
-            event_details_recycler_view.setOnClickListener {
-                (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
-            }
-
-            event_comments_label.setOnClickListener {
-                (activity as NavigationActivity).showEventCommentsDialogFragment()
-            }
-
-            eventViewModel.changeLoadStatus(1)
-
-            eventViewModel.getLoadingStatus()?.observe(this, Observer {
-                when (it) {
-                    0 -> hideProgressBar()
-                    1 -> showProgressBar()
-                }
-            })
-
-            eventViewModel.getSignedUsers()?.observe(this, Observer {
-                event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it ,context!!,
-                        object : EventDetailsRecyclerViewAdapter.MyClickListener{
-                    override fun onItemClicked(position: Int) {
-                        (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
-                    }
-
-                })
-            })
-
-            eventViewModel.getEventComments()?.observe(this, Observer {
-                var commentsList = mutableListOf<CommentMessage>()
-                if (it.size > 2){
-                    commentsList.add(CommentMessage("View " + (it.size - 2) + " more comments...", null, null,
-                            null, ""))
-                    commentsList.add(it[it.size - 2])
-                    commentsList.add(it[it.size - 1])
-                } else{
-                    commentsList = it.toMutableList()
-                    commentsList.add(CommentMessage("Write Message", null, null,
-                            null, ""))
-                }
-                event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
-                        object : EventCommentsRecyclerViewAdapter.MyClickListener{
-                            override fun onItemClicked(position: Int) {
-                                (activity as NavigationActivity).showEventCommentsDialogFragment()
-                            }
-
-                        })
-            })
-
-            setupUI()
-
-        }
         val actionBar = (activity as AppCompatActivity).supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
@@ -137,31 +82,83 @@ class EventDetailsDialogFragment : DialogFragment() {
         return rootView
     }
 
-    private fun setupUI(){
-        eventViewModel.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
-            if (it != null) {
-                if (userId == it.userId) {
-                    setupHomeUI(it)
-                } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)) {
-                    setupProfileUI(it)
-                } else {
-                    setupDashboardUI(it)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        eventViewModel.loadDetailsEvent(eventId)
+        event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
+
+        signed_users_layout.setOnClickListener {
+            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+        }
+        event_details_recycler_view.setOnClickListener {
+            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+        }
+
+        event_comments_label.setOnClickListener {
+            (activity as NavigationActivity).showEventCommentsDialogFragment()
+        }
+
+        eventViewModel.changeLoadStatus(1)
+
+        eventViewModel.getLoadingStatus()?.nonNullObserve(this) {
+            when (it) {
+                0 -> hideProgressBar()
+                1 -> showProgressBar()
             }
-//            when (status) {
-//                0 -> setupDashboardUI(it)
-//                1 -> setupProfileUI(it)
-//                2 -> setupHomeUI(it)
-//
-//            })
-        })
+        }
+
+        eventViewModel.getSignedUsers()?.nonNullObserve(this) {
+            event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it, context!!,
+                    object : EventDetailsRecyclerViewAdapter.MyClickListener {
+                        override fun onItemClicked(position: Int) {
+                            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+                        }
+
+                    })
+        }
+
+        eventViewModel.getEventComments()?.nonNullObserve(this) {
+            var commentsList = mutableListOf<CommentMessage>()
+            if (it.size > 2) {
+                commentsList.add(CommentMessage("View " + (it.size - 2) + " more comments...", null, null,
+                        null, ""))
+                commentsList.add(it[it.size - 2])
+                commentsList.add(it[it.size - 1])
+            } else {
+                commentsList = it.toMutableList()
+                commentsList.add(CommentMessage("Write Message", null, null,
+                        null, ""))
+            }
+            event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
+                    object : EventCommentsRecyclerViewAdapter.MyClickListener {
+                        override fun onItemClicked(position: Int) {
+                            (activity as NavigationActivity).showEventCommentsDialogFragment()
+                        }
+
+                    })
+        }
+
+        setupUI()
+
+    }
+
+    private fun setupUI(){
+        eventViewModel.getDetailsOneEvent()?.nonNullObserve(this) {
+            if (userId == it.userId) {
+                setupHomeUI(it)
+            } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)) {
+                setupProfileUI(it)
+            } else {
+                setupDashboardUI(it)
+            }
+        }
     }
 
 
 
     private fun setupHomeUI(event: Event) {
         setHasOptionsMenu(true)
-        eventId = event.eventId
         updateUI(event)
         event_details_submit_button.text = getString(R.string.edit_event_button_label)
         event_details_submit_button.setOnClickListener { view ->
@@ -171,14 +168,13 @@ class EventDetailsDialogFragment : DialogFragment() {
     }
 
     fun setupDashboardUI(event: Event) {
-        eventId = event.eventId
         updateUI(event)
         event_details_submit_button.text = getString(R.string.event_description_positive_button)
         event_details_submit_button.setOnClickListener { view ->
             event_details_submit_button.isEnabled = false
             showProgressBar()
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-                if (task.isSuccessful()) {
+                if (task.isSuccessful) {
                     val token = task.getResult()?.getToken()
                     eventWebService.signEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
                         override fun onFailure(call: Call<Void>, t: Throwable) {
@@ -201,8 +197,7 @@ class EventDetailsDialogFragment : DialogFragment() {
 
     }
 
-    fun setupProfileUI(event: Event) {
-        eventId = event.eventId
+    private fun setupProfileUI(event: Event) {
         updateUI(event)
         event_details_submit_button.setOnClickListener { view ->
             event_details_submit_button.isEnabled = false
@@ -312,10 +307,6 @@ class EventDetailsDialogFragment : DialogFragment() {
         }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?) {
-        super.onPrepareOptionsMenu(menu)
-    }
-
     override fun onStart() {
         super.onStart()
         val actionBar = (activity as AppCompatActivity).supportActionBar
@@ -324,6 +315,23 @@ class EventDetailsDialogFragment : DialogFragment() {
             actionBar.setHomeButtonEnabled(true)
             actionBar.title = getString(R.string.event_details_title_label)
             actionBar.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
+        }
+    }
+
+    companion object {
+
+        val ARG_EVENT_ID = "EVENT_ID"
+
+        fun newInstance(
+                eventId: Long? = null
+        ): EventDetailsDialogFragment {
+            return EventDetailsDialogFragment().apply {
+                arguments = Bundle().apply {
+                    eventId?.let {
+                        putLong(ARG_EVENT_ID, it)
+                    }
+                }
+            }
         }
     }
 }

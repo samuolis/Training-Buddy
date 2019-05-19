@@ -39,7 +39,7 @@ class ProfileFragment : Fragment() {
         setupInfo()
     }
 
-    private fun setupInfo(){
+    private fun setupInfo() {
         val eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.getStatus()?.observe(this, Observer {
@@ -53,9 +53,9 @@ class ProfileFragment : Fragment() {
         }
         profile_swipe_container.setColorSchemeResources(R.color.colorAccent)
         eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
-            if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size){
+            if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
                 DrawableUtils.setupInitials(initials_image_view, user)
-            } else{
+            } else {
                 initials_image_view.setImageResource(ProfilePicture.values()[user.profilePictureIndex!!].drawableId)
             }
             user_full_name_text_view.text = user.fullName
@@ -73,13 +73,13 @@ class ProfileFragment : Fragment() {
 
         eventViewModel.getUserEvents()?.observe(this, Observer { userEvents ->
 
-            profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(userEvents, context!!, object : UserEventsRecyclerViewAdapter.MyClickListener {
-                override fun onItemClicked(position: Int) {
-                    eventViewModel.loadDetailsEvent(userEvents[position].eventId)
-                    (activity as NavigationActivity).showEventDetailsDialogFragment()
-                }
-
-            })
+            profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(
+                    userEvents,
+                    context!!
+            ) { position ->
+                (activity as NavigationActivity)
+                        .showEventDetailsDialogFragment(userEvents[position].eventId!!)
+            }
         })
 
         eventViewModel.getArchivedEvents()?.observe(this, Observer {
