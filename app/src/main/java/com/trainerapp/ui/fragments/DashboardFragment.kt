@@ -6,31 +6,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import javax.inject.Inject
 
 
 class DashboardFragment : BaseFragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
     lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        return rootView
+        return inflater.inflate(R.layout.fragment_dashboard, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
         eventViewModel.getEventsOfLocation()?.observe(this, Observer {
             if (it != null && it.isNotEmpty()) {

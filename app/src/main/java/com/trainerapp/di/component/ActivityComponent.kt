@@ -2,12 +2,16 @@ package com.trainerapp.di.component
 
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.module.ActivityModule
+import com.trainerapp.di.module.ViewModelModule
 import com.trainerapp.ui.LoginActivity
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.fragments.*
 import dagger.Component
 
-@Component(modules = arrayOf(ActivityModule::class))
+@Component(modules = [
+    ActivityModule::class,
+    ViewModelModule::class
+])
 interface ActivityComponent {
 
     fun inject(mainActivity: NavigationActivity)
@@ -27,4 +31,10 @@ interface ActivityComponent {
     fun inject(dashboardFragment: DashboardFragment)
 
     fun inject(profileFragment: ProfileFragment)
+
+    fun inject(loginFragment: LoginFragment)
+
+    fun inject(accountEditDialogFragment: AccountEditDialogFragment)
+
+    fun inject(archivedEventsDialogFragment: ArchivedEventsDialogFragment)
 }

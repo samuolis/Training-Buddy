@@ -8,8 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -22,8 +21,10 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.gson.GsonBuilder
 import com.trainerapp.R
+import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.User
 import com.trainerapp.ui.LoginActivity
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -32,18 +33,22 @@ import kotlinx.android.synthetic.main.fragment_login.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
+import javax.inject.Inject
 
 
-class LoginFragment : Fragment() {
+class LoginFragment : BaseFragment() {
 
-    private var userWebService: UserWebService? = null
+    @Inject
+    lateinit var userWebService: UserWebService
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
     lateinit var userSharedPref: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
     lateinit var eventViewModel: EventViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +68,11 @@ class LoginFragment : Fragment() {
 
     }
 
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
+    }
+
     private fun signIn() {
         val signInIntent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
@@ -72,32 +82,21 @@ class LoginFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_login, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        val gson = GsonBuilder()
-                .setLenient()
-                .create()
+        return rootView
+    }
 
-        val retrofit = Retrofit.Builder()
-                .baseUrl(eventViewModel!!.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
-        userWebService = retrofit.create(UserWebService::class.java)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
         userSharedPref = activity!!.getSharedPreferences(context
                 ?.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         editor = userSharedPref.edit()
-
-        rootView.post {
-
-            login_email!!.setOnClickListener {
-                showProgressBar()
-                signIn()
-            }
-
-            login_email.setSize(SignInButton.SIZE_WIDE)
+        login_email!!.setOnClickListener {
+            showProgressBar()
+            signIn()
         }
 
-        return rootView
+        login_email.setSize(SignInButton.SIZE_WIDE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

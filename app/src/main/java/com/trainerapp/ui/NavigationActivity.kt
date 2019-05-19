@@ -15,7 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -23,6 +23,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
@@ -99,12 +100,14 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     lateinit var logoutIntent: Intent
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
     var fragmentAdded: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
-        eventViewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
+        eventViewModel = getViewModel(viewModelFactory)
 
         supportActionBar?.title = getString(R.string.app_name)
         //Listen for changes in the back stack
@@ -300,9 +303,9 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         supportActionBar!!.title = getString(R.string.signed_user_list_title)
     }
 
-    fun showEventCommentsDialogFragment() {
+    fun showEventCommentsDialogFragment(eventId: Long) {
         val fragmentManager = supportFragmentManager
-        val newFragment = EventCommentsDialogFragment()
+        val newFragment = EventCommentsDialogFragment.newInstance(eventId)
         // The device is smaller, so show the fragment fullscreen
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation

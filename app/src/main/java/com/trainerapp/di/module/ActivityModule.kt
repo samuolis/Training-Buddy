@@ -7,6 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.gson.GsonBuilder
 import com.trainerapp.R
 import com.trainerapp.web.webservice.EventWebService
+import com.trainerapp.web.webservice.UserWebService
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
@@ -16,6 +17,16 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ActivityModule(private var activity: Activity) {
 
     val BASE_URL = "https://training-222106.appspot.com/"
+
+    val gson = GsonBuilder()
+            .setLenient()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+            .create()
+
+    val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
 
     @Provides
     fun providesGoogleSignIn(): GoogleSignInClient {
@@ -31,16 +42,16 @@ class ActivityModule(private var activity: Activity) {
 
     @Provides
     fun providesEventWebService(): EventWebService {
-        val gson = GsonBuilder()
-                .setLenient()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                .create()
-
-        val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
         return retrofit.create(EventWebService::class.java)
+    }
+
+    @Provides
+    fun providesUserWebService(): UserWebService {
+        return retrofit.create(UserWebService::class.java)
+    }
+
+    @Provides
+    fun providesActivity(): Activity {
+        return activity
     }
 }

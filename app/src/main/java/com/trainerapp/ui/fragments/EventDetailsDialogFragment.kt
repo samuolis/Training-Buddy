@@ -9,7 +9,7 @@ import android.text.SpannableStringBuilder
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +18,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
@@ -40,6 +41,8 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
     @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
     lateinit var eventWebService: EventWebService
     lateinit var userId: String
     lateinit var auth: FirebaseAuth
@@ -53,7 +56,6 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_event_details_dialog, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
 
         auth = FirebaseAuth.getInstance()
         currentUser = auth.currentUser
@@ -77,6 +79,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        eventViewModel = getViewModel(viewModelFactory)
         super.onViewCreated(view, savedInstanceState)
         eventViewModel.loadDetailsEvent(eventId)
         event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -90,7 +93,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         }
 
         event_comments_label.setOnClickListener {
-            (activity as NavigationActivity).showEventCommentsDialogFragment()
+            (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
         }
 
         eventViewModel.changeLoadStatus(1)
@@ -127,7 +130,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
                     object : EventCommentsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
-                            (activity as NavigationActivity).showEventCommentsDialogFragment()
+                            (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
                         }
 
                     })

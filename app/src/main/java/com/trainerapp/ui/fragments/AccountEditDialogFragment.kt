@@ -9,11 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import com.google.gson.GsonBuilder
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.ProfilePicture
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -23,17 +25,21 @@ import kotlinx.android.synthetic.main.fragment_account_edit.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
+import javax.inject.Inject
 
 class AccountEditDialogFragment : BaseDialogFragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
     lateinit var eventViewModel: EventViewModel
     var userId: String? = null
     var databaseId: Long = 0
     var profileInt: Int? = null
     var signedEvents: List<Long>? = null
+
+    @Inject
+    lateinit var userWebService: UserWebService
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -46,6 +52,7 @@ class AccountEditDialogFragment : BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(100))
+        eventViewModel = getViewModel(viewModelFactory)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
             profileInt = user.profilePictureIndex
@@ -76,6 +83,11 @@ class AccountEditDialogFragment : BaseDialogFragment() {
         setHasOptionsMenu(false)
     }
 
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
+    }
+
     private fun submitEdit() {
         // Reset errors.
         name_edit_text.error = null
@@ -95,17 +107,6 @@ class AccountEditDialogFragment : BaseDialogFragment() {
             // perform the user login attempt.
             val currentTime = Calendar.getInstance().time
             val user = User(userId, fullName, currentTime, profileInt, signedEvents)
-
-            val gson = GsonBuilder()
-                    .setLenient()
-                    .create()
-
-            val retrofit = Retrofit.Builder()
-                    .baseUrl(eventViewModel.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build()
-
-            val userWebService = retrofit.create(UserWebService::class.java)
 
             userWebService.postUser(user).enqueue(object : Callback<User> {
                 override fun onResponse(call: Call<User>, response: Response<User>) {

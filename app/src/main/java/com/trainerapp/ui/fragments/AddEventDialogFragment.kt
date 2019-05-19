@@ -17,7 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
@@ -27,6 +27,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.Event
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
@@ -42,6 +43,9 @@ import javax.inject.Inject
 
 
 class AddEventDialogFragment : BaseDialogFragment() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
     var date_time = ""
@@ -73,7 +77,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
 
         var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
@@ -83,6 +86,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
         event_date_time_text_view.setOnClickListener {
             datePicker()
         }

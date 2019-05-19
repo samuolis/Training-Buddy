@@ -5,18 +5,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-
 import com.trainerapp.R
+import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_archived_events_dialog.*
+import javax.inject.Inject
 
-class ArchivedEventsDialogFragment : Fragment() {
+class ArchivedEventsDialogFragment : BaseFragment() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -25,8 +32,8 @@ class ArchivedEventsDialogFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
         super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
         archived_events_swipe_container.setOnRefreshListener {
             eventViewModel.loadEvents()
         }
@@ -48,5 +55,10 @@ class ArchivedEventsDialogFragment : Fragment() {
             archived_events_swipe_container.isRefreshing = it != 0
         })
 
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 }

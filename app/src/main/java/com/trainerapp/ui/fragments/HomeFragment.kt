@@ -6,37 +6,41 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
+import javax.inject.Inject
 
 class HomeFragment : BaseFragment() {
 
-    lateinit var eventViewModel: EventViewModel
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    var eventViewModel: EventViewModel? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        return rootView
+        return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
         fab.setOnClickListener {
-            eventViewModel.loadDetailsEvent()
+            eventViewModel?.loadDetailsEvent()
             (activity as NavigationActivity).showEventCreateDialogFragment()
         }
         home_recyclerview.layoutManager = LinearLayoutManager(context)
         swipe_container.setOnRefreshListener {
-            eventViewModel.loadEvents()
+            eventViewModel?.loadEvents()
         }
         swipe_container.setColorSchemeResources(R.color.colorAccent)
         loadUi()
@@ -52,7 +56,7 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun loadUi() {
-        eventViewModel.getEvents()?.observe(this, Observer {
+        eventViewModel?.getEvents()?.observe(this, Observer {
             home_recyclerview.adapter = null
             val list = it
             home_recyclerview.adapter = UserEventsRecyclerViewAdapter(
@@ -63,13 +67,13 @@ class HomeFragment : BaseFragment() {
                         .showEventDetailsDialogFragment(it[position].eventId!!)
             }
         })
-        eventViewModel.getArchivedEvents()?.observe(this, Observer {
+        eventViewModel?.getArchivedEvents()?.observe(this, Observer {
             if (it != null) {
                 expired_event_count.text = it.size.toString()
                 expired_event_layout.visibility = View.VISIBLE
             }
         })
-        eventViewModel.getStatus()?.observe(this, Observer {
+        eventViewModel?.getStatus()?.observe(this, Observer {
             swipe_container.isRefreshing = !(it == 0)
         })
     }

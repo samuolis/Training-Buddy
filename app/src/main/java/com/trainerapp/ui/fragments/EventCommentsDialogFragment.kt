@@ -11,7 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -35,6 +36,13 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
     lateinit var eventViewModel: EventViewModel
     @Inject
     lateinit var eventWebService: EventWebService
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val eventId: Long by lazy {
+        arguments!!.getLong(EventDetailsDialogFragment.ARG_EVENT_ID)
+    }
+
     val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
@@ -44,9 +52,6 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_event_comments_dialog, container, false)
-
-        eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-
         val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0") ?: "0"
 
@@ -55,6 +60,8 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        eventViewModel = getViewModel(viewModelFactory)
+        eventViewModel.loadEventComments(eventId)
         val commentsLinearLayout = LinearLayoutManager(context)
         commentsLinearLayout.orientation = RecyclerView.VERTICAL
         commentsLinearLayout.reverseLayout = true
@@ -96,7 +103,7 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
         activityComponent.inject(this)
     }
 
-    fun sendCommentMessage(eventId: Long?){
+    private fun sendCommentMessage(eventId: Long?) {
         showProgressBarComment()
         val message = comment_edit_text.text.toString()
         val timeNow = Calendar.getInstance().timeInMillis
@@ -151,5 +158,19 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
         }
     }
 
+    companion object {
+        val ARG_EVENT_ID = "EVENT_ID"
 
+        fun newInstance(
+                eventId: Long? = null
+        ): EventCommentsDialogFragment {
+            return EventCommentsDialogFragment().apply {
+                arguments = Bundle().apply {
+                    eventId?.let {
+                        putLong(ARG_EVENT_ID, it)
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,7 +1,7 @@
 package com.trainerapp.ui.viewmodel
 
 import android.Manifest
-import android.app.Application
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -9,13 +9,12 @@ import android.location.Geocoder
 import android.location.Location
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.gson.GsonBuilder
 import com.trainerapp.R
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
@@ -25,12 +24,15 @@ import com.trainerapp.web.webservice.UserWebService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
+import javax.inject.Inject
 
 
-class EventViewModel(application: Application) : AndroidViewModel(application) {
+class EventViewModel @Inject constructor(
+        private val myApplication: Activity,
+        private val eventWebService: EventWebService,
+        private val userWebService: UserWebService
+) : ViewModel() {
 
     var events: MutableLiveData<List<Event>>? = null
     var archivedEvents: MutableLiveData<List<Event>>? = null
@@ -49,14 +51,9 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
 
     var userWeb: MutableLiveData<User>? = null
-
-    var eventWebService: EventWebService
-    var userWebService: UserWebService
-    val BASE_URL = "https://training-222106.appspot.com/"
     var userPreferedDistance: String? = "30"
     var user: User? = null
     var userId: String? = null
-    private var myApplication = application
     var userSharedPref: SharedPreferences
 
     init {
@@ -64,17 +61,6 @@ class EventViewModel(application: Application) : AndroidViewModel(application) {
                 .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
         loggedUser = FirebaseAuth.getInstance().currentUser
-        val gson = GsonBuilder()
-                .setLenient()
-                .create()
-
-        val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-
-        eventWebService = retrofit.create(EventWebService::class.java)
-        userWebService = retrofit.create(UserWebService::class.java)
     }
 
     fun getEvents(): LiveData<List<Event>>? {

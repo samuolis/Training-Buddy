@@ -6,22 +6,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.ProfilePicture
+import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
 import kotlinx.android.synthetic.main.fragment_profile.*
+import javax.inject.Inject
 
 
 class ProfileFragment : BaseFragment() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -35,7 +42,7 @@ class ProfileFragment : BaseFragment() {
     }
 
     private fun setupInfo() {
-        val eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+        eventViewModel = getViewModel(viewModelFactory)
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.getStatus()?.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
