@@ -1,7 +1,10 @@
 package com.trainerapp.ui.fragments
 
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -12,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -21,6 +25,7 @@ import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.CommentMessage
+import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
@@ -155,6 +160,39 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeButtonEnabled(true)
             actionBar.title = getString(R.string.event_details_title_label)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(mMessageReceiver,
+                IntentFilter(NavigationActivity.BROADCAST_REFRESH))
+    }
+
+    //Must unregister onPause()
+    override fun onPause() {
+        super.onPause()
+        LocalBroadcastManager.getInstance(context!!).unregisterReceiver(mMessageReceiver)
+    }
+
+    private val mMessageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.getStringExtra(NavigationActivity.NOTIFICATION_EVENT_KEY)) {
+                NavigationActivity.NOTIFICATION_EVENT_COMMENT_VALUE -> {
+                    val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
+                    if (id != "" && id.toLong() == eventId) {
+                        eventViewModel.loadEventComments(id.toLong())
+                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                    }
+                }
+                NavigationActivity.NOTIFICATION_EVENT_REFRESH_VALUE -> {
+                    val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
+                    if (id != "" && id.toLong() == eventId) {
+                        eventViewModel.loadEventComments(id.toLong())
+                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                    }
+                }
+            }
         }
     }
 

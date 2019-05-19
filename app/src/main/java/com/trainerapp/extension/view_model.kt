@@ -19,5 +19,5 @@ inline fun <reified T : ViewModel> FragmentActivity.getViewModel(
 inline fun <reified T : ViewModel> Fragment.getViewModel(
         viewModelFactory: ViewModelProvider.Factory
 ): T {
-    return ViewModelProviders.of(this, viewModelFactory)[T::class.java]
+    return ViewModelProviders.of(this.activity!!, viewModelFactory)[T::class.java]
 }

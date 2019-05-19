@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -52,14 +53,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
         val EVENT_ID_INTENT: String = "EVENTID"
 
-        fun refreshData(context: Context, eventKey: String, eventId: String) {
-
-            val intent = Intent("refresh")
-            intent.putExtra(EVENT_ID_INTENT, eventId)
-            intent.putExtra(NOTIFICATION_EVENT_KEY, eventKey)
-
-            context.sendBroadcast(intent)
-        }
+        val BROADCAST_REFRESH: String = "refresh"
     }
 
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -391,37 +385,23 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     //register your activity onResume()
     public override fun onResume() {
         super.onResume()
-        registerReceiver(mMessageReceiver, IntentFilter("refresh"))
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, IntentFilter(BROADCAST_REFRESH))
     }
 
     //Must unregister onPause()
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(mMessageReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
     }
 
     //This is the handler that will manager to process the broadcast intent
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val eventKey = intent.getStringExtra(NOTIFICATION_EVENT_KEY)
-            when (eventKey) {
-                NOTIFICATION_EVENT_COMMENT_VALUE -> {
-                    val eventId = intent.getStringExtra(EVENT_ID_INTENT)
-                    if (eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
-                        eventViewModel.loadEventComments(eventId.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
-                    }
-                    eventViewModel.loadUserEventsByIds()
-                }
+            when (intent.getStringExtra(NOTIFICATION_EVENT_KEY)) {
                 NOTIFICATION_EVENT_REFRESH_VALUE -> {
-                    val eventId = intent.getStringExtra(EVENT_ID_INTENT)
                     eventViewModel.loadEvents()
                     eventViewModel.loadEventsByLocation()
                     eventViewModel.loadUserEventsByIds()
-                    if (eventId != "" && eventViewModel.detailsEventId != null && eventViewModel.detailsEventId == eventId.toLong()) {
-                        eventViewModel.loadEventComments(eventId.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = eventId.toLong())
-                    }
                 }
             }
         }

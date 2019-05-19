@@ -1,21 +1,19 @@
 package com.trainerapp.web.firebase
 
 import android.app.NotificationChannel
-import com.google.firebase.messaging.FirebaseMessagingService
-import com.google.firebase.messaging.RemoteMessage
 import android.app.NotificationManager
-import android.os.Build
-import android.content.Context.NOTIFICATION_SERVICE
-import android.media.RingtoneManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
+import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.ViewModelProviders
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
 import com.trainerapp.R
 import com.trainerapp.ui.NavigationActivity
-import com.trainerapp.ui.viewmodel.EventViewModel
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -36,20 +34,17 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         var notificationEvent = remoteMessage.data[NOTIFICATION_EVENT_KEY]
         when (notificationEvent){
             NOTIFICATION_EVENT_COMMENT_VALUE -> {
-                var eventId = remoteMessage.data[EVENT_ID_KEY]
+                val eventId = remoteMessage.data[EVENT_ID_KEY]
                 if (eventId != null) {
-                    NavigationActivity.refreshData(context = applicationContext,
-                            eventKey = NOTIFICATION_EVENT_COMMENT_VALUE, eventId = eventId)
+                    sendToActivity(eventKey = NOTIFICATION_EVENT_COMMENT_VALUE, eventId = eventId)
                 }
             }
             NOTIFICATION_EVENT_REFRESH_VALUE -> {
-                var eventId = remoteMessage.data[EVENT_ID_KEY]
+                val eventId = remoteMessage.data[EVENT_ID_KEY]
                 if (eventId != null) {
-                    NavigationActivity.refreshData(context = applicationContext,
-                            eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = eventId)
+                    sendToActivity(eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = eventId)
                 } else {
-                    NavigationActivity.refreshData(context = applicationContext,
-                            eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = "")
+                    sendToActivity(eventKey = NOTIFICATION_EVENT_REFRESH_VALUE, eventId = "")
                 }
             }
         }
@@ -59,6 +54,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 //            sendNotification(remoteMessage.notification)
 //        }
 
+    }
+
+    private fun sendToActivity(eventKey: String?, eventId: String?) {
+        val intent = Intent(NavigationActivity.BROADCAST_REFRESH)
+        intent.putExtra(NavigationActivity.EVENT_ID_INTENT, eventId)
+        intent.putExtra(NavigationActivity.NOTIFICATION_EVENT_KEY, eventKey)
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
     /**

@@ -51,14 +51,13 @@ class EventViewModel @Inject constructor(
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
 
     var userWeb: MutableLiveData<User>? = null
-    var userPreferedDistance: String? = "30"
+    private var userPreferedDistance: String? = "30"
     var user: User? = null
     var userId: String? = null
-    var userSharedPref: SharedPreferences
+    var userSharedPref: SharedPreferences = myApplication?.getSharedPreferences(myApplication
+            .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
 
     init {
-        userSharedPref = myApplication?.getSharedPreferences(myApplication
-                .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
         loggedUser = FirebaseAuth.getInstance().currentUser
     }
