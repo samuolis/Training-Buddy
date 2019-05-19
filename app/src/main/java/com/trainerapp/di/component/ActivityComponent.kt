@@ -4,9 +4,7 @@ import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.module.ActivityModule
 import com.trainerapp.ui.LoginActivity
 import com.trainerapp.ui.NavigationActivity
-import com.trainerapp.ui.fragments.AddEventDialogFragment
-import com.trainerapp.ui.fragments.EventCommentsDialogFragment
-import com.trainerapp.ui.fragments.EventDetailsDialogFragment
+import com.trainerapp.ui.fragments.*
 import dagger.Component
 
 @Component(modules = arrayOf(ActivityModule::class))
@@ -24,4 +22,9 @@ interface ActivityComponent {
 
     fun inject(eventCommentsDialogFragment: EventCommentsDialogFragment)
 
+    fun inject(homeFragment: HomeFragment)
+
+    fun inject(dashboardFragment: DashboardFragment)
+
+    fun inject(profileFragment: ProfileFragment)
 }

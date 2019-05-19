@@ -5,18 +5,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
+import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 
 
-class DashboardFragment : Fragment() {
+class DashboardFragment : BaseFragment() {
 
     lateinit var eventViewModel: EventViewModel
 
@@ -53,5 +54,10 @@ class DashboardFragment : Fragment() {
             (activity as NavigationActivity).showDashnoardSearchDialogFragment()
         }
         dashboard_swipe_container.setColorSchemeResources(R.color.colorAccent)
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 }

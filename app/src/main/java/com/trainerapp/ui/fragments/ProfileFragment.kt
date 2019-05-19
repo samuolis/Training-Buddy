@@ -5,12 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.trainerapp.R
+import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
@@ -20,13 +21,7 @@ import com.trainerapp.utils.DrawableUtils
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
-class ProfileFragment : Fragment() {
+class ProfileFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -91,5 +86,10 @@ class ProfileFragment : Fragment() {
             }
         })
 
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 }

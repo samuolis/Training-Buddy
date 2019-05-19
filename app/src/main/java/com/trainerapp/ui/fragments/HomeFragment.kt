@@ -5,17 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
+import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeFragment : Fragment() {
+class HomeFragment : BaseFragment() {
 
     lateinit var eventViewModel: EventViewModel
 
@@ -43,6 +44,11 @@ class HomeFragment : Fragment() {
         expired_event_layout.setOnClickListener {
             (activity as NavigationActivity).showArchivedEventsDialogFragment()
         }
+    }
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
     }
 
     private fun loadUi() {
