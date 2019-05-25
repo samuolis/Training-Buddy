@@ -13,6 +13,7 @@ class DrawableUtils {
 
         private val r = Rect()
 
+        @Deprecated("Need to fix crash when navigating fast or remove")
         fun setupInitials(imageView: ImageView, user: User) : Bitmap{
 
             var bitmap = Bitmap.createBitmap(imageView.width, imageView.height, Bitmap.Config.ARGB_8888)
