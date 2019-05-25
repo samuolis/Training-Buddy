@@ -21,3 +21,7 @@ inline fun <reified T : ViewModel> Fragment.getViewModel(
 ): T {
     return ViewModelProviders.of(this.activity!!, viewModelFactory)[T::class.java]
 }
+
+fun <T : Any> MutableLiveData<T>.readOnly(): LiveData<T> {
+    return this
+}

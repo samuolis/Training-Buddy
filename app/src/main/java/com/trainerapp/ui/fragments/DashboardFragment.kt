@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -49,6 +51,13 @@ class DashboardFragment : BaseFragment() {
         eventViewModel.getStatus()?.observe(this, Observer {
             dashboard_swipe_container.isRefreshing = !(it == 0)
         })
+        eventViewModel.errorData.nonNullObserve(this) {
+            Toast.makeText(context,
+                    "Failed to get data " + it.localizedMessage,
+                    Toast.LENGTH_LONG
+            ).show()
+        }
+
         dashboard_swipe_container.setOnRefreshListener {
             eventViewModel.loadEventsByLocation()
         }

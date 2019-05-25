@@ -20,7 +20,7 @@ interface EventWebService {
                             @Path("radius") radius: String?,
                             @Path("countryCode") countryCode: String?,
                             @Path("latitude") latitude: Float?,
-                            @Path("longitude") longitude: Float?): Call<List<Event>>
+                            @Path("longitude") longitude: Float?): Single<List<Event>>
 
     @POST("/event/{userId}/{eventId}")
     fun signEvent(@Path("userId") userId: String?,
@@ -32,8 +32,9 @@ interface EventWebService {
                     @Path("eventId") eventId: Long?,
                     @Header("authorization-code") authorizationCode: String?): Call<Void>
 
+    @Deprecated("Need to pass userId instead of eventsIds")
     @POST("/events")
-    fun getEventByIds(@Body eventsIds: List<Long>?): Call<List<Event>>
+    fun getEventByIds(@Body eventsIds: List<Long>?): Single<List<Event>>
 
     @DELETE("/event/delete/{eventId}")
     fun deleteEventById(@Path("eventId") eventId: Long?,

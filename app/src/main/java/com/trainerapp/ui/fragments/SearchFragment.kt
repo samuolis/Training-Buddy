@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
+import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
@@ -52,5 +53,9 @@ class SearchFragment : BaseDialogFragment() {
         }
     }
 
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
+    }
 
 }

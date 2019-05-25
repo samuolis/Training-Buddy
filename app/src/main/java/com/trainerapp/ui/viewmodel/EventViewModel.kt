@@ -1,21 +1,18 @@
 package com.trainerapp.ui.viewmodel
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.trainerapp.R
 import com.trainerapp.base.BaseViewModel
+import com.trainerapp.extension.readOnly
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
@@ -26,7 +23,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.rx2.await
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,7 +41,6 @@ class EventViewModel @Inject constructor(
     var archivedEvents: MutableLiveData<List<Event>>? = null
     var eventsByLocation: MutableLiveData<List<Event>>? = null
     var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
-    var profilePicture: MutableLiveData<Int>? = MutableLiveData<Int>()
     var refreshStatus: MutableLiveData<Int>? = null
     var eventComments: MutableLiveData<List<CommentMessage>>? = MutableLiveData<List<CommentMessage>>()
     var myEventPosition: Int? = null
@@ -56,6 +51,9 @@ class EventViewModel @Inject constructor(
 
     var userEvents: MutableLiveData<List<Event>>? = null
     var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
+
+    private val _errorData: MutableLiveData<Throwable> = MutableLiveData()
+    val errorData = _errorData.readOnly()
 
     var userWeb: MutableLiveData<User>? = null
     private var userPreferedDistance: String? = "30"
@@ -122,29 +120,35 @@ class EventViewModel @Inject constructor(
 
     fun loadEventsByLocation() {
         refreshStatus?.value = 1
-        userPreferedDistance = userSharedPref?.getString(myApplication.getString(R.string.user_prefered_distance_key), "30")
-        getDataFromLocation {deviceLocation, deviceCountryCode ->
-            if (deviceLocation == null || deviceCountryCode == null){
-                eventsByLocation = null
-                refreshStatus?.value = 0
-                return@getDataFromLocation
-            }
-            eventWebService.getEventsByLocation(userId, userPreferedDistance, deviceCountryCode,
-                    deviceLocation?.latitude?.toFloat(),
-                    deviceLocation?.longitude?.toFloat())
-                    .enqueue(object : Callback<List<Event>> {
-                override fun onFailure(call: Call<List<Event>>, t: Throwable) {
-                    Toast.makeText(myApplication, "failure", Toast.LENGTH_LONG).show()
-                    refreshStatus?.value = 0
-                }
+        userPreferedDistance = userSharedPref.getString(myApplication.getString(R.string.user_prefered_distance_key), "30")
 
-                override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
-                    eventsByLocation?.value = response.body()
-                    refreshStatus?.value = 0
+        locationService.getDeviceLocation()
+                .subscribeOn(Schedulers.io())
+                .observeOn(schedulerUI)
+                .flatMap { location ->
+                    val geocoder = Geocoder(myApplication, Locale.getDefault())
+                    val adresses = geocoder.getFromLocation(location.latitude,
+                            location.longitude, 1)
+                    eventWebService.getEventsByLocation(
+                            userId,
+                            userPreferedDistance,
+                            adresses[0].countryCode,
+                            location.latitude.toFloat(),
+                            location.longitude.toFloat()
+                    )
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(schedulerUI)
                 }
-
-            })
-        }
+                .subscribeBy(
+                        onSuccess = { eventsList ->
+                            eventsByLocation?.value = eventsList
+                            refreshStatus?.value = 0
+                        },
+                        onError = {
+                            _errorData.value = it
+                            refreshStatus?.value = 0
+                        }
+                ).bind()
     }
 
     fun getStatus(): MutableLiveData<Int>? {
@@ -194,8 +198,11 @@ class EventViewModel @Inject constructor(
                             refreshStatus?.value = 0
                         },
                         onError = {
-                            Toast.makeText(myApplication, "Failure get events or location",
-                                    Toast.LENGTH_LONG).show()
+                            Toast.makeText(myApplication,
+                                    "Failed to get data " + it.localizedMessage,
+                                    Toast.LENGTH_LONG
+                            ).show()
+                            refreshStatus?.value = 0
                         }
                 ).bind()
     }
@@ -212,37 +219,6 @@ class EventViewModel @Inject constructor(
             newUserEventList.add(newEvent)
         }
         return newUserEventList
-    }
-
-    fun getDataFromLocation (callback: (gotLocation: Location?, countryCode: String?) -> Unit){
-        var fusedLocationClient = LocationServices.getFusedLocationProviderClient(myApplication)
-        if (ContextCompat.checkSelfPermission(myApplication,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location: Location? ->
-                        if (location != null) {
-                            var geocoder = Geocoder(myApplication, Locale.getDefault())
-                            var adresses = geocoder.getFromLocation(location.latitude,
-                                    location.longitude, 1)
-                            var address = adresses[0]
-                            callback(location, address.countryCode)
-                        } else {
-                            Toast.makeText(myApplication, "Your location is null", Toast.LENGTH_LONG).show()
-                            callback(null, null)
-                        }
-                    }
-                    .addOnFailureListener {exception ->
-                        Toast.makeText(myApplication, "Failed to load location with : " + exception.message, Toast.LENGTH_LONG).show()
-                        callback(null, null)
-                    }
-        } else {
-            Toast.makeText(myApplication, "You do not enabled location", Toast.LENGTH_LONG).show()
-            callback(null, null)
-        }
-    }
-
-    private suspend fun getLocation(): Location {
-        return locationService.getDeviceLocation().await()
     }
 
 
@@ -288,53 +264,37 @@ class EventViewModel @Inject constructor(
     fun loadUserEventsByIds() {
         if (userWeb?.value?.signedEventsList == null){
             userEvents?.value = null
+            refreshStatus?.value = 0
+            return
         }
+
         eventWebService.getEventByIds(userWeb?.value?.signedEventsList)
-                .enqueue(object : Callback<List<Event>> {
-                    override fun onFailure(call: Call<List<Event>>, t: Throwable) {
-                        refreshStatus?.value = 0
-                    }
-
-                    override fun onResponse(call: Call<List<Event>>, response: Response<List<Event>>) {
-                        if (response.isSuccessful) {
-                            getDataFromLocation { deviceLocation, deviceCountryCode ->
-                                var newUserEventList = mutableListOf<Event>()
-                                if (deviceLocation == null || deviceCountryCode == null) {
-                                    newUserEventList = response.body()!!.toMutableList()
-                                } else {
-                                    var userEventsList = response.body()
-                                    userEventsList?.forEach {
-                                        var newEvent = it
-                                        var eventLoacation = Location("Event")
-                                        eventLoacation.longitude = newEvent.eventLocationLongitude!!
-                                        eventLoacation.latitude = newEvent.eventLocationLatitude!!
-                                        var distance = eventLoacation.distanceTo(deviceLocation) / 1000
-                                        newEvent.eventDistance = distance
-                                        newUserEventList.add(newEvent)
-                                    }
-                                }
-                                var validDateEventList = newUserEventList.filter {
-                                    it.eventDate!!.after(Date(System.currentTimeMillis()))
-                                }
-                                var archivedEventList = newUserEventList.filter {
-                                    it.eventDate!!.before(Date(System.currentTimeMillis()))
-                                }
-                                userEvents?.value = validDateEventList
-                                archivedEvents?.value = archivedEventList
-                                refreshStatus?.value = 0
+                .zipWith(locationService.getDeviceLocation(),
+                        BiFunction { eventsList: List<Event>, location: Location ->
+                            updateEventsList(eventsList, location)
+                        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(schedulerUI)
+                .subscribeBy(
+                        onSuccess = { eventsList ->
+                            val validDateEventList = eventsList.filter {
+                                it.eventDate!!.after(Date(System.currentTimeMillis()))
                             }
-
-                        } else {
-                            Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
+                            val archivedEventList = eventsList.filter {
+                                it.eventDate!!.before(Date(System.currentTimeMillis()))
+                            }
+                            userEvents?.value = validDateEventList
+                            archivedEvents?.value = archivedEventList
+                            refreshStatus?.value = 0
+                        },
+                        onError = {
+                            Toast.makeText(myApplication,
+                                    "Failed to get data " + it.localizedMessage,
+                                    Toast.LENGTH_LONG
+                            ).show()
                             refreshStatus?.value = 0
                         }
-                    }
-
-                })
-    }
-
-    fun getProfilePicture(): LiveData<Int>?{
-        return profilePicture
+                ).bind()
     }
 
     fun getSignedUsers(): LiveData<List<User>>?{

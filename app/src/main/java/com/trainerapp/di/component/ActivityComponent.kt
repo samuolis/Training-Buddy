@@ -39,4 +39,6 @@ interface ActivityComponent {
     fun inject(accountEditDialogFragment: AccountEditDialogFragment)
 
     fun inject(archivedEventsDialogFragment: ArchivedEventsDialogFragment)
+
+    fun inject(searchFragment: SearchFragment)
 }
