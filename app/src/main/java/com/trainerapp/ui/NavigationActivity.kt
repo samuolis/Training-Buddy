@@ -104,15 +104,22 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         eventViewModel = getViewModel(viewModelFactory)
 
         supportActionBar?.title = getString(R.string.app_name)
-        //Listen for changes in the back stack
-        supportFragmentManager.addOnBackStackChangedListener(this);
+        supportFragmentManager.addOnBackStackChangedListener(this)
+
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                    REQUEST_PERMISION_CODE /*LOCATION_PERMISSION_REQUEST_CODE*/)
+                    REQUEST_PERMISION_CODE)
         }
-        //Handle when activity is recreated like on orientation Change
+
+        if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_PERMISION_CODE)
+        }
+
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {
             eventViewModel.setDescriptionStatus(2)

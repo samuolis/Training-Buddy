@@ -2,6 +2,7 @@ package com.trainerapp.web.webservice
 
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
+import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -12,7 +13,7 @@ interface EventWebService {
                     @Header("authorization-code") authorizationCode: String?): Call<Event>
 
     @GET("/event/{userId}")
-    fun getEventsByUserId(@Path("userId") userId: String?): Call<List<Event>>
+    fun getEventsByUserId(@Path("userId") userId: String?): Single<List<Event>>
 
     @GET("/event/{userId}/{radius}/{countryCode}/{latitude}/{longitude}")
     fun getEventsByLocation(@Path("userId") userId: String?,
