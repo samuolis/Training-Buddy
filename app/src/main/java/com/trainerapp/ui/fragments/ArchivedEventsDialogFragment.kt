@@ -39,7 +39,7 @@ class ArchivedEventsDialogFragment : BaseFragment() {
         }
         archived_events_swipe_container.setColorSchemeResources(R.color.colorAccent)
         archived_events_recyclerview.layoutManager = LinearLayoutManager(context)
-        eventViewModel.getArchivedEvents()?.observe(this, Observer {
+        eventViewModel.archivedEvents.observe(this, Observer {
             archived_events_recyclerview.adapter = null
             val list = it
             archived_events_recyclerview.adapter = UserEventsRecyclerViewAdapter(
@@ -51,7 +51,7 @@ class ArchivedEventsDialogFragment : BaseFragment() {
             }
         })
 
-        eventViewModel.getStatus()?.observe(this, Observer {
+        eventViewModel.refreshStatus.observe(this, Observer {
             archived_events_swipe_container.isRefreshing = it != 0
         })
 

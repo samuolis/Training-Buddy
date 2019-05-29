@@ -153,7 +153,7 @@ class LoginFragment : BaseFragment() {
     private fun getUser(gotUser: FirebaseUser) {
         FirebaseInstanceId.getInstance().instanceId
                 .addOnCompleteListener { task ->
-                    userWebService!!.getExistantUser(gotUser.uid)
+                    userWebService.getExistantUser(gotUser.uid)
                             .enqueue(object : Callback<User> {
                                 override fun onResponse(call: Call<User>, response: Response<User>) {
                                     if (response.isSuccessful) {
@@ -180,7 +180,7 @@ class LoginFragment : BaseFragment() {
     private fun newUserCreation(user: FirebaseUser) {
         val newUser = User(user.uid, user.displayName, Calendar.getInstance().time,
                 null, null)
-        userWebService!!.postUser(newUser!!).enqueue(object : Callback<User> {
+        userWebService.postUser(newUser).enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 onSuccesfullLogin()
             }

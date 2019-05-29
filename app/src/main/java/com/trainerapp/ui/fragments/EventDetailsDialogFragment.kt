@@ -101,14 +101,14 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
         eventViewModel.changeLoadStatus(1)
 
-        eventViewModel.getLoadingStatus()?.nonNullObserve(this) {
+        eventViewModel.loadingStatus.nonNullObserve(this) {
             when (it) {
                 0 -> hideProgressBar()
                 1 -> showProgressBar()
             }
         }
 
-        eventViewModel.getSignedUsers()?.nonNullObserve(this) {
+        eventViewModel.signedUsers.nonNullObserve(this) {
             event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it, context!!,
                     object : EventDetailsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
@@ -118,7 +118,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
                     })
         }
 
-        eventViewModel.getEventComments()?.nonNullObserve(this) {
+        eventViewModel.eventComments.nonNullObserve(this) {
             var commentsList = mutableListOf<CommentMessage>()
             if (it.size > 2) {
                 commentsList.add(CommentMessage("View " + (it.size - 2) + " more comments...", null, null,
@@ -144,7 +144,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     }
 
     private fun setupUI(){
-        eventViewModel.getDetailsOneEvent()?.nonNullObserve(this) {
+        eventViewModel.detailsOneEvent.nonNullObserve(this) {
             if (userId == it.userId) {
                 setupHomeUI(it)
             } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)) {

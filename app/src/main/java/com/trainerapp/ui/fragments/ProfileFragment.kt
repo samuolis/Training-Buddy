@@ -44,7 +44,7 @@ class ProfileFragment : BaseFragment() {
     private fun setupInfo() {
         eventViewModel = getViewModel(viewModelFactory)
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
-        eventViewModel.getStatus()?.observe(this, Observer {
+        eventViewModel.refreshStatus.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
         })
         expired_event_layout.setOnClickListener {
@@ -54,7 +54,7 @@ class ProfileFragment : BaseFragment() {
             eventViewModel.loadUserData()
         }
         profile_swipe_container.setColorSchemeResources(R.color.colorAccent)
-        eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
+        eventViewModel.user.observe(this, Observer { user: User ->
             initials_image_view.post {
                 if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
                     DrawableUtils.setupInitials(initials_image_view, user)
@@ -75,7 +75,7 @@ class ProfileFragment : BaseFragment() {
             (activity as NavigationActivity).showAccountEditDialogFragment()
         }
 
-        eventViewModel.getUserEvents()?.observe(this, Observer { userEvents ->
+        eventViewModel.userEvents.observe(this, Observer { userEvents ->
 
             profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(
                     userEvents,
@@ -86,7 +86,7 @@ class ProfileFragment : BaseFragment() {
             }
         })
 
-        eventViewModel.getArchivedEvents()?.observe(this, Observer {
+        eventViewModel.archivedEvents.observe(this, Observer {
             if (it != null) {
                 expired_event_count.text = it.size.toString()
                 expired_event_layout.visibility = View.VISIBLE

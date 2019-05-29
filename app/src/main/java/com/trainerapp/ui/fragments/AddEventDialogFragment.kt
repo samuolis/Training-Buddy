@@ -58,7 +58,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
     var selectedLocationCountryCode: String? = null
     var eventId: Long? = null
     var userId: String? = null
-    var eventViewModel: EventViewModel? = null
+    lateinit var eventViewModel: EventViewModel
     var selectedDateAndTime: Date? = null
     var eventSignedPlayers: List<String>? = null
     var eventCommentMessage: List<Long>? = null
@@ -76,9 +76,9 @@ class AddEventDialogFragment : BaseDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        var rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
 
-        var userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
+        val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
 
         return rootView
@@ -113,7 +113,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
             saveEvent(view)
         }
 
-        eventViewModel?.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+        eventViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
             if (it != null) {
                 event_name_edit_text.text = SpannableStringBuilder(it.eventName)
                 event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
@@ -176,11 +176,9 @@ class AddEventDialogFragment : BaseDialogFragment() {
                     }
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                        (activity as NavigationActivity).let {
-                            it.backOnStack()
-                        }
-                        eventViewModel?.loadDetailsEvent(eventId)
-                        eventViewModel?.loadEvents()
+                        (activity as NavigationActivity).backOnStack()
+                        eventViewModel.loadDetailsEvent(eventId)
+                        eventViewModel.loadEvents()
                         FirebaseMessaging
                                 .getInstance()
                                 .subscribeToTopic(event.eventId.toString())

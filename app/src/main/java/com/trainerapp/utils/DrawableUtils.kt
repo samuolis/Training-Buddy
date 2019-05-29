@@ -3,7 +3,6 @@ package com.trainerapp.utils
 import android.graphics.*
 import android.widget.ImageView
 import com.trainerapp.models.User
-import java.io.ByteArrayOutputStream
 
 class DrawableUtils {
 
@@ -92,23 +91,6 @@ class DrawableUtils {
 
             // Set the paint for that size.
             paint.textSize = desiredTextSize
-        }
-
-        fun convertBitmapToByte(bitmap: Bitmap): ByteArray{
-            var bos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);
-            var bArray = bos.toByteArray()
-            return bArray
-        }
-
-        fun convertByteToBitmap(byteArray: ByteArray?): Bitmap{
-            var gotBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size);
-            return gotBitmap
-        }
-
-        fun resizeBitmapByScale(bitmap: Bitmap, double: Double): Bitmap{
-            return Bitmap.createScaledBitmap(bitmap,(bitmap.getWidth()/double).toInt(),
-                    (bitmap.getHeight()/double).toInt(), true);
         }
     }
 

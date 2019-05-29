@@ -54,7 +54,7 @@ class AccountEditDialogFragment : BaseDialogFragment() {
         name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(100))
         eventViewModel = getViewModel(viewModelFactory)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
-        eventViewModel.getUserWeb()?.observe(this, Observer { user: User ->
+        eventViewModel.user.observe(this, Observer { user: User ->
             profileInt = user.profilePictureIndex
             if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
                 DrawableUtils.setupInitials(initials_image_view_fragment_edit, user)
@@ -95,8 +95,8 @@ class AccountEditDialogFragment : BaseDialogFragment() {
         // Store values at the time of the login attempt.
         val fullName = name_edit_text.getText().toString()
 
-        var cancel = false
-        var focusView: View? = null
+        val cancel = false
+        val focusView: View? = null
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first

@@ -37,7 +37,7 @@ class DashboardFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         eventViewModel = getViewModel(viewModelFactory)
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
-        eventViewModel.getEventsOfLocation()?.observe(this, Observer {
+        eventViewModel.eventsByLocation.observe(this, Observer {
             if (it != null && it.isNotEmpty()) {
                 dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(
                         it,
@@ -48,7 +48,7 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         })
-        eventViewModel.getStatus()?.observe(this, Observer {
+        eventViewModel.refreshStatus.observe(this, Observer {
             dashboard_swipe_container.isRefreshing = !(it == 0)
         })
         eventViewModel.errorData.nonNullObserve(this) {

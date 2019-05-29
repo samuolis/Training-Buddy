@@ -87,11 +87,11 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
 
         })
 
-        eventViewModel.getEventComments()?.observe(this, androidx.lifecycle.Observer {
+        eventViewModel.eventComments.observe(this, androidx.lifecycle.Observer {
             event_comments_recycler_view.adapter = CommentsDetailsRecyclerViewAdapter(it, context!!)
         })
 
-        eventViewModel.getDetailsOneEvent()?.observe(this, androidx.lifecycle.Observer {
+        eventViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
             confirm_message_submit_text_view.setOnClickListener { view ->
                 if (comment_edit_text.text.toString().length <= 100) {
                     comment_edit_text.isEnabled = false

@@ -59,7 +59,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                eventViewModel.setDescriptionStatus(2)
                 eventViewModel.loadEvents()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -68,7 +67,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
-                eventViewModel.setDescriptionStatus(0)
                 eventViewModel.loadEventsByLocation()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -77,7 +75,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
-                eventViewModel.setDescriptionStatus(1)
                 eventViewModel.loadUserData()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -122,7 +119,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {
-            eventViewModel.setDescriptionStatus(2)
             supportFragmentManager.beginTransaction()
                     .replace(R.id.navigation_frame, homeFragment)
                     .commit()
@@ -178,9 +174,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         //This method is called when the up button is pressed. Just the pop back stack.
         supportFragmentManager.popBackStack()
         if (supportFragmentManager.backStackEntryCount < 2) {
-            if (eventViewModel.myEventPosition != null) {
-                eventViewModel.myEventPosition = null
-            }
             if (eventViewModel.eventComments != null) {
                 eventViewModel.cleanComments()
             }
@@ -232,9 +225,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     }
 
     fun cleanCashedData() {
-        if (eventViewModel.myEventPosition != null) {
-            eventViewModel.myEventPosition = null
-        }
         if (eventViewModel.eventComments != null) {
             eventViewModel.cleanComments()
         }

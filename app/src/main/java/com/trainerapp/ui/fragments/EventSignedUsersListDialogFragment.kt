@@ -33,7 +33,7 @@ class EventSignedUsersListDialogFragment : BaseDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        var rootView = inflater.inflate(R.layout.fragment_event_signed_users_list_dialog, container, false)
+        val rootView = inflater.inflate(R.layout.fragment_event_signed_users_list_dialog, container, false)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
 
         return rootView
@@ -43,7 +43,7 @@ class EventSignedUsersListDialogFragment : BaseDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         eventViewModel = getViewModel(viewModelFactory)
         event_signed_players_list_recycler_view.layoutManager = LinearLayoutManager(context)
-        eventViewModel.getSignedUsers()?.observe(this, Observer {
+        eventViewModel.signedUsers.observe(this, Observer {
             event_signed_players_list_recycler_view.adapter = EventSignedUsersRecyclerViewAdapter(it, context!!, null)
         })
     }

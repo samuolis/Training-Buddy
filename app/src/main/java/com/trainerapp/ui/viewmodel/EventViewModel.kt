@@ -6,10 +6,7 @@ import android.content.SharedPreferences
 import android.location.Geocoder
 import android.location.Location
 import android.widget.Toast
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.trainerapp.R
 import com.trainerapp.base.BaseViewModel
 import com.trainerapp.extension.readOnly
@@ -37,71 +34,66 @@ class EventViewModel @Inject constructor(
         private val locationService: LocationService
 ) : BaseViewModel() {
 
-    var events: MutableLiveData<List<Event>>? = null
-    var archivedEvents: MutableLiveData<List<Event>>? = null
-    var eventsByLocation: MutableLiveData<List<Event>>? = null
-    var descriptionStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
-    var refreshStatus: MutableLiveData<Int>? = null
-    var eventComments: MutableLiveData<List<CommentMessage>>? = MutableLiveData<List<CommentMessage>>()
-    var myEventPosition: Int? = null
-    var detailsEventId: Long? = null
-    var detailsOneEvent: MutableLiveData<Event>? = MutableLiveData<Event>()
-    var loadingStatus: MutableLiveData<Int>? = MutableLiveData<Int>()
-    var loggedUser: FirebaseUser? = null
-
-    var userEvents: MutableLiveData<List<Event>>? = null
-    var signedUsersList: MutableLiveData<List<User>>? = MutableLiveData<List<User>>()
-
     private val _errorData: MutableLiveData<Throwable> = MutableLiveData()
     val errorData = _errorData.readOnly()
 
-    var userWeb: MutableLiveData<User>? = null
+    private var _refreshStatus: MutableLiveData<Int> = MutableLiveData()
+    val refreshStatus = _refreshStatus.readOnly()
+
+    private var _events = MutableLiveData<List<Event>>()
+    val events = _events.readOnly()
+
+    private var _archivedEvents = MutableLiveData<List<Event>>()
+    val archivedEvents = _archivedEvents.readOnly()
+
+    private var _eventsByLocation = MutableLiveData<List<Event>>()
+    val eventsByLocation = _eventsByLocation.readOnly()
+
+    private var _eventComments = MutableLiveData<List<CommentMessage>>()
+    val eventComments = _eventComments.readOnly()
+
+    private var _detailsOneEvent = MutableLiveData<Event>()
+    val detailsOneEvent = _detailsOneEvent.readOnly()
+
+    private var _loadingStatus = MutableLiveData<Int>()
+    val loadingStatus = _loadingStatus.readOnly()
+
+    private var _userEvents = MutableLiveData<List<Event>>()
+    val userEvents = _userEvents.readOnly()
+
+    private var _signedUsers = MutableLiveData<List<User>>()
+    val signedUsers = _signedUsers.readOnly()
+
+    private var _user = MutableLiveData<User>()
+    val user = _user.readOnly()
+
     private var userPreferedDistance: String? = "30"
-    var user: User? = null
-    var userId: String? = null
-    var userSharedPref: SharedPreferences = myApplication?.getSharedPreferences(myApplication
+    private var userId: String? = null
+    private var userSharedPref: SharedPreferences = myApplication
+            .getSharedPreferences(myApplication
             .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-    val schedulerUI = AndroidSchedulers.mainThread()
+    private val schedulerUI = AndroidSchedulers.mainThread()
 
     init {
-        userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
-        loggedUser = FirebaseAuth.getInstance().currentUser
+        userId = userSharedPref.getString(myApplication.getString(R.string.user_id_key), "0")
     }
 
-    fun getEvents(): LiveData<List<Event>>? {
-        if (events == null) {
-            events = MutableLiveData<List<Event>>()
-            loadEvents()
-        }
-        return events
-    }
-
-    fun getDetailsOneEvent(): LiveData<Event>?{
-        return detailsOneEvent
-    }
-
-    fun setDescriptionStatus(status: Int){
-        descriptionStatus?.value = status
-    }
-
-    fun loadDetailsEvent(eventId: Long? = null){
-        if (eventId == null){
-            detailsOneEvent?.value = null
+    fun loadDetailsEvent(eventId: Long? = null) {
+        if (eventId == null) {
+            _detailsOneEvent.value = null
             return
         }
-        eventWebService.getEventById(eventId).enqueue(object : Callback<Event>{
+        eventWebService.getEventById(eventId).enqueue(object : Callback<Event> {
             override fun onFailure(call: Call<Event>, t: Throwable) {
                 Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
             }
 
             override fun onResponse(call: Call<Event>, response: Response<Event>) {
                 if (response.isSuccessful) {
-                    var value = response.body()
+                    val value = response.body()
                     loadSignedUserList(value?.eventSignedPlayers)
                     loadEventComments(eventId)
-                    detailsOneEvent?.value = value
-                    detailsEventId = value?.eventId
-
+                    _detailsOneEvent.value = value
                 } else {
                     Toast.makeText(myApplication, "event id was wrong", Toast.LENGTH_LONG).show()
                 }
@@ -110,16 +102,8 @@ class EventViewModel @Inject constructor(
         })
     }
 
-    fun getEventsOfLocation(): LiveData<List<Event>>? {
-        if (eventsByLocation == null) {
-            eventsByLocation = MutableLiveData<List<Event>>()
-            loadEventsByLocation()
-        }
-        return eventsByLocation
-    }
-
     fun loadEventsByLocation() {
-        refreshStatus?.value = 1
+        _refreshStatus.value = 1
         userPreferedDistance = userSharedPref.getString(myApplication.getString(R.string.user_prefered_distance_key), "30")
 
         locationService.getDeviceLocation()
@@ -141,43 +125,18 @@ class EventViewModel @Inject constructor(
                 }
                 .subscribeBy(
                         onSuccess = { eventsList ->
-                            eventsByLocation?.value = eventsList
-                            refreshStatus?.value = 0
+                            _eventsByLocation.value = eventsList
+                            _refreshStatus.value = 0
                         },
                         onError = {
                             _errorData.value = it
-                            refreshStatus?.value = 0
+                            _refreshStatus.value = 0
                         }
                 ).bind()
     }
 
-    fun getStatus(): MutableLiveData<Int>? {
-        if (refreshStatus == null) {
-            refreshStatus = MutableLiveData<Int>()
-            refreshStatus?.value = 0
-        }
-        return refreshStatus
-    }
-
-    // 0 is for dashboard and 1 is for profile
-    fun getStatusForDescription(): MutableLiveData<Int>? {
-        if (descriptionStatus == null) {
-            descriptionStatus = MutableLiveData<Int>()
-            descriptionStatus?.value = 0
-        }
-        return descriptionStatus
-    }
-
-    fun getArchivedEvents(): LiveData<List<Event>>? {
-        if (archivedEvents == null) {
-            archivedEvents = MutableLiveData<List<Event>>()
-            loadEvents()
-        }
-        return archivedEvents
-    }
-
     fun loadEvents() {
-        refreshStatus?.value = 1
+        _refreshStatus.value = 1
         eventWebService.getEventsByUserId(userId = userId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(schedulerUI)
@@ -193,16 +152,16 @@ class EventViewModel @Inject constructor(
                             val archivedEventList = eventsList.filter {
                                 it.eventDate!!.before(Date(System.currentTimeMillis()))
                             }
-                            events?.value = validDateEventList
-                            archivedEvents?.value = archivedEventList
-                            refreshStatus?.value = 0
+                            _events.value = validDateEventList
+                            _archivedEvents.value = archivedEventList
+                            _refreshStatus.value = 0
                         },
                         onError = {
                             Toast.makeText(myApplication,
                                     "Failed to get data " + it.localizedMessage,
                                     Toast.LENGTH_LONG
                             ).show()
-                            refreshStatus?.value = 0
+                            _refreshStatus.value = 0
                         }
                 ).bind()
     }
@@ -221,33 +180,16 @@ class EventViewModel @Inject constructor(
         return newUserEventList
     }
 
-
-    fun getUserEvents(): LiveData<List<Event>>? {
-        if (userEvents == null) {
-            userEvents = MutableLiveData<List<Event>>()
-            loadUserEventsByIds()
-        }
-        return userEvents
-    }
-
-    fun getUserWeb() : LiveData<User>? {
-        if (userWeb == null) {
-            userWeb = MutableLiveData<User>()
-            loadUserData()
-        }
-        return userWeb
-    }
-
     fun loadUserData() {
-        refreshStatus?.value = 1
-        var userSharedPref = myApplication?.getSharedPreferences(myApplication
+        _refreshStatus.value = 1
+        val userSharedPref = myApplication.getSharedPreferences(myApplication
                 .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-        var userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
+        val userId = userSharedPref?.getString(myApplication.getString(R.string.user_id_key), "0")
         userWebService.getExistantUser(userId)
                 .enqueue(object : Callback<User> {
                     override fun onResponse(call: Call<User>, response: Response<User>) {
                         if (response.isSuccessful) {
-                            userWeb?.value = response.body()
+                            _user.value = response.body()
                             loadUserEventsByIds()
 
                         } else {
@@ -262,13 +204,13 @@ class EventViewModel @Inject constructor(
     }
 
     fun loadUserEventsByIds() {
-        if (userWeb?.value?.signedEventsList == null){
-            userEvents?.value = null
-            refreshStatus?.value = 0
+        if (_user.value?.signedEventsList == null) {
+            _userEvents.value = null
+            _refreshStatus.value = 0
             return
         }
 
-        eventWebService.getEventByIds(userWeb?.value?.signedEventsList)
+        eventWebService.getEventByIds(_user.value?.signedEventsList)
                 .zipWith(locationService.getDeviceLocation(),
                         BiFunction { eventsList: List<Event>, location: Location ->
                             updateEventsList(eventsList, location)
@@ -283,26 +225,22 @@ class EventViewModel @Inject constructor(
                             val archivedEventList = eventsList.filter {
                                 it.eventDate!!.before(Date(System.currentTimeMillis()))
                             }
-                            userEvents?.value = validDateEventList
-                            archivedEvents?.value = archivedEventList
-                            refreshStatus?.value = 0
+                            _userEvents.value = validDateEventList
+                            _archivedEvents.value = archivedEventList
+                            _refreshStatus.value = 0
                         },
                         onError = {
                             Toast.makeText(myApplication,
                                     "Failed to get data " + it.localizedMessage,
                                     Toast.LENGTH_LONG
                             ).show()
-                            refreshStatus?.value = 0
+                            _refreshStatus.value = 0
                         }
                 ).bind()
     }
 
-    fun getSignedUsers(): LiveData<List<User>>?{
-        return signedUsersList
-    }
-
-    fun loadSignedUserList(userIdsList: List<String>?){
-        userWebService.getUserByIds(userIdsList).enqueue(object : Callback<List<User>>{
+    fun loadSignedUserList(userIdsList: List<String>?) {
+        userWebService.getUserByIds(userIdsList).enqueue(object : Callback<List<User>> {
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
                 Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
@@ -310,7 +248,7 @@ class EventViewModel @Inject constructor(
 
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
-                    signedUsersList?.value = response.body()
+                    _signedUsers.value = response.body()
 
                 } else {
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
@@ -320,18 +258,14 @@ class EventViewModel @Inject constructor(
         })
     }
 
-    fun loadProfilePicture(pictureIndex: Int){
-        var userCache = userWeb?.value
+    fun loadProfilePicture(pictureIndex: Int) {
+        val userCache = _user.value
         userCache?.profilePictureIndex = pictureIndex
-        userWeb?.value = userCache
+        _user.value = userCache
     }
 
-    fun getEventComments(): LiveData<List<CommentMessage>>? {
-        return eventComments
-    }
-
-    fun loadEventComments(eventId: Long? = null){
-        eventWebService.getEventById(eventId).enqueue(object : Callback<Event>{
+    fun loadEventComments(eventId: Long? = null) {
+        eventWebService.getEventById(eventId).enqueue(object : Callback<Event> {
             override fun onFailure(call: Call<Event>, t: Throwable) {
                 Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
                 changeLoadStatus(0)
@@ -351,9 +285,9 @@ class EventViewModel @Inject constructor(
         })
     }
 
-    fun querryComments(event: Event?){
+    fun querryComments(event: Event?) {
         if (event?.eventComments != null) {
-            eventWebService.getEventCommentsByIds(event?.eventComments).enqueue(object : Callback<List<CommentMessage>> {
+            eventWebService.getEventCommentsByIds(event.eventComments).enqueue(object : Callback<List<CommentMessage>> {
                 override fun onFailure(call: Call<List<CommentMessage>>, t: Throwable) {
                     Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
                     changeLoadStatus(0)
@@ -361,7 +295,7 @@ class EventViewModel @Inject constructor(
 
                 override fun onResponse(call: Call<List<CommentMessage>>, response: Response<List<CommentMessage>>) {
                     if (response.isSuccessful) {
-                        eventComments?.value = response.body()
+                        _eventComments.value = response.body()
                         changeLoadStatus(0)
 
                     } else {
@@ -371,23 +305,19 @@ class EventViewModel @Inject constructor(
                 }
 
             })
-        } else{
-            eventComments?.value = mutableListOf<CommentMessage>()
+        } else {
+            _eventComments.value = mutableListOf<CommentMessage>()
             changeLoadStatus(0)
         }
     }
 
-    fun cleanComments(){
-        eventComments?.value = mutableListOf()
-    }
-
-    fun getLoadingStatus(): LiveData<Int>?{
-        return loadingStatus
+    fun cleanComments() {
+        _eventComments.value = mutableListOf()
     }
 
     // 0 - stop loading
     // 1 - start loading
-    fun changeLoadStatus(status: Int){
-        loadingStatus?.value = status
+    fun changeLoadStatus(status: Int) {
+        _loadingStatus.value = status
     }
 }

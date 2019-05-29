@@ -23,7 +23,7 @@ class HomeFragment : BaseFragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    var eventViewModel: EventViewModel? = null
+    lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -35,12 +35,12 @@ class HomeFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         eventViewModel = getViewModel(viewModelFactory)
         fab.setOnClickListener {
-            eventViewModel?.loadDetailsEvent()
+            eventViewModel.loadDetailsEvent()
             (activity as NavigationActivity).showEventCreateDialogFragment()
         }
         home_recyclerview.layoutManager = LinearLayoutManager(context)
         swipe_container.setOnRefreshListener {
-            eventViewModel?.loadEvents()
+            eventViewModel.loadEvents()
         }
         swipe_container.setColorSchemeResources(R.color.colorAccent)
         loadUi()
@@ -56,7 +56,7 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun loadUi() {
-        eventViewModel?.getEvents()?.observe(this, Observer {
+        eventViewModel.events.observe(this, Observer {
             home_recyclerview.adapter = null
             val list = it
             home_recyclerview.adapter = UserEventsRecyclerViewAdapter(
@@ -67,13 +67,13 @@ class HomeFragment : BaseFragment() {
                         .showEventDetailsDialogFragment(it[position].eventId!!)
             }
         })
-        eventViewModel?.getArchivedEvents()?.observe(this, Observer {
+        eventViewModel.archivedEvents.observe(this, Observer {
             if (it != null) {
                 expired_event_count.text = it.size.toString()
                 expired_event_layout.visibility = View.VISIBLE
             }
         })
-        eventViewModel?.getStatus()?.observe(this, Observer {
+        eventViewModel.refreshStatus.observe(this, Observer {
             swipe_container.isRefreshing = !(it == 0)
         })
     }
