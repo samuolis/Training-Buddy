@@ -28,9 +28,12 @@ import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
+import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
+import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
@@ -56,12 +59,11 @@ class AddEventDialogFragment : BaseDialogFragment() {
     var selectedLocationLatitude: Double? = null
     var selectedLocationLongitude: Double? = null
     var selectedLocationCountryCode: String? = null
-    var eventId: Long? = null
     var userId: String? = null
     lateinit var eventViewModel: EventViewModel
     var selectedDateAndTime: Date? = null
-    var eventSignedPlayers: List<String>? = null
-    var eventCommentMessage: List<Long>? = null
+    var eventSignedPlayers: List<User>? = null
+    var eventCommentMessage: List<CommentMessage>? = null
 
     var mHour: Int = 0
     var mMinute: Int = 0
@@ -71,6 +73,12 @@ class AddEventDialogFragment : BaseDialogFragment() {
     }
     @Inject
     lateinit var eventWebService: EventWebService
+
+    lateinit var eventDetailsViewModel: EventDetailsViewModel
+
+    private val eventId: Long by lazy {
+        arguments!!.getLong(EventDetailsDialogFragment.ARG_EVENT_ID, -1)
+    }
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -87,6 +95,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         eventViewModel = getViewModel(viewModelFactory)
+        eventDetailsViewModel = getViewModel(viewModelFactory)
         event_date_time_text_view.setOnClickListener {
             datePicker()
         }
@@ -113,25 +122,29 @@ class AddEventDialogFragment : BaseDialogFragment() {
             saveEvent(view)
         }
 
-        eventViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
-            if (it != null) {
-                event_name_edit_text.text = SpannableStringBuilder(it.eventName)
-                event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
-                event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
-                selectedLocationCountryCode = it.eventLocationCountryCode
-                selectedLocationLongitude = it.eventLocationLongitude
-                selectedLocationLatitude = it.eventLocationLatitude
-                selectedLocationName = it.eventLocationName
-                event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
-                eventId = it.eventId
-                userId = it.userId
-                val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
-                event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
-                selectedDateAndTime = it.eventDate
-                eventSignedPlayers = it.eventSignedPlayers
-                eventCommentMessage = it.eventComments
-            }
+        if (eventId > -1) {
+            eventDetailsViewModel.loadDetailsEvent(eventId)
+            setupEditEvent()
+        }
+    }
+
+    private fun setupEditEvent() {
+        eventDetailsViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
+            event_name_edit_text.text = SpannableStringBuilder(it.eventName)
+            event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
+            event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
+            selectedLocationCountryCode = it.eventLocationCountryCode
+            selectedLocationLongitude = it.eventLocationLongitude
+            selectedLocationLatitude = it.eventLocationLatitude
+            selectedLocationName = it.eventLocationName
+            event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
+            userId = it.userId
+            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
+            timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
+            event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
+            selectedDateAndTime = it.eventDate
+            eventSignedPlayers = it.eventSignedPlayers
+            eventCommentMessage = it.eventComments
         })
     }
 
@@ -152,6 +165,12 @@ class AddEventDialogFragment : BaseDialogFragment() {
             return
         }
 
+        val createEventId = if (eventId > -1) {
+            eventId
+        } else {
+            null
+        }
+
         val eventPlayersNumber: Int? = if (event_players_edit_text.text.toString() == "") {
             1
         } else {
@@ -159,7 +178,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
         }
         val event: Event
 
-        event = Event(eventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
+        event = Event(createEventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
                 selectedLocationName, selectedLocationLatitude,
                 selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
                 eventPlayers = eventPlayersNumber, eventDistance = null,
@@ -177,7 +196,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
 
                     override fun onResponse(call: Call<Event>, response: Response<Event>) {
                         (activity as NavigationActivity).backOnStack()
-                        eventViewModel.loadDetailsEvent(eventId)
+                        eventDetailsViewModel.loadDetailsEvent(eventId)
                         eventViewModel.loadEvents()
                         FirebaseMessaging
                                 .getInstance()
@@ -253,5 +272,19 @@ class AddEventDialogFragment : BaseDialogFragment() {
         timePickerDialog.show()
     }
 
+    companion object {
+        val ARG_EVENT_ID = "EVENT_ID"
 
+        fun newInstance(
+                eventId: Long? = null
+        ): AddEventDialogFragment {
+            return AddEventDialogFragment().apply {
+                arguments = Bundle().apply {
+                    eventId?.let {
+                        putLong(ARG_EVENT_ID, it)
+                    }
+                }
+            }
+        }
+    }
 }

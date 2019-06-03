@@ -41,4 +41,6 @@ interface ActivityComponent {
     fun inject(archivedEventsDialogFragment: ArchivedEventsDialogFragment)
 
     fun inject(searchFragment: SearchFragment)
+
+    fun inject(eventSignedUsersListDialogFragment: EventSignedUsersListDialogFragment)
 }

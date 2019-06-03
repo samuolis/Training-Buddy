@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.User
@@ -82,7 +83,10 @@ class ProfileFragment : BaseFragment() {
                     context!!
             ) { position ->
                 (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(userEvents[position].eventId!!)
+                        .showEventDetailsDialogFragment(
+                                userEvents[position].eventId!!,
+                                EventDetailScreen.PROFILE
+                        )
             }
         })
 

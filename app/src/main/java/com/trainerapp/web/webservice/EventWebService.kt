@@ -41,7 +41,7 @@ interface EventWebService {
                         @Header("authorization-code") authorizationCode: String?): Call<Void>
 
     @GET("/event/one/{eventId}")
-    fun getEventById(@Path("eventId") eventId: Long?): Call<Event>
+    fun getEventById(@Path("eventId") eventId: Long?): Single<Event>
 
     @POST("/event/comment")
     fun createCommentMessage(@Body commentMessage: CommentMessage,

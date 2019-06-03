@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
+import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import javax.inject.Inject
@@ -24,6 +26,7 @@ class HomeFragment : BaseFragment() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     lateinit var eventViewModel: EventViewModel
+    lateinit var eventDetailsViewModel: EventDetailsViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -34,8 +37,8 @@ class HomeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         eventViewModel = getViewModel(viewModelFactory)
+        eventDetailsViewModel = getViewModel(viewModelFactory)
         fab.setOnClickListener {
-            eventViewModel.loadDetailsEvent()
             (activity as NavigationActivity).showEventCreateDialogFragment()
         }
         home_recyclerview.layoutManager = LinearLayoutManager(context)
@@ -64,7 +67,10 @@ class HomeFragment : BaseFragment() {
                     context!!
             ) { position ->
                 (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(it[position].eventId!!)
+                        .showEventDetailsDialogFragment(
+                                it[position].eventId!!,
+                                EventDetailScreen.HOME
+                        )
             }
         })
         eventViewModel.archivedEvents.observe(this, Observer {

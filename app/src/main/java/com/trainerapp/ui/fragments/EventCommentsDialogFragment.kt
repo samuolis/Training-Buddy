@@ -27,7 +27,7 @@ import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
-import com.trainerapp.ui.viewmodel.EventViewModel
+import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_event_comments_dialog.*
 import retrofit2.Call
@@ -38,7 +38,7 @@ import javax.inject.Inject
 
 class EventCommentsDialogFragment : BaseDialogFragment() {
 
-    lateinit var eventViewModel: EventViewModel
+    lateinit var eventDetailsViewModel: EventDetailsViewModel
     @Inject
     lateinit var eventWebService: EventWebService
     @Inject
@@ -65,8 +65,8 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel = getViewModel(viewModelFactory)
-        eventViewModel.loadEventComments(eventId)
+        eventDetailsViewModel = getViewModel(viewModelFactory)
+        eventDetailsViewModel.loadDetailsEvent(eventId)
         val commentsLinearLayout = LinearLayoutManager(context)
         commentsLinearLayout.orientation = RecyclerView.VERTICAL
         commentsLinearLayout.reverseLayout = true
@@ -87,20 +87,21 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
 
         })
 
-        eventViewModel.eventComments.observe(this, androidx.lifecycle.Observer {
-            event_comments_recycler_view.adapter = CommentsDetailsRecyclerViewAdapter(it, context!!)
+        eventDetailsViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer { event ->
+            event_comments_recycler_view.adapter = CommentsDetailsRecyclerViewAdapter(
+                    commentMessages = event.eventComments,
+                    context = context!!
+            )
         })
 
-        eventViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
-            confirm_message_submit_text_view.setOnClickListener { view ->
-                if (comment_edit_text.text.toString().length <= 100) {
-                    comment_edit_text.isEnabled = false
-                    sendCommentMessage(it.eventId)
-                } else {
-                    Snackbar.make(event_comments_layout, "Text is too long", Snackbar.LENGTH_SHORT).show()
-                }
+        confirm_message_submit_text_view.setOnClickListener { view ->
+            if (comment_edit_text.text.toString().length <= 100) {
+                comment_edit_text.isEnabled = false
+                sendCommentMessage(eventId)
+            } else {
+                Snackbar.make(event_comments_layout, "Text is too long", Snackbar.LENGTH_SHORT).show()
             }
-        })
+        }
     }
 
     override fun onInject(activityComponent: ActivityComponent) {
@@ -127,7 +128,7 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
                         hideProgressBarComment()
                         comment_edit_text.text = SpannableStringBuilder("")
                         comment_edit_text.isEnabled = true
-                        eventViewModel.loadEventComments(eventId)
+                        eventDetailsViewModel.loadDetailsEvent(eventId)
                     }
 
                 })
@@ -181,15 +182,13 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
                 NavigationActivity.NOTIFICATION_EVENT_COMMENT_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
                     if (id != "" && id.toLong() == eventId) {
-                        eventViewModel.loadEventComments(id.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                        eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
                 }
                 NavigationActivity.NOTIFICATION_EVENT_REFRESH_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
                     if (id != "" && id.toLong() == eventId) {
-                        eventViewModel.loadEventComments(id.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                        eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
                 }
             }

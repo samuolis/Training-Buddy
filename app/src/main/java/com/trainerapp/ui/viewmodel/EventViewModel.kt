@@ -10,7 +10,6 @@ import androidx.lifecycle.MutableLiveData
 import com.trainerapp.R
 import com.trainerapp.base.BaseViewModel
 import com.trainerapp.extension.readOnly
-import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
 import com.trainerapp.service.LocationService
@@ -49,15 +48,6 @@ class EventViewModel @Inject constructor(
     private var _eventsByLocation = MutableLiveData<List<Event>>()
     val eventsByLocation = _eventsByLocation.readOnly()
 
-    private var _eventComments = MutableLiveData<List<CommentMessage>>()
-    val eventComments = _eventComments.readOnly()
-
-    private var _detailsOneEvent = MutableLiveData<Event>()
-    val detailsOneEvent = _detailsOneEvent.readOnly()
-
-    private var _loadingStatus = MutableLiveData<Int>()
-    val loadingStatus = _loadingStatus.readOnly()
-
     private var _userEvents = MutableLiveData<List<Event>>()
     val userEvents = _userEvents.readOnly()
 
@@ -73,33 +63,10 @@ class EventViewModel @Inject constructor(
             .getSharedPreferences(myApplication
             .getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
     private val schedulerUI = AndroidSchedulers.mainThread()
+    private val schedulerIO = Schedulers.io()
 
     init {
         userId = userSharedPref.getString(myApplication.getString(R.string.user_id_key), "0")
-    }
-
-    fun loadDetailsEvent(eventId: Long? = null) {
-        if (eventId == null) {
-            _detailsOneEvent.value = null
-            return
-        }
-        eventWebService.getEventById(eventId).enqueue(object : Callback<Event> {
-            override fun onFailure(call: Call<Event>, t: Throwable) {
-                Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
-            }
-
-            override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                if (response.isSuccessful) {
-                    val value = response.body()
-                    loadSignedUserList(value?.eventSignedPlayers)
-                    loadEventComments(eventId)
-                    _detailsOneEvent.value = value
-                } else {
-                    Toast.makeText(myApplication, "event id was wrong", Toast.LENGTH_LONG).show()
-                }
-            }
-
-        })
     }
 
     fun loadEventsByLocation() {
@@ -107,7 +74,7 @@ class EventViewModel @Inject constructor(
         userPreferedDistance = userSharedPref.getString(myApplication.getString(R.string.user_prefered_distance_key), "30")
 
         locationService.getDeviceLocation()
-                .subscribeOn(Schedulers.io())
+                .subscribeOn(schedulerIO)
                 .observeOn(schedulerUI)
                 .flatMap { location ->
                     val geocoder = Geocoder(myApplication, Locale.getDefault())
@@ -138,7 +105,7 @@ class EventViewModel @Inject constructor(
     fun loadEvents() {
         _refreshStatus.value = 1
         eventWebService.getEventsByUserId(userId = userId)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(schedulerIO)
                 .observeOn(schedulerUI)
                 .zipWith(locationService.getDeviceLocation(),
                         BiFunction { eventsList: List<Event>, location: Location ->
@@ -239,85 +206,9 @@ class EventViewModel @Inject constructor(
                 ).bind()
     }
 
-    fun loadSignedUserList(userIdsList: List<String>?) {
-        userWebService.getUserByIds(userIdsList).enqueue(object : Callback<List<User>> {
-
-            override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-            }
-
-            override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                if (response.isSuccessful) {
-                    _signedUsers.value = response.body()
-
-                } else {
-                    Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-                }
-            }
-
-        })
-    }
-
     fun loadProfilePicture(pictureIndex: Int) {
         val userCache = _user.value
         userCache?.profilePictureIndex = pictureIndex
         _user.value = userCache
-    }
-
-    fun loadEventComments(eventId: Long? = null) {
-        eventWebService.getEventById(eventId).enqueue(object : Callback<Event> {
-            override fun onFailure(call: Call<Event>, t: Throwable) {
-                Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
-                changeLoadStatus(0)
-            }
-
-            override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                if (response.isSuccessful) {
-                    querryComments(response.body())
-
-
-                } else {
-                    Toast.makeText(myApplication, "failed to get event", Toast.LENGTH_LONG).show()
-                    changeLoadStatus(0)
-                }
-            }
-
-        })
-    }
-
-    fun querryComments(event: Event?) {
-        if (event?.eventComments != null) {
-            eventWebService.getEventCommentsByIds(event.eventComments).enqueue(object : Callback<List<CommentMessage>> {
-                override fun onFailure(call: Call<List<CommentMessage>>, t: Throwable) {
-                    Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-                    changeLoadStatus(0)
-                }
-
-                override fun onResponse(call: Call<List<CommentMessage>>, response: Response<List<CommentMessage>>) {
-                    if (response.isSuccessful) {
-                        _eventComments.value = response.body()
-                        changeLoadStatus(0)
-
-                    } else {
-                        Toast.makeText(myApplication, "failed to get data", Toast.LENGTH_LONG).show()
-                        changeLoadStatus(0)
-                    }
-                }
-
-            })
-        } else {
-            _eventComments.value = mutableListOf<CommentMessage>()
-            changeLoadStatus(0)
-        }
-    }
-
-    fun cleanComments() {
-        _eventComments.value = mutableListOf()
-    }
-
-    // 0 - stop loading
-    // 1 - start loading
-    fun changeLoadStatus(status: Int) {
-        _loadingStatus.value = status
     }
 }

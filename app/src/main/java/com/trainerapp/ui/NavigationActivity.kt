@@ -24,6 +24,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -173,11 +174,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     override fun onSupportNavigateUp(): Boolean {
         //This method is called when the up button is pressed. Just the pop back stack.
         supportFragmentManager.popBackStack()
-        if (supportFragmentManager.backStackEntryCount < 2) {
-            if (eventViewModel.eventComments != null) {
-                eventViewModel.cleanComments()
-            }
-        }
         return true
     }
 
@@ -206,9 +202,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
         if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()
-            if (supportFragmentManager.backStackEntryCount < 2) {
-                cleanCashedData()
-            }
         } else {
             if (doubleBackToExitPressedOnce) {
                 moveTaskToBack(true)
@@ -221,12 +214,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
             Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
 
             Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
-        }
-    }
-
-    fun cleanCashedData() {
-        if (eventViewModel.eventComments != null) {
-            eventViewModel.cleanComments()
         }
     }
 
@@ -261,20 +248,27 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     }
 
     fun showEventCreateDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = AddEventDialogFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
+        val newFragment = AddEventDialogFragment.newInstance()
+        val transaction = supportFragmentManager.beginTransaction()
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
         transaction
                 .add(android.R.id.content, newFragment)
                 .addToBackStack(null)
                 .commit()
         supportFragmentManager.executePendingTransactions()
         supportActionBar!!.title = getString(R.string.create_new_event_title)
+    }
+
+    fun showEventEditDialogFragment(eventId: Long) {
+        val newFragment = AddEventDialogFragment.newInstance(eventId)
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        transaction
+                .add(android.R.id.content, newFragment)
+                .addToBackStack(null)
+                .commit()
+        supportFragmentManager.executePendingTransactions()
+        supportActionBar!!.title = getString(R.string.edit_event_button_label)
     }
 
     fun showEventSignedUsersListDialogFragment() {
@@ -343,9 +337,12 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 .commit()
     }
 
-    fun showEventDetailsDialogFragment(eventId: Long) {
+    fun showEventDetailsDialogFragment(eventId: Long, eventDetailScreen: EventDetailScreen) {
         val fragmentManager = supportFragmentManager
-        val newFragment = EventDetailsDialogFragment.newInstance(eventId)
+        val newFragment = EventDetailsDialogFragment.newInstance(
+                eventId,
+                eventDetailScreen
+        )
         // The device is smaller, so show the fragment fullscreen
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation

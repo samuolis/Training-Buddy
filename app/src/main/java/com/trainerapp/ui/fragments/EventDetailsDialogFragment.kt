@@ -21,6 +21,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
@@ -28,6 +29,7 @@ import com.trainerapp.models.Event
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.EventCommentsRecyclerViewAdapter
 import com.trainerapp.ui.adapters.EventDetailsRecyclerViewAdapter
+import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_event_details_dialog.*
@@ -43,6 +45,7 @@ import javax.inject.Inject
 class EventDetailsDialogFragment : BaseDialogFragment() {
 
     lateinit var eventViewModel: EventViewModel
+    lateinit var eventDetailsViewModel: EventDetailsViewModel
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
     @Inject
@@ -53,6 +56,10 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
     private val eventId: Long by lazy {
         arguments!!.getLong(ARG_EVENT_ID)
+    }
+
+    private val eventScreen: String by lazy {
+        arguments!!.getString(ARG_EVENT_SCREEN)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -84,7 +91,9 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         eventViewModel = getViewModel(viewModelFactory)
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel.loadDetailsEvent(eventId)
+        eventDetailsViewModel = getViewModel(viewModelFactory)
+        showProgressBar()
+        eventDetailsViewModel.loadDetailsEvent(eventId)
         event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
 
@@ -99,70 +108,70 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
         }
 
-        eventViewModel.changeLoadStatus(1)
+        setupUI()
 
-        eventViewModel.loadingStatus.nonNullObserve(this) {
-            when (it) {
-                0 -> hideProgressBar()
-                1 -> showProgressBar()
-            }
-        }
+    }
 
-        eventViewModel.signedUsers.nonNullObserve(this) {
-            event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(it, context!!,
+    private fun setupUI() {
+        eventDetailsViewModel.detailsOneEvent.nonNullObserve(this) { event ->
+            hideProgressBar()
+
+            event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(event.eventSignedPlayers, context!!,
                     object : EventDetailsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
                             (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
                         }
 
                     })
-        }
 
-        eventViewModel.eventComments.nonNullObserve(this) {
-            var commentsList = mutableListOf<CommentMessage>()
-            if (it.size > 2) {
-                commentsList.add(CommentMessage("View " + (it.size - 2) + " more comments...", null, null,
-                        null, ""))
-                commentsList.add(it[it.size - 2])
-                commentsList.add(it[it.size - 1])
-            } else {
-                commentsList = it.toMutableList()
-                commentsList.add(CommentMessage("Write Message", null, null,
-                        null, ""))
-            }
-            event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
-                    object : EventCommentsRecyclerViewAdapter.MyClickListener {
-                        override fun onItemClicked(position: Int) {
-                            (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
-                        }
+            setupCommentsAdapter(event.eventComments)
 
-                    })
-        }
-
-        setupUI()
-
-    }
-
-    private fun setupUI(){
-        eventViewModel.detailsOneEvent.nonNullObserve(this) {
-            if (userId == it.userId) {
-                setupHomeUI(it)
-            } else if (it.eventSignedPlayers != null && it.eventSignedPlayers.contains(userId)) {
-                setupProfileUI(it)
-            } else {
-                setupDashboardUI(it)
+            when (eventScreen) {
+                EventDetailScreen.DASHBOARD.name -> setupDashboardUI(event)
+                EventDetailScreen.PROFILE.name -> setupProfileUI(event)
+                EventDetailScreen.HOME.name -> setupHomeUI(event)
             }
         }
     }
 
+    private fun setupCommentsAdapter(commentMessages: List<CommentMessage>?) {
+        var commentsList = mutableListOf<CommentMessage>()
 
+        if (commentMessages != null && commentMessages.size > 2) {
+            commentsList.add(CommentMessage(
+                    messageText = "View " + (commentMessages.size - 2) + " more comments...",
+                    userId = null,
+                    eventId = null,
+                    messageTime = null,
+                    messageUserName = ""
+            ))
+            commentsList.add(commentMessages[commentMessages.size - 2])
+            commentsList.add(commentMessages[commentMessages.size - 1])
+        } else {
+            commentsList = commentMessages?.toMutableList() ?: mutableListOf()
+            commentsList.add(CommentMessage(
+                    messageText = "Write Message",
+                    userId = null,
+                    eventId = null,
+                    messageTime = null,
+                    messageUserName = ""
+            ))
+        }
+        event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
+                object : EventCommentsRecyclerViewAdapter.MyClickListener {
+                    override fun onItemClicked(position: Int) {
+                        (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
+                    }
+
+                })
+    }
 
     private fun setupHomeUI(event: Event) {
         setHasOptionsMenu(true)
         updateUI(event)
         event_details_submit_button.text = getString(R.string.edit_event_button_label)
         event_details_submit_button.setOnClickListener { view ->
-            (activity as NavigationActivity).showEventCreateDialogFragment()
+            (activity as NavigationActivity).showEventEditDialogFragment(eventId)
         }
 
     }
@@ -185,7 +194,6 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
-                            (activity as NavigationActivity).cleanCashedData()
                             eventViewModel.loadEventsByLocation()
                             FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
                         }
@@ -214,7 +222,6 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             (activity as NavigationActivity).backOnStack()
-                            (activity as NavigationActivity).cleanCashedData()
                             eventViewModel.loadUserData()
                             FirebaseMessaging.getInstance().unsubscribeFromTopic(event.eventId.toString())
                         }
@@ -336,16 +343,13 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
                 NavigationActivity.NOTIFICATION_EVENT_COMMENT_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
                     if (id != "" && id.toLong() == eventId) {
-                        eventViewModel.loadEventComments(id.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                        eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
-                    eventViewModel.loadUserEventsByIds()
                 }
                 NavigationActivity.NOTIFICATION_EVENT_REFRESH_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
                     if (id != "" && id.toLong() == eventId) {
-                        eventViewModel.loadEventComments(id.toLong())
-                        eventViewModel.loadDetailsEvent(eventId = id.toLong())
+                        eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
                 }
             }
@@ -355,15 +359,16 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     companion object {
 
         val ARG_EVENT_ID = "EVENT_ID"
+        val ARG_EVENT_SCREEN = "EVENT_SCREEN"
 
         fun newInstance(
-                eventId: Long? = null
+                eventId: Long,
+                eventScreen: EventDetailScreen
         ): EventDetailsDialogFragment {
             return EventDetailsDialogFragment().apply {
                 arguments = Bundle().apply {
-                    eventId?.let {
-                        putLong(ARG_EVENT_ID, it)
-                    }
+                    putLong(ARG_EVENT_ID, eventId)
+                    putString(ARG_EVENT_SCREEN, eventScreen.name)
                 }
             }
         }

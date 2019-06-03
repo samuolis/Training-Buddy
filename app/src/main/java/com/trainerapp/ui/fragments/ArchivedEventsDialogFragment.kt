@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
+import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
@@ -47,7 +48,7 @@ class ArchivedEventsDialogFragment : BaseFragment() {
                     context!!
             ) { position ->
                 (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(it[position].eventId!!)
+                        .showEventDetailsDialogFragment(it[position].eventId!!, EventDetailScreen.HOME)
             }
         })
 
