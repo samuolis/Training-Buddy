@@ -51,9 +51,6 @@ class EventViewModel @Inject constructor(
     private var _userEvents = MutableLiveData<List<Event>>()
     val userEvents = _userEvents.readOnly()
 
-    private var _signedUsers = MutableLiveData<List<User>>()
-    val signedUsers = _signedUsers.readOnly()
-
     private var _user = MutableLiveData<User>()
     val user = _user.readOnly()
 

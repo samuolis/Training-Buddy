@@ -108,6 +108,13 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
         }
 
+        eventDetailsViewModel.error.nonNullObserve(this) {
+            Snackbar.make(view, "Error " + it.message, Snackbar.LENGTH_LONG)
+                    .show()
+            hideProgressBar()
+            eventDetailsViewModel
+        }
+
         setupUI()
 
     }
@@ -182,25 +189,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         event_details_submit_button.setOnClickListener { view ->
             event_details_submit_button.isEnabled = false
             showProgressBar()
-            currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val token = task.getResult()?.getToken()
-                    eventWebService.signEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
-                        override fun onFailure(call: Call<Void>, t: Throwable) {
-                            Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                    .show()
-                            hideProgressBar()
-                        }
-
-                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                            (activity as NavigationActivity).backOnStack()
-                            eventViewModel.loadEventsByLocation()
-                            FirebaseMessaging.getInstance().subscribeToTopic(event.eventId.toString())
-                        }
-
-                    })
-                }
-            }
+            eventDetailsViewModel.signEvent(userId, event.eventId)
         }
 
     }
@@ -213,14 +202,15 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
                 if (task.isSuccessful()) {
                     val token = task.getResult()?.getToken()
-                    eventWebService.unsignEvent(userId, event.eventId, token).enqueue(object : Callback<Void> {
-                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                    eventWebService.unsignEvent(userId, event.eventId, token).enqueue(object : Callback<Event> {
+
+                        override fun onFailure(call: Call<Event>, t: Throwable) {
                             Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
                                     .show()
                             hideProgressBar()
                         }
 
-                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        override fun onResponse(call: Call<Event>, response: Response<Event>) {
                             (activity as NavigationActivity).backOnStack()
                             eventViewModel.loadUserData()
                             FirebaseMessaging.getInstance().unsubscribeFromTopic(event.eventId.toString())

@@ -25,12 +25,12 @@ interface EventWebService {
     @POST("/event/{userId}/{eventId}")
     fun signEvent(@Path("userId") userId: String?,
                   @Path("eventId") eventId: Long?,
-                  @Header("authorization-code") authorizationCode: String?): Call<Void>
+                  @Header("authorization-code") authorizationCode: String?): Single<Event>
 
     @POST("/event/delete/{userId}/{eventId}")
     fun unsignEvent(@Path("userId") userId: String?,
                     @Path("eventId") eventId: Long?,
-                    @Header("authorization-code") authorizationCode: String?): Call<Void>
+                    @Header("authorization-code") authorizationCode: String?): Call<Event>
 
     @Deprecated("Need to pass userId instead of eventsIds")
     @POST("/events")
@@ -46,8 +46,5 @@ interface EventWebService {
     @POST("/event/comment")
     fun createCommentMessage(@Body commentMessage: CommentMessage,
                              @Header("authorization-code") authorizationCode: String?): Call<CommentMessage>
-
-    @POST("/event/comments")
-    fun getEventCommentsByIds(@Body eventsIds: List<Long>?): Call<List<CommentMessage>>
 
 }

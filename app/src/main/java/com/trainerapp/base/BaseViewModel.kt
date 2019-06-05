@@ -1,7 +1,7 @@
 package com.trainerapp.base
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.hadilq.liveevent.LiveEvent
 import com.trainerapp.extension.readOnly
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -19,7 +19,7 @@ abstract class BaseViewModel : ViewModel(), CoroutineScope {
 
     private val compositeDisposable = CompositeDisposable()
 
-    protected val _error = MutableLiveData<Throwable>()
+    protected val _error = LiveEvent<Throwable>()
     val error = _error.readOnly()
 
     override fun onCleared() {
