@@ -252,18 +252,6 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!--<com.google.android.material.floatingactionbutton.FloatingActionButton-->
-        <!--android:id="@+id/event_details_fab"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="end|bottom"-->
-        <!--android:layout_margin="16dp"-->
-        <!--android:layout_marginEnd="8dp"-->
-        <!--android:layout_marginBottom="8dp"-->
-        <!--android:src="@drawable/ic_edit"-->
-        <!--app:layout_constraintBottom_toTopOf="@+id/event_details_submit_button_layout"-->
-        <!--app:layout_constraintEnd_toEndOf="parent" />-->
-
     <androidx.cardview.widget.CardView
         android:id="@+id/event_details_submit_button_layout"
         android:layout_width="match_parent"

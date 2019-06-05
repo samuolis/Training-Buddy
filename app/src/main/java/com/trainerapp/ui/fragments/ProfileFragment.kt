@@ -1,10 +1,12 @@
 package com.trainerapp.ui.fragments
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +17,7 @@ import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
@@ -42,17 +45,29 @@ class ProfileFragment : BaseFragment() {
         setupInfo()
     }
 
-    private fun setupInfo() {
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
         eventViewModel = getViewModel(viewModelFactory)
+        eventViewModel.loadUserEventsByIds()
+    }
+
+    private fun setupInfo() {
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.refreshStatus.observe(this, Observer {
             profile_swipe_container.isRefreshing = !(it == 0)
         })
+        eventViewModel.error.nonNullObserve(this) {
+            Toast.makeText(
+                    activity,
+                    "Failed to get data " + it.localizedMessage,
+                    Toast.LENGTH_LONG
+            ).show()
+        }
         expired_event_layout.setOnClickListener {
             (activity as NavigationActivity).showArchivedEventsDialogFragment()
         }
         profile_swipe_container.setOnRefreshListener {
-            eventViewModel.loadUserData()
+            eventViewModel.loadUserEventsByIds()
         }
         profile_swipe_container.setColorSchemeResources(R.color.colorAccent)
         eventViewModel.user.observe(this, Observer { user: User ->
@@ -65,9 +80,6 @@ class ProfileFragment : BaseFragment() {
             }
             user_full_name_text_view.text = user.fullName
             profile_linear_layout.visibility = View.VISIBLE
-
-            eventViewModel.loadUserEventsByIds()
-
         })
         user_full_name_text_view.setOnClickListener {
             (activity as NavigationActivity).showAccountEditDialogFragment()

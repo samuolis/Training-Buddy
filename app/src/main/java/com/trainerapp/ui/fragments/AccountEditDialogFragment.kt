@@ -16,15 +16,12 @@ import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.User
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
-import com.trainerapp.web.webservice.UserWebService
 import kotlinx.android.synthetic.main.fragment_account_edit.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.*
 import javax.inject.Inject
 
@@ -38,14 +35,10 @@ class AccountEditDialogFragment : BaseDialogFragment() {
     var profileInt: Int? = null
     var signedEvents: List<Long>? = null
 
-    @Inject
-    lateinit var userWebService: UserWebService
-
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        // Inflate the layout to use as dialog or embedded fragment
         return inflater.inflate(R.layout.fragment_account_edit, container, false)
     }
 
@@ -54,6 +47,9 @@ class AccountEditDialogFragment : BaseDialogFragment() {
         name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(100))
         eventViewModel = getViewModel(viewModelFactory)
         eventViewModel = ViewModelProviders.of(activity!!).get(EventViewModel::class.java)
+        eventViewModel.error.nonNullObserve(this) {
+            Toast.makeText(activity, it.localizedMessage, Toast.LENGTH_LONG).show()
+        }
         eventViewModel.user.observe(this, Observer { user: User ->
             profileInt = user.profilePictureIndex
             if (user.profilePictureIndex == null || user.profilePictureIndex!! >= ProfilePicture.values().size) {
@@ -95,30 +91,9 @@ class AccountEditDialogFragment : BaseDialogFragment() {
         // Store values at the time of the login attempt.
         val fullName = name_edit_text.getText().toString()
 
-        val cancel = false
-        val focusView: View? = null
+        val currentTime = Calendar.getInstance().time
+        val user = User(userId, fullName, currentTime, profileInt, signedEvents)
 
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView!!.requestFocus()
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            val currentTime = Calendar.getInstance().time
-            val user = User(userId, fullName, currentTime, profileInt, signedEvents)
-
-            userWebService.postUser(user).enqueue(object : Callback<User> {
-                override fun onResponse(call: Call<User>, response: Response<User>) {
-                    eventViewModel.loadUserData()
-                    (activity as NavigationActivity).backOnStack()
-                }
-
-                override fun onFailure(call: Call<User>, t: Throwable) {
-                    Toast.makeText(activity, t.localizedMessage, Toast.LENGTH_LONG).show()
-                }
-            })
-
-        }
+        eventViewModel.postUser(user)
     }
 }

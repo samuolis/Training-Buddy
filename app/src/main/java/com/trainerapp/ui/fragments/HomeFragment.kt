@@ -1,6 +1,7 @@
 package com.trainerapp.ui.fragments
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +16,6 @@ import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
-import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
 import javax.inject.Inject
@@ -26,7 +26,6 @@ class HomeFragment : BaseFragment() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
     lateinit var eventViewModel: EventViewModel
-    lateinit var eventDetailsViewModel: EventDetailsViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -34,10 +33,14 @@ class HomeFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        eventViewModel = getViewModel(viewModelFactory)
+        eventViewModel.loadEvents()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel = getViewModel(viewModelFactory)
-        eventDetailsViewModel = getViewModel(viewModelFactory)
         fab.setOnClickListener {
             (activity as NavigationActivity).showEventCreateDialogFragment()
         }

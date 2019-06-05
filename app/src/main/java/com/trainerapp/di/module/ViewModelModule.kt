@@ -6,6 +6,7 @@ import com.trainerapp.di.ViewModelFactory
 import com.trainerapp.di.ViewModelKey
 import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
+import com.trainerapp.ui.viewmodel.LoginViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -25,4 +26,9 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(EventDetailsViewModel::class)
     internal abstract fun eventDetailsViewModel(viewModel: EventDetailsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(LoginViewModel::class)
+    internal abstract fun loginViewModel(viewModel: LoginViewModel): ViewModel
 }

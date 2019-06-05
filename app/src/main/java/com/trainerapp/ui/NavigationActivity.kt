@@ -60,7 +60,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                eventViewModel.loadEvents()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, homeFragment)
@@ -68,7 +67,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
-                eventViewModel.loadEventsByLocation()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, dashboardFragment)
@@ -76,7 +74,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
-                eventViewModel.loadUserData()
                 supportFragmentManager.beginTransaction()
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                         .replace(R.id.navigation_frame, profileFragment)
@@ -123,7 +120,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
             supportFragmentManager.beginTransaction()
                     .replace(R.id.navigation_frame, homeFragment)
                     .commit()
-            eventViewModel.loadEvents()
         }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }

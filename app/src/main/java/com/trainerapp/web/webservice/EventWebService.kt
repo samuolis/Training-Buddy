@@ -30,15 +30,14 @@ interface EventWebService {
     @POST("/event/delete/{userId}/{eventId}")
     fun unsignEvent(@Path("userId") userId: String?,
                     @Path("eventId") eventId: Long?,
-                    @Header("authorization-code") authorizationCode: String?): Call<Event>
+                    @Header("authorization-code") authorizationCode: String?): Single<Event>
 
-    @Deprecated("Need to pass userId instead of eventsIds")
-    @POST("/events")
-    fun getEventByIds(@Body eventsIds: List<Long>?): Single<List<Event>>
+    @POST("/events/signed/{userId}")
+    fun getUserSignedEvents(@Path("userId") userId: String?): Single<List<Event>>
 
     @DELETE("/event/delete/{eventId}")
     fun deleteEventById(@Path("eventId") eventId: Long?,
-                        @Header("authorization-code") authorizationCode: String?): Call<Void>
+                        @Header("authorization-code") authorizationCode: String?): Single<Void>
 
     @GET("/event/one/{eventId}")
     fun getEventById(@Path("eventId") eventId: Long?): Single<Event>

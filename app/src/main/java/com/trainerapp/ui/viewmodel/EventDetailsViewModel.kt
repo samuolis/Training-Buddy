@@ -35,18 +35,22 @@ class EventDetailsViewModel @Inject constructor(
 
         launch {
             try {
+                _loadingStatus.value = true
                 _detailsOneEvent.value = eventWebService.getEventById(eventId)
                         .subscribeOn(schedulerIO)
                         .await()
+                _loadingStatus.value = false
             } catch (t: Throwable) {
-                Log.e(TAG, "failed to get event")
+                Log.e(TAG, "Failed to get event")
                 _error.postValue(t)
+                _loadingStatus.value = false
             }
         }
     }
 
     fun signEvent(userId: String, eventId: Long?) {
         if (currentUser == null) return
+        _loadingStatus.value = true
         currentUser.getIdToken(true).toSingle()
                 .subscribeOn(schedulerIO)
                 .flatMap { task ->
@@ -60,8 +64,57 @@ class EventDetailsViewModel @Inject constructor(
                             FirebaseMessaging.getInstance().subscribeToTopic(eventId.toString())
                         },
                         onError = {
-                            Log.e(TAG, "failed to sign event")
+                            Log.e(TAG, "Failed to sign event")
                             _error.postValue(it)
+                            _loadingStatus.value = false
+                        }
+                )
+                .bind()
+    }
+
+    fun unsignEvent(userId: String, eventId: Long?) {
+        if (currentUser == null) return
+        _loadingStatus.value = true
+        currentUser.getIdToken(true).toSingle()
+                .subscribeOn(schedulerIO)
+                .flatMap { task ->
+                    val token = task.token
+                    eventWebService.unsignEvent(userId, eventId, token)
+                            .subscribeOn(schedulerIO)
+                }
+                .subscribeBy(
+                        onSuccess = {
+                            (activity as NavigationActivity).backOnStack()
+                            FirebaseMessaging.getInstance().unsubscribeFromTopic(eventId.toString())
+                        },
+                        onError = {
+                            Log.e(TAG, "Failed to unsign event")
+                            _error.postValue(it)
+                            _loadingStatus.value = false
+                        }
+                )
+                .bind()
+    }
+
+    fun deleteEvent(eventId: Long?) {
+        if (currentUser == null) return
+        _loadingStatus.value = true
+        currentUser.getIdToken(true).toSingle()
+                .subscribeOn(schedulerIO)
+                .flatMap { task ->
+                    val token = task.token
+                    eventWebService.deleteEventById(eventId, token)
+                            .subscribeOn(schedulerIO)
+                }
+                .subscribeBy(
+                        onSuccess = {
+                            (activity as NavigationActivity).getBackOnStackToMainMenu()
+                            FirebaseMessaging.getInstance().unsubscribeFromTopic(eventId.toString())
+                        },
+                        onError = {
+                            Log.e(TAG, "Failed to delete event")
+                            _error.postValue(it)
+                            _loadingStatus.value = false
                         }
                 )
                 .bind()

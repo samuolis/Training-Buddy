@@ -22,6 +22,9 @@ abstract class BaseViewModel : ViewModel(), CoroutineScope {
     protected val _error = LiveEvent<Throwable>()
     val error = _error.readOnly()
 
+    protected val _loadingStatus = LiveEvent<Boolean>()
+    val loadingStatus = _loadingStatus.readOnly()
+
     override fun onCleared() {
         compositeDisposable.clear()
         viewModelJob.cancel()

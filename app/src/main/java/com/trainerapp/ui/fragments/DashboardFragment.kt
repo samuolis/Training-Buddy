@@ -1,6 +1,7 @@
 package com.trainerapp.ui.fragments
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,9 +35,14 @@ class DashboardFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_dashboard, container, false)
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        eventViewModel = getViewModel(viewModelFactory)
+        eventViewModel.loadEventsByLocation()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel = getViewModel(viewModelFactory)
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
         eventViewModel.eventsByLocation.observe(this, Observer {
             if (it != null && it.isNotEmpty()) {
@@ -55,7 +61,7 @@ class DashboardFragment : BaseFragment() {
         eventViewModel.refreshStatus.observe(this, Observer {
             dashboard_swipe_container.isRefreshing = !(it == 0)
         })
-        eventViewModel.errorData.nonNullObserve(this) {
+        eventViewModel.error.nonNullObserve(this) {
             Toast.makeText(context,
                     "Failed to get data " + it.localizedMessage,
                     Toast.LENGTH_LONG

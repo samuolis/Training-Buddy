@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -17,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
@@ -33,9 +31,6 @@ import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_event_details_dialog.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -92,8 +87,14 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         eventViewModel = getViewModel(viewModelFactory)
         super.onViewCreated(view, savedInstanceState)
         eventDetailsViewModel = getViewModel(viewModelFactory)
-        showProgressBar()
         eventDetailsViewModel.loadDetailsEvent(eventId)
+        eventDetailsViewModel.loadingStatus.nonNullObserve(this) { loading ->
+            if (loading) {
+                showProgressBar()
+            } else {
+                hideProgressBar()
+            }
+        }
         event_details_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
 
@@ -111,7 +112,6 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         eventDetailsViewModel.error.nonNullObserve(this) {
             Snackbar.make(view, "Error " + it.message, Snackbar.LENGTH_LONG)
                     .show()
-            hideProgressBar()
             eventDetailsViewModel
         }
 
@@ -121,7 +121,6 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
     private fun setupUI() {
         eventDetailsViewModel.detailsOneEvent.nonNullObserve(this) { event ->
-            hideProgressBar()
 
             event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(event.eventSignedPlayers, context!!,
                     object : EventDetailsRecyclerViewAdapter.MyClickListener {
@@ -199,26 +198,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         event_details_submit_button.setOnClickListener { view ->
             event_details_submit_button.isEnabled = false
             showProgressBar()
-            currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-                if (task.isSuccessful()) {
-                    val token = task.getResult()?.getToken()
-                    eventWebService.unsignEvent(userId, event.eventId, token).enqueue(object : Callback<Event> {
-
-                        override fun onFailure(call: Call<Event>, t: Throwable) {
-                            Snackbar.make(view, "Error " + t.message, Snackbar.LENGTH_LONG)
-                                    .show()
-                            hideProgressBar()
-                        }
-
-                        override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                            (activity as NavigationActivity).backOnStack()
-                            eventViewModel.loadUserData()
-                            FirebaseMessaging.getInstance().unsubscribeFromTopic(event.eventId.toString())
-                        }
-
-                    })
-                }
-            }
+            eventDetailsViewModel.unsignEvent(userId, event.eventId)
         }
     }
 
@@ -247,11 +227,10 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         } else{
             event_details_distance.text = DecimalFormat("##.##").format(event.eventDistance)
         }
-        var spotsLeft: Int? = 0
-        if (event.eventSignedPlayers != null) {
-            spotsLeft = event.eventPlayers!! - event.eventSignedPlayers.size
+        val spotsLeft: Int = if (event.eventSignedPlayers != null) {
+            event.eventPlayers!! - event.eventSignedPlayers.size
         } else{
-            spotsLeft = event.eventPlayers
+            event.eventPlayers ?: 0
         }
         event_details_players_spot_left.text = SpannableStringBuilder(spotsLeft.toString())
         event_details_location.text = SpannableStringBuilder(event.eventLocationName)
@@ -271,32 +250,13 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-//        inflater?.inflate(R.menu.main, menu)
         menu?.add("Remove")
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean = when(item?.itemId) {
         0 -> {
-
-            currentUser?.getIdToken(true)?.addOnCompleteListener{
-                if (it.isSuccessful()) {
-                    val token = it.getResult()?.getToken();
-                    eventWebService.deleteEventById(eventId, token).enqueue(object : Callback<Void>{
-                        override fun onFailure(call: Call<Void>, t: Throwable) {
-                            Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
-                                    .show()
-                        }
-
-                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                            (activity as NavigationActivity).getBackOnStackToMainMenu()
-                            eventViewModel.loadEvents()
-                            FirebaseMessaging.getInstance().unsubscribeFromTopic(eventId.toString())
-                        }
-
-                    })
-                }
-            }
+            eventDetailsViewModel.deleteEvent(eventId)
             true
         }
         else -> {

@@ -1,8 +1,6 @@
 package com.trainerapp.ui.fragments
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,46 +8,33 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
-import com.trainerapp.models.User
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.ui.LoginActivity
-import com.trainerapp.ui.viewmodel.EventViewModel
-import com.trainerapp.web.webservice.UserWebService
+import com.trainerapp.ui.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.fragment_login.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.util.*
 import javax.inject.Inject
 
 
 class LoginFragment : BaseFragment() {
 
-    @Inject
-    lateinit var userWebService: UserWebService
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
-    lateinit var userSharedPref: SharedPreferences
-    lateinit var editor: SharedPreferences.Editor
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    lateinit var eventViewModel: EventViewModel
+    lateinit var loginViewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,15 +72,15 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel = getViewModel(viewModelFactory)
-        userSharedPref = activity!!.getSharedPreferences(context
-                ?.getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-        editor = userSharedPref.edit()
+        loginViewModel = getViewModel(viewModelFactory)
         login_email!!.setOnClickListener {
             showProgressBar()
             signIn()
         }
 
+        loginViewModel.error.nonNullObserve(this) {
+            hideProgressBar()
+        }
         login_email.setSize(SignInButton.SIZE_WIDE)
     }
 
@@ -107,7 +92,7 @@ class LoginFragment : BaseFragment() {
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account!!)
+                loginViewModel.firebaseAuthWithGoogle(account!!)
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
@@ -120,76 +105,6 @@ class LoginFragment : BaseFragment() {
         }
 
 
-    }
-
-    private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.id!!)
-
-        val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
-
-        auth.signInWithCredential(credential)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-
-                        val user = auth.currentUser
-                        Log.d(TAG, "signInWithCredential:success with user : " + user!!.email)
-                        val sharedPref = activity!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-                        val editor = sharedPref.edit()
-                        editor.putString(getString(R.string.user_id_key), user.uid)
-                        editor.commit()
-                        getUser(user)
-
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        hideProgressBar()
-                        Snackbar.make(login_layout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show()
-                    }
-
-                }
-    }
-
-    private fun getUser(gotUser: FirebaseUser) {
-        FirebaseInstanceId.getInstance().instanceId
-                .addOnCompleteListener { task ->
-                    userWebService.getExistantUser(gotUser.uid)
-                            .enqueue(object : Callback<User> {
-                                override fun onResponse(call: Call<User>, response: Response<User>) {
-                                    if (response.isSuccessful) {
-                                        if (!task.isSuccessful) {
-                                            hideProgressBar()
-                                            Log.w("LoginFragment", "getInstanceId failed",
-                                                    task.exception)
-                                        } else {
-                                            subscribeToAllUserEvents(response.body()!!)
-                                            onSuccesfullLogin()
-                                        }
-                                    } else {
-                                        newUserCreation(gotUser)
-                                    }
-                                }
-
-                                override fun onFailure(call: Call<User>, t: Throwable) {
-                                    newUserCreation(gotUser)
-                                }
-                            })
-                }
-    }
-
-    private fun newUserCreation(user: FirebaseUser) {
-        val newUser = User(user.uid, user.displayName, Calendar.getInstance().time,
-                null, null)
-        userWebService.postUser(newUser).enqueue(object : Callback<User> {
-            override fun onResponse(call: Call<User>, response: Response<User>) {
-                onSuccesfullLogin()
-            }
-
-            override fun onFailure(call: Call<User>, t: Throwable) {
-                hideProgressBar()
-                Snackbar.make(login_layout, "Try again.", Snackbar.LENGTH_SHORT).show()
-            }
-        })
     }
 
 
@@ -215,15 +130,6 @@ class LoginFragment : BaseFragment() {
     fun onSuccesfullLogin() {
         (activity as LoginActivity).GoToNavigationActivity()
         FirebaseMessaging.getInstance().subscribeToTopic("all")
-    }
-
-    fun subscribeToAllUserEvents(user: User) {
-        val signedEvents = user.signedEventsList
-        if (signedEvents != null) {
-            signedEvents.forEach {
-                FirebaseMessaging.getInstance().subscribeToTopic(it.toString())
-            }
-        }
     }
 
     companion object {
