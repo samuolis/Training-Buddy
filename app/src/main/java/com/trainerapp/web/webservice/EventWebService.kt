@@ -3,14 +3,13 @@ package com.trainerapp.web.webservice
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import io.reactivex.Single
-import retrofit2.Call
 import retrofit2.http.*
 
 interface EventWebService {
 
     @POST("/event")
     fun createEvent(@Body event: Event,
-                    @Header("authorization-code") authorizationCode: String?): Call<Event>
+                    @Header("authorization-code") authorizationCode: String?): Single<Event>
 
     @GET("/event/{userId}")
     fun getEventsByUserId(@Path("userId") userId: String?): Single<List<Event>>
@@ -44,6 +43,6 @@ interface EventWebService {
 
     @POST("/event/comment")
     fun createCommentMessage(@Body commentMessage: CommentMessage,
-                             @Header("authorization-code") authorizationCode: String?): Call<CommentMessage>
+                             @Header("authorization-code") authorizationCode: String?): Single<CommentMessage>
 
 }

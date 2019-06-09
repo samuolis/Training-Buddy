@@ -51,6 +51,13 @@ class ProfileFragment : BaseFragment() {
         eventViewModel.loadUserEventsByIds()
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            eventViewModel.loadUserEventsByIds()
+        }
+    }
+
     private fun setupInfo() {
         profile_events_recycler_view.layoutManager = LinearLayoutManager(context) as RecyclerView.LayoutManager?
         eventViewModel.refreshStatus.observe(this, Observer {
@@ -59,12 +66,9 @@ class ProfileFragment : BaseFragment() {
         eventViewModel.error.nonNullObserve(this) {
             Toast.makeText(
                     activity,
-                    "Failed to get data " + it.localizedMessage,
+                    "Failed to get data: " + it.localizedMessage,
                     Toast.LENGTH_LONG
             ).show()
-        }
-        expired_event_layout.setOnClickListener {
-            (activity as NavigationActivity).showArchivedEventsDialogFragment()
         }
         profile_swipe_container.setOnRefreshListener {
             eventViewModel.loadUserEventsByIds()
@@ -88,7 +92,7 @@ class ProfileFragment : BaseFragment() {
             (activity as NavigationActivity).showAccountEditDialogFragment()
         }
 
-        eventViewModel.userEvents.observe(this, Observer { userEvents ->
+        eventViewModel.userEvents.nonNullObserve(this) { userEvents ->
 
             profile_events_recycler_view.adapter = UserEventsRecyclerViewAdapter(
                     userEvents,
@@ -100,15 +104,7 @@ class ProfileFragment : BaseFragment() {
                                 EventDetailScreen.PROFILE
                         )
             }
-        })
-
-        eventViewModel.archivedEvents.observe(this, Observer {
-            if (it != null) {
-                expired_event_count.text = it.size.toString()
-                expired_event_layout.visibility = View.VISIBLE
-            }
-        })
-
+        }
     }
 
     override fun onInject(activityComponent: ActivityComponent) {

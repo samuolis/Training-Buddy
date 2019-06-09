@@ -24,15 +24,13 @@ import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.CommentsDetailsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_event_comments_dialog.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.util.*
 import javax.inject.Inject
 
@@ -94,6 +92,27 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
             )
         })
 
+        eventDetailsViewModel.onMessageSubmited.nonNullObserve(this) {
+            comment_edit_text.text = SpannableStringBuilder("")
+            comment_edit_text.isEnabled = true
+        }
+
+        eventDetailsViewModel.loadingStatus.nonNullObserve(this) {
+            if (it) {
+                showProgressBarComment()
+            } else {
+                hideProgressBarComment()
+            }
+        }
+
+        eventDetailsViewModel.error.nonNullObserve(this) {
+            Snackbar.make(
+                    event_comments_layout,
+                    "Failed to send message",
+                    Snackbar.LENGTH_SHORT
+            ).show()
+        }
+
         confirm_message_submit_text_view.setOnClickListener { view ->
             if (comment_edit_text.text.toString().length <= 100) {
                 comment_edit_text.isEnabled = false
@@ -114,30 +133,7 @@ class EventCommentsDialogFragment : BaseDialogFragment() {
         val message = comment_edit_text.text.toString()
         val timeNow = Calendar.getInstance().timeInMillis
         val commentMessage = CommentMessage(message, userId, eventId, timeNow, "")
-        val currentUser = auth.currentUser
-        currentUser?.getIdToken(true)?.addOnCompleteListener {
-            if (it.isSuccessful()) {
-                val token = it.getResult()?.getToken();
-                eventWebService.createCommentMessage(commentMessage, token).enqueue(object : Callback<CommentMessage> {
-                    override fun onFailure(call: Call<CommentMessage>, t: Throwable) {
-                        hideProgressBarComment()
-                        Snackbar.make(event_comments_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
-                    }
-
-                    override fun onResponse(call: Call<CommentMessage>, response: Response<CommentMessage>) {
-                        hideProgressBarComment()
-                        comment_edit_text.text = SpannableStringBuilder("")
-                        comment_edit_text.isEnabled = true
-                        eventDetailsViewModel.loadDetailsEvent(eventId)
-                    }
-
-                })
-            } else{
-                hideProgressBarComment()
-                Snackbar.make(event_comments_layout, "Failed to send message", Snackbar.LENGTH_SHORT).show()
-            }
-        }
-
+        eventDetailsViewModel.createCommentMessage(commentMessage)
     }
 
     private fun showProgressBarComment() {

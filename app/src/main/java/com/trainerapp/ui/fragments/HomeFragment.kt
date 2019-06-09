@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +15,7 @@ import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -62,16 +64,15 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun loadUi() {
-        eventViewModel.events.observe(this, Observer {
+        eventViewModel.events.observe(this, Observer { events ->
             home_recyclerview.adapter = null
-            val list = it
             home_recyclerview.adapter = UserEventsRecyclerViewAdapter(
-                    list,
+                    events,
                     context!!
             ) { position ->
                 (activity as NavigationActivity)
                         .showEventDetailsDialogFragment(
-                                it[position].eventId!!,
+                                events[position].eventId!!,
                                 EventDetailScreen.HOME
                         )
             }
@@ -85,5 +86,11 @@ class HomeFragment : BaseFragment() {
         eventViewModel.refreshStatus.observe(this, Observer {
             swipe_container.isRefreshing = !(it == 0)
         })
+        eventViewModel.error.nonNullObserve(this) {
+            Toast.makeText(activity,
+                    "Failed to get data: " + it.localizedMessage,
+                    Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }

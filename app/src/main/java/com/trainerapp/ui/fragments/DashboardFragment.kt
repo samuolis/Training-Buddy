@@ -44,26 +44,24 @@ class DashboardFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dashboard_recyclerview.layoutManager = LinearLayoutManager(context)
-        eventViewModel.eventsByLocation.observe(this, Observer {
-            if (it != null && it.isNotEmpty()) {
-                dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(
-                        it,
-                        context!!
-                ) { position ->
-                    (activity as NavigationActivity)
-                            .showEventDetailsDialogFragment(
-                                    it[position].eventId!!,
-                                    EventDetailScreen.DASHBOARD
-                            )
-                }
+        eventViewModel.eventsByLocation.nonNullObserve(this) { events ->
+            dashboard_recyclerview.adapter = UserEventsRecyclerViewAdapter(
+                    events,
+                    context!!
+            ) { position ->
+                (activity as NavigationActivity)
+                        .showEventDetailsDialogFragment(
+                                events[position].eventId!!,
+                                EventDetailScreen.DASHBOARD
+                        )
             }
-        })
+        }
         eventViewModel.refreshStatus.observe(this, Observer {
             dashboard_swipe_container.isRefreshing = !(it == 0)
         })
         eventViewModel.error.nonNullObserve(this) {
             Toast.makeText(context,
-                    "Failed to get data " + it.localizedMessage,
+                    "Failed to get data: " + it.localizedMessage,
                     Toast.LENGTH_LONG
             ).show()
         }

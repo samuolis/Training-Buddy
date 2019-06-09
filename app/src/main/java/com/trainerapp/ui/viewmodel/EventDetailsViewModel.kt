@@ -8,6 +8,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.base.BaseViewModel
 import com.trainerapp.extension.readOnly
 import com.trainerapp.extension.toSingle
+import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.web.webservice.EventWebService
@@ -26,6 +27,9 @@ class EventDetailsViewModel @Inject constructor(
 
     private var _detailsOneEvent = MutableLiveData<Event>()
     val detailsOneEvent = _detailsOneEvent.readOnly()
+
+    private val _onMessageSubmited = MutableLiveData<Unit>()
+    val onMessageSubmited = _onMessageSubmited.readOnly()
 
     private val schedulerIO = Schedulers.io()
     private val currentUser = FirebaseAuth.getInstance().currentUser
@@ -118,5 +122,55 @@ class EventDetailsViewModel @Inject constructor(
                         }
                 )
                 .bind()
+    }
+
+    fun createCommentMessage(commentMessage: CommentMessage) {
+        if (currentUser == null) return
+        _loadingStatus.value = true
+        currentUser.getIdToken(true).toSingle()
+                .subscribeOn(schedulerIO)
+                .flatMap { task ->
+                    val token = task.token
+                    eventWebService.createCommentMessage(commentMessage, token)
+                }
+                .subscribeBy(
+                        onSuccess = {
+                            _loadingStatus.value = false
+                            _onMessageSubmited.value = Unit
+                        },
+                        onError = {
+                            Log.e(TAG, "Failed to create comment")
+                            _loadingStatus.value = true
+                            _error.value = it
+                        }
+                ).bind()
+    }
+
+    fun createEvent(event: Event) {
+        if (currentUser == null) return
+        _loadingStatus.value = true
+        currentUser.getIdToken(true).toSingle()
+                .subscribeOn(schedulerIO)
+                .flatMap { task ->
+                    val token = task.token
+                    eventWebService.createEvent(event, token)
+                }
+                .subscribeBy(
+                        onSuccess = {
+                            _loadingStatus.value = false
+                            (activity as NavigationActivity).backOnStack()
+                            FirebaseMessaging
+                                    .getInstance()
+                                    .subscribeToTopic(event.eventId.toString())
+                            FirebaseMessaging
+                                    .getInstance()
+                                    .subscribeToTopic("subscribeEventSignIn-" + event.eventId)
+                        },
+                        onError = {
+                            Log.e(TAG, "Failed to create comment")
+                            _loadingStatus.value = false
+                            _error.value = it
+                        }
+                ).bind()
     }
 }

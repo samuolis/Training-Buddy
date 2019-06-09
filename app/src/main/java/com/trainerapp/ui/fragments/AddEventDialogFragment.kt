@@ -16,14 +16,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.messaging.FirebaseMessaging
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
@@ -31,15 +29,11 @@ import com.trainerapp.extension.getViewModel
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
-import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.customui.InputFilterMinMax
 import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -176,39 +170,23 @@ class AddEventDialogFragment : BaseDialogFragment() {
         } else {
             event_players_edit_text.text?.toString()?.toInt()
         }
-        val event: Event
 
-        event = Event(createEventId, userId, event_name_edit_text.text?.toString(), event_description_edit_text.text?.toString(),
-                selectedLocationName, selectedLocationLatitude,
-                selectedLocationLongitude, selectedLocationCountryCode, eventDate = selectedDateAndTime,
-                eventPlayers = eventPlayersNumber, eventDistance = null,
-                eventSignedPlayers = eventSignedPlayers, eventComments = eventCommentMessage)
-
-        val currentUser = auth.currentUser
-        currentUser?.getIdToken(true)?.addOnCompleteListener {
-            if (it.isSuccessful()) {
-                val token = it.getResult()?.getToken()
-                eventWebService.createEvent(event, token).enqueue(object : Callback<Event> {
-                    override fun onFailure(call: Call<Event>, t: Throwable) {
-                        Toast.makeText(context, "failed with " + t.message, Toast.LENGTH_LONG)
-                                .show()
-                    }
-
-                    override fun onResponse(call: Call<Event>, response: Response<Event>) {
-                        (activity as NavigationActivity).backOnStack()
-                        eventDetailsViewModel.loadDetailsEvent(eventId)
-                        eventViewModel.loadEvents()
-                        FirebaseMessaging
-                                .getInstance()
-                                .subscribeToTopic(event.eventId.toString())
-                        FirebaseMessaging
-                                .getInstance()
-                                .subscribeToTopic("subscribeEventSignIn-" + event.eventId)
-                    }
-
-                })
-            }
-        }
+        val event = Event(
+                eventId = createEventId,
+                userId = userId,
+                eventName = event_name_edit_text.text?.toString(),
+                eventDescription = event_description_edit_text.text?.toString(),
+                eventLocationName = selectedLocationName,
+                eventLocationLatitude = selectedLocationLatitude,
+                eventLocationLongitude = selectedLocationLongitude,
+                eventLocationCountryCode = selectedLocationCountryCode,
+                eventDate = selectedDateAndTime,
+                eventPlayers = eventPlayersNumber,
+                eventDistance = null,
+                eventSignedPlayers = eventSignedPlayers,
+                eventComments = eventCommentMessage
+        )
+        eventDetailsViewModel.createEvent(event)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

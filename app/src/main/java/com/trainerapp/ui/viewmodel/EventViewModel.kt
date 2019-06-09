@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.location.Geocoder
 import android.location.Location
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import com.trainerapp.R
 import com.trainerapp.base.BaseViewModel
@@ -116,10 +115,7 @@ class EventViewModel @Inject constructor(
                             _refreshStatus.value = 0
                         },
                         onError = {
-                            Toast.makeText(activity,
-                                    "Failed to get data " + it.localizedMessage,
-                                    Toast.LENGTH_LONG
-                            ).show()
+                            _error.value = it
                             _refreshStatus.value = 0
                         }
                 ).bind()
@@ -173,11 +169,7 @@ class EventViewModel @Inject constructor(
                             val validDateEventList = eventsList.filter {
                                 it.eventDate!!.after(Date(System.currentTimeMillis()))
                             }
-                            val archivedEventList = eventsList.filter {
-                                it.eventDate!!.before(Date(System.currentTimeMillis()))
-                            }
                             _userEvents.value = validDateEventList
-                            _archivedEvents.value = archivedEventList
                             _refreshStatus.value = 0
                         },
                         onError = {
