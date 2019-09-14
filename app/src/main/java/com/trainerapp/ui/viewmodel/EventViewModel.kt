@@ -1,5 +1,6 @@
 package com.trainerapp.ui.viewmodel
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
@@ -12,6 +13,7 @@ import com.trainerapp.extension.readOnly
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
 import com.trainerapp.service.LocationService
+import com.trainerapp.service.PermissionService
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.web.webservice.EventWebService
 import com.trainerapp.web.webservice.UserWebService
@@ -27,7 +29,8 @@ class EventViewModel @Inject constructor(
         private val activity: Activity,
         private val eventWebService: EventWebService,
         private val userWebService: UserWebService,
-        private val locationService: LocationService
+        private val locationService: LocationService,
+        permissionService: PermissionService
 ) : BaseViewModel() {
 
     private var _refreshStatus: MutableLiveData<Int> = MutableLiveData()
@@ -58,6 +61,16 @@ class EventViewModel @Inject constructor(
 
     init {
         userId = userSharedPref.getString(activity.getString(R.string.user_id_key), "0")
+        permissionService.checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                .subscribeBy(
+                        onSuccess = {
+                            val test = it
+                        },
+                        onError = {
+                            val test = it
+                        }
+                )
+                .bind()
     }
 
     fun loadEventsByLocation() {

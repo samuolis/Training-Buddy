@@ -1,11 +1,15 @@
 package com.trainerapp.di.module
 
 import android.app.Activity
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.gson.GsonBuilder
+import com.tbruyelle.rxpermissions2.RxPermissions
 import com.trainerapp.R
+import com.trainerapp.service.PermissionService
+import com.trainerapp.service.PermissionServiceImpl
 import com.trainerapp.web.webservice.EventWebService
 import com.trainerapp.web.webservice.UserWebService
 import dagger.Module
@@ -55,5 +59,10 @@ class ActivityModule(private var activity: Activity) {
     @Provides
     fun providesActivity(): Activity {
         return activity
+    }
+
+    @Provides
+    fun providePermissionsService(activity: Activity): PermissionService {
+        return PermissionServiceImpl(activity, RxPermissions(activity as FragmentActivity))
     }
 }

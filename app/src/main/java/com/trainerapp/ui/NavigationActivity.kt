@@ -1,6 +1,5 @@
 package com.trainerapp.ui
 
-import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -11,8 +10,6 @@ import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
@@ -100,20 +97,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
 
         supportActionBar?.title = getString(R.string.app_name)
         supportFragmentManager.addOnBackStackChangedListener(this)
-
-        if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                    REQUEST_PERMISION_CODE)
-        }
-
-        if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_PERMISION_CODE)
-        }
 
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {

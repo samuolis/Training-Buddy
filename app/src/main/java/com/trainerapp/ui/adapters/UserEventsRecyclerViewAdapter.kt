@@ -22,9 +22,7 @@ class UserEventsRecyclerViewAdapter(
     var layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // create a new view
         val view: View = layoutInflater.inflate(R.layout.event_list_recyclerview_item, parent, false)
-        // set the view's size, margins, paddings and layout parameters
         return ViewHolder(view)
     }
 
@@ -41,11 +39,12 @@ class UserEventsRecyclerViewAdapter(
             holder.eventDate.text = dateStr
             holder.eventPlaceName.text = eventList[position].eventLocationName
             val signedUsersCount = eventList[position].eventSignedPlayers?.size ?: 0
-            holder.eventPlayersCount.text = signedUsersCount.toString() + " of " + eventList!![position].eventPlayers.toString()
+            val eventUsage = signedUsersCount.toString() + " of " + eventList!![position].eventPlayers.toString()
+            holder.eventPlayersCount.text = eventUsage
             if (eventList[position].eventDistance == null) {
-                holder.eventsDistanceLinearLAyout.visibility = View.INVISIBLE
+                holder.eventsDistanceLinearLayout.visibility = View.INVISIBLE
             } else {
-                holder.eventsDistanceLinearLAyout.visibility = View.VISIBLE
+                holder.eventsDistanceLinearLayout.visibility = View.VISIBLE
                 holder.eventsDistance.text = DecimalFormat("##.##").format(eventList[position].eventDistance)
             }
             holder.listContentLayout.setOnClickListener { onClick(position) }
@@ -70,13 +69,13 @@ class UserEventsRecyclerViewAdapter(
         }
     }
 
-    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view){
+    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val eventName = view.event_name_text_view
         val eventDate = view.event_date_text_view
         val eventPlayersCount = view.event_players_number_text_view
         val eventPlaceName = view.event_place_name_text_view
         val eventsDistance = view.event_distance_text_view
-        val eventsDistanceLinearLAyout = view.distance_linear_layout
+        val eventsDistanceLinearLayout = view.distance_linear_layout
         val listContentLayout = view.list_content_layout
     }
 
