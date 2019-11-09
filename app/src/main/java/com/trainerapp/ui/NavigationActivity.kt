@@ -29,22 +29,6 @@ import javax.inject.Inject
 
 class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener {
 
-    private val REQUEST_PERMISION_CODE = 1111
-
-    companion object {
-        var permisionsResult: Boolean = false
-
-        val NOTIFICATION_EVENT_KEY = "notification_event"
-
-        val NOTIFICATION_EVENT_COMMENT_VALUE = "comment"
-
-        val NOTIFICATION_EVENT_REFRESH_VALUE = "refresh"
-
-        val EVENT_ID_INTENT: String = "EVENTID"
-
-        val BROADCAST_REFRESH: String = "refresh"
-    }
-
     private var doubleBackToExitPressedOnce = false
     lateinit var eventViewModel: EventViewModel
     @Inject
@@ -198,5 +182,21 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 }
             }
         }
+    }
+
+    companion object {
+        var permisionsResult: Boolean = false
+
+        private const val REQUEST_PERMISION_CODE = 1111
+
+        const val NOTIFICATION_EVENT_KEY = "notification_event"
+
+        const val NOTIFICATION_EVENT_COMMENT_VALUE = "comment"
+
+        const val NOTIFICATION_EVENT_REFRESH_VALUE = "refresh"
+
+        const val EVENT_ID_INTENT: String = "EVENTID"
+
+        const val BROADCAST_REFRESH: String = "refresh"
     }
 }
