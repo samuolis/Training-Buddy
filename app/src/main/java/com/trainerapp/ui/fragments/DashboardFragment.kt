@@ -35,7 +35,7 @@ class DashboardFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_dashboard, container, false)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         eventViewModel = getViewModel(viewModelFactory)
         eventViewModel.loadEventsByLocation()

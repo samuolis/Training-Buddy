@@ -36,7 +36,6 @@ class ProfileFragment : BaseFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -45,7 +44,7 @@ class ProfileFragment : BaseFragment() {
         setupInfo()
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         eventViewModel = getViewModel(viewModelFactory)
         eventViewModel.loadUserEventsByIds()

@@ -53,7 +53,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         arguments!!.getLong(ARG_EVENT_ID)
     }
 
-    private val eventScreen: String by lazy {
+    private val eventScreen: String? by lazy {
         arguments!!.getString(ARG_EVENT_SCREEN)
     }
 
@@ -249,12 +249,12 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         event_details_submit_button_layout.visibility = View.VISIBLE
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu?.add("Remove")
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when(item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when(item?.itemId) {
         0 -> {
             eventDetailsViewModel.deleteEvent(eventId)
             true

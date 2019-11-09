@@ -6,7 +6,7 @@ import com.trainerapp.di.component.ActivityComponent
 
 open class BaseDialogFragment : DialogFragment() {
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         onInject(activityComponent = (activity as BaseActivity).component)
     }
