@@ -16,6 +16,7 @@ import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
@@ -26,6 +27,8 @@ class HomeFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
 
     lateinit var eventViewModel: EventViewModel
 
@@ -44,7 +47,7 @@ class HomeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fab.setOnClickListener {
-            (activity as NavigationActivity).showEventCreateDialogFragment()
+            navigationController.showEventCreateDialogFragment()
         }
         home_recyclerview.layoutManager = LinearLayoutManager(context)
         swipe_container.setOnRefreshListener {

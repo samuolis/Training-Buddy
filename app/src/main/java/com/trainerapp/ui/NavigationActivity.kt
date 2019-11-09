@@ -23,6 +23,7 @@ import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.feature.maps.EventsMapFragment
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.activity_navigation.*
@@ -37,6 +38,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     var profileFragment = ProfileFragment()
     var homeFragment = HomeFragment()
     var dashboardFragment = DashboardFragment()
+    var mapsFragment = EventsMapFragment()
 
     private val REQUEST_PERMISION_CODE = 1111
 
@@ -77,13 +79,19 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                         .commit()
                 return@OnNavigationItemSelectedListener true
             }
+            R.id.navigation_map -> {
+                supportFragmentManager.beginTransaction()
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .replace(R.id.navigation_frame, mapsFragment)
+                        .commit()
+                return@OnNavigationItemSelectedListener true
+            }
         }
         false
     }
 
     private var doubleBackToExitPressedOnce = false
     lateinit var eventViewModel: EventViewModel
-    lateinit var logoutIntent: Intent
     @Inject
     lateinit var googleSignInClient: GoogleSignInClient
     @Inject
@@ -101,7 +109,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.navigation_frame, homeFragment)
+                    .replace(R.id.navigation_frame, mapsFragment)
                     .commit()
         }
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
@@ -144,7 +152,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         }
     }
 
-    fun shouldDisplayHomeUp() {
+    private fun shouldDisplayHomeUp() {
         //Enable Up button only  if there are entries in the back stack
         supportActionBar!!.setDisplayHomeAsUpEnabled(fragmentAdded)
         supportActionBar!!.setHomeAsUpIndicator(android.R.drawable.ic_menu_close_clear_cancel)
@@ -203,7 +211,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         FirebaseInstanceId.getInstance().deleteInstanceId()
         FirebaseAuth.getInstance().signOut()
         googleSignInClient.signOut().addOnCompleteListener {
-            logoutIntent = Intent(this@NavigationActivity, LoginActivity::class.java)
+            val logoutIntent = Intent(this@NavigationActivity, LoginActivity::class.java)
             startActivity(logoutIntent)
             finish()
         }
@@ -224,18 +232,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
                 .commit()
         supportFragmentManager.executePendingTransactions()
         supportActionBar!!.title = getString(R.string.edit_acount_title)
-    }
-
-    fun showEventCreateDialogFragment() {
-        val newFragment = AddEventDialogFragment.newInstance()
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.create_new_event_title)
     }
 
     fun showEventEditDialogFragment(eventId: Long) {
@@ -341,8 +337,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         val transaction = fragmentManager.beginTransaction()
         // For a little polish, specify a transition animation
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
         transaction
                 .add(android.R.id.content, newFragment)
                 .addToBackStack(null)

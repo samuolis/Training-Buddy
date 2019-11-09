@@ -8,6 +8,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.trainerapp.R
+import com.trainerapp.base.BaseActivity
 import com.trainerapp.service.PermissionService
 import com.trainerapp.service.PermissionServiceImpl
 import com.trainerapp.web.webservice.EventWebService
@@ -19,16 +20,16 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 @Module
-class ActivityModule(private var activity: Activity) {
+class ActivityModule(private var activity: BaseActivity) {
 
-    val BASE_URL = "https://training-222106.appspot.com/"
+    private val BASE_URL = "https://training-222106.appspot.com/"
 
-    val gson = GsonBuilder()
+    private val gson = GsonBuilder()
             .setLenient()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
             .create()
 
-    val retrofit = Retrofit.Builder()
+    private val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -58,6 +59,11 @@ class ActivityModule(private var activity: Activity) {
 
     @Provides
     fun providesActivity(): Activity {
+        return activity
+    }
+
+    @Provides
+    fun providesBaseActivity(): BaseActivity {
         return activity
     }
 

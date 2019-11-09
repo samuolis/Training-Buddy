@@ -3,6 +3,7 @@ package com.trainerapp.di.component
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.module.ActivityModule
 import com.trainerapp.di.module.LocationModule
+import com.trainerapp.di.module.NavigationModule
 import com.trainerapp.di.module.ViewModelModule
 import com.trainerapp.ui.LoginActivity
 import com.trainerapp.ui.NavigationActivity
@@ -12,7 +13,8 @@ import dagger.Component
 @Component(modules = [
     ActivityModule::class,
     ViewModelModule::class,
-    LocationModule::class
+    LocationModule::class,
+    NavigationModule::class
 ])
 interface ActivityComponent {
 
