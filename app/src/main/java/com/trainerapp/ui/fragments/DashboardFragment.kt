@@ -16,7 +16,7 @@ import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
-import com.trainerapp.ui.NavigationActivity
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_dashboard.*
@@ -27,6 +27,8 @@ class DashboardFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
     lateinit var eventViewModel: EventViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -49,11 +51,10 @@ class DashboardFragment : BaseFragment() {
                     events,
                     context!!
             ) { position ->
-                (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(
-                                events[position].eventId!!,
-                                EventDetailScreen.DASHBOARD
-                        )
+                navigationController.showEventDetailsDialogFragment(
+                        events[position].eventId!!,
+                        EventDetailScreen.DASHBOARD
+                )
             }
         }
         eventViewModel.refreshStatus.observe(this, Observer {
@@ -71,7 +72,7 @@ class DashboardFragment : BaseFragment() {
         }
 
         dashboard_fab.setOnClickListener {
-            (activity as NavigationActivity).showDashnoardSearchDialogFragment()
+            navigationController.showDashnoardSearchDialogFragment()
         }
         dashboard_swipe_container.setColorSchemeResources(R.color.colorAccent)
     }

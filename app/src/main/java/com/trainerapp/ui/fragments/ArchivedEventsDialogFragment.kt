@@ -13,7 +13,7 @@ import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
-import com.trainerapp.ui.NavigationActivity
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_archived_events_dialog.*
@@ -23,6 +23,8 @@ class ArchivedEventsDialogFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
 
     lateinit var eventViewModel: EventViewModel
 
@@ -47,8 +49,10 @@ class ArchivedEventsDialogFragment : BaseFragment() {
                     list,
                     context!!
             ) { position ->
-                (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(it[position].eventId!!, EventDetailScreen.HOME)
+                navigationController.showEventDetailsDialogFragment(
+                        eventId = it[position].eventId!!,
+                        eventDetailScreen = EventDetailScreen.HOME
+                )
             }
         })
 

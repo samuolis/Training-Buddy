@@ -18,7 +18,7 @@ import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.User
-import com.trainerapp.ui.NavigationActivity
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
 import kotlinx.android.synthetic.main.fragment_account_edit.*
@@ -29,6 +29,8 @@ class AccountEditDialogFragment : BaseDialogFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
     lateinit var eventViewModel: EventViewModel
     var userId: String? = null
     var databaseId: Long = 0
@@ -64,7 +66,7 @@ class AccountEditDialogFragment : BaseDialogFragment() {
                 submitEdit()
             }
             initials_image_view_fragment_edit.setOnClickListener {
-                (activity as NavigationActivity).showProfilePictureDialogFragment()
+                navigationController.showProfilePictureDialogFragment()
             }
             edit_profile_default_picture_text_view.setOnClickListener {
                 profileInt = ProfilePicture.values().size

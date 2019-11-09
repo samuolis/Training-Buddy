@@ -24,6 +24,7 @@ import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.EventCommentsRecyclerViewAdapter
 import com.trainerapp.ui.adapters.EventDetailsRecyclerViewAdapter
@@ -45,6 +46,8 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     lateinit var viewModelFactory: ViewModelProvider.Factory
     @Inject
     lateinit var eventWebService: EventWebService
+    @Inject
+    lateinit var navigationController: NavigationController
     lateinit var userId: String
     lateinit var auth: FirebaseAuth
     private var currentUser: FirebaseUser? = null
@@ -99,14 +102,14 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         event_comments_recycler_view.layoutManager = LinearLayoutManager(context)
 
         signed_users_layout.setOnClickListener {
-            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+            navigationController.showEventSignedUsersListDialogFragment()
         }
         event_details_recycler_view.setOnClickListener {
-            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+            navigationController.showEventSignedUsersListDialogFragment()
         }
 
         event_comments_label.setOnClickListener {
-            (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
+            navigationController.showEventCommentsDialogFragment(eventId)
         }
 
         eventDetailsViewModel.error.nonNullObserve(this) {
@@ -125,7 +128,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             event_details_recycler_view.adapter = EventDetailsRecyclerViewAdapter(event.eventSignedPlayers, context!!,
                     object : EventDetailsRecyclerViewAdapter.MyClickListener {
                         override fun onItemClicked(position: Int) {
-                            (activity as NavigationActivity).showEventSignedUsersListDialogFragment()
+                            navigationController.showEventSignedUsersListDialogFragment()
                         }
 
                     })
@@ -166,7 +169,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         event_comments_recycler_view.adapter = EventCommentsRecyclerViewAdapter(commentsList, context!!,
                 object : EventCommentsRecyclerViewAdapter.MyClickListener {
                     override fun onItemClicked(position: Int) {
-                        (activity as NavigationActivity).showEventCommentsDialogFragment(eventId)
+                        navigationController.showEventCommentsDialogFragment(eventId)
                     }
 
                 })
@@ -177,7 +180,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         updateUI(event)
         event_details_submit_button.text = getString(R.string.edit_event_button_label)
         event_details_submit_button.setOnClickListener { view ->
-            (activity as NavigationActivity).showEventEditDialogFragment(eventId)
+            navigationController.showEventEditDialogFragment(eventId)
         }
 
     }
@@ -214,7 +217,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
         }
         event_details_title.text = SpannableStringBuilder(event.eventName)
         val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-        timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+        timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
         val dateStr = timeStampFormat.format(event.eventDate)
         event_details_date.text = SpannableStringBuilder(dateStr)
         if (event.eventDescription == null || event.eventDescription == ""){
@@ -238,19 +241,19 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
     }
 
     private fun showProgressBar() {
-        progress_bar_background_event_details.setVisibility(View.VISIBLE)
-        login_progress_event_details.setVisibility(View.VISIBLE)
+        progress_bar_background_event_details.visibility = View.VISIBLE
+        login_progress_event_details.visibility = View.VISIBLE
     }
 
     private fun hideProgressBar() {
-        progress_bar_background_event_details.setVisibility(View.GONE)
-        login_progress_event_details.setVisibility(View.GONE)
+        progress_bar_background_event_details.visibility = View.GONE
+        login_progress_event_details.visibility = View.GONE
         nestedScrollView.visibility = View.VISIBLE
         event_details_submit_button_layout.visibility = View.VISIBLE
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu?.add("Remove")
+        menu.add("Remove")
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -292,13 +295,13 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             when (intent.getStringExtra(NavigationActivity.NOTIFICATION_EVENT_KEY)) {
                 NavigationActivity.NOTIFICATION_EVENT_COMMENT_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
-                    if (id != "" && id.toLong() == eventId) {
+                    if (id != "" && id?.toLong() == eventId) {
                         eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
                 }
                 NavigationActivity.NOTIFICATION_EVENT_REFRESH_VALUE -> {
                     val id = intent.getStringExtra(NavigationActivity.EVENT_ID_INTENT)
-                    if (id != "" && id.toLong() == eventId) {
+                    if (id != "" && id?.toLong() == eventId) {
                         eventDetailsViewModel.loadDetailsEvent(eventId = id.toLong())
                     }
                 }
@@ -308,8 +311,8 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
     companion object {
 
-        val ARG_EVENT_ID = "EVENT_ID"
-        val ARG_EVENT_SCREEN = "EVENT_SCREEN"
+        const val ARG_EVENT_ID = "EVENT_ID"
+        const val ARG_EVENT_SCREEN = "EVENT_SCREEN"
 
         fun newInstance(
                 eventId: Long,

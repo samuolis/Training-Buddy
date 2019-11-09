@@ -11,7 +11,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -20,9 +19,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
-import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
-import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -131,7 +128,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_logout -> {
             CoroutineScope(Dispatchers.IO).launch {
-                Logout()
+                logout()
             }
             true
         }
@@ -161,7 +158,7 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         }
     }
 
-    private fun Logout() {
+    private fun logout() {
         for (fragment in supportFragmentManager.fragments) {
             supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
@@ -172,134 +169,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
             startActivity(logoutIntent)
             finish()
         }
-    }
-
-    fun showAccountEditDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = AccountEditDialogFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.edit_acount_title)
-    }
-
-    fun showEventEditDialogFragment(eventId: Long) {
-        val newFragment = AddEventDialogFragment.newInstance(eventId)
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.edit_event_button_label)
-    }
-
-    fun showEventSignedUsersListDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = EventSignedUsersListDialogFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.signed_user_list_title)
-    }
-
-    fun showEventCommentsDialogFragment(eventId: Long) {
-        val fragmentManager = supportFragmentManager
-        val newFragment = EventCommentsDialogFragment.newInstance(eventId)
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.event_comments)
-    }
-
-    fun showDashnoardSearchDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = SearchFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.search_properties_title)
-    }
-
-    fun showProfilePictureDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = ProfilePictureDialogFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-    }
-
-    fun showEventDetailsDialogFragment(eventId: Long, eventDetailScreen: EventDetailScreen) {
-        val fragmentManager = supportFragmentManager
-        val newFragment = EventDetailsDialogFragment.newInstance(
-                eventId,
-                eventDetailScreen
-        )
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-    }
-
-    fun showArchivedEventsDialogFragment() {
-        val fragmentManager = supportFragmentManager
-        val newFragment = ArchivedEventsDialogFragment()
-        // The device is smaller, so show the fragment fullscreen
-        val transaction = fragmentManager.beginTransaction()
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-        transaction
-                .add(android.R.id.content, newFragment)
-                .addToBackStack(null)
-                .commit()
-        supportFragmentManager.executePendingTransactions()
-        supportActionBar!!.title = getString(R.string.archived_events)
     }
 
     fun backOnStack() {

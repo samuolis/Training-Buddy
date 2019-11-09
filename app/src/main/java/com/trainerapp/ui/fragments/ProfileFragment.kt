@@ -19,7 +19,7 @@ import com.trainerapp.enums.ProfilePicture
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.User
-import com.trainerapp.ui.NavigationActivity
+import com.trainerapp.navigation.NavigationController
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.utils.DrawableUtils
@@ -31,6 +31,8 @@ class ProfileFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigationController: NavigationController
 
     lateinit var eventViewModel: EventViewModel
 
@@ -85,10 +87,10 @@ class ProfileFragment : BaseFragment() {
             profile_linear_layout.visibility = View.VISIBLE
         })
         user_full_name_text_view.setOnClickListener {
-            (activity as NavigationActivity).showAccountEditDialogFragment()
+            navigationController.showAccountEditDialogFragment()
         }
         initials_image_view.setOnClickListener {
-            (activity as NavigationActivity).showAccountEditDialogFragment()
+            navigationController.showAccountEditDialogFragment()
         }
 
         eventViewModel.userEvents.nonNullObserve(this) { userEvents ->
@@ -97,11 +99,10 @@ class ProfileFragment : BaseFragment() {
                     userEvents,
                     context!!
             ) { position ->
-                (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(
-                                userEvents[position].eventId!!,
-                                EventDetailScreen.PROFILE
-                        )
+                navigationController.showEventDetailsDialogFragment(
+                        userEvents[position].eventId!!,
+                        EventDetailScreen.PROFILE
+                )
             }
         }
     }

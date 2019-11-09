@@ -17,7 +17,6 @@ import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.navigation.NavigationController
-import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.adapters.UserEventsRecyclerViewAdapter
 import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -57,7 +56,7 @@ class HomeFragment : BaseFragment() {
         loadUi()
 
         expired_event_layout.setOnClickListener {
-            (activity as NavigationActivity).showArchivedEventsDialogFragment()
+            navigationController.showArchivedEventsDialogFragment()
         }
     }
 
@@ -73,11 +72,10 @@ class HomeFragment : BaseFragment() {
                     events,
                     context!!
             ) { position ->
-                (activity as NavigationActivity)
-                        .showEventDetailsDialogFragment(
-                                events[position].eventId!!,
-                                EventDetailScreen.HOME
-                        )
+                navigationController.showEventDetailsDialogFragment(
+                        eventId = events[position].eventId!!,
+                        eventDetailScreen = EventDetailScreen.HOME
+                )
             }
         })
         eventViewModel.archivedEvents.observe(this, Observer {
