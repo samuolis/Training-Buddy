@@ -15,7 +15,6 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.iid.FirebaseInstanceId
 import com.trainerapp.R
@@ -23,10 +22,8 @@ import com.trainerapp.base.BaseActivity
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.extension.getViewModel
-import com.trainerapp.feature.maps.EventsMapFragment
 import com.trainerapp.ui.fragments.*
 import com.trainerapp.ui.viewmodel.EventViewModel
-import kotlinx.android.synthetic.main.activity_navigation.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,11 +31,6 @@ import javax.inject.Inject
 
 
 class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedListener {
-
-    var profileFragment = ProfileFragment()
-    var homeFragment = HomeFragment()
-    var dashboardFragment = DashboardFragment()
-    var mapsFragment = EventsMapFragment()
 
     private val REQUEST_PERMISION_CODE = 1111
 
@@ -54,40 +46,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         val EVENT_ID_INTENT: String = "EVENTID"
 
         val BROADCAST_REFRESH: String = "refresh"
-    }
-
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
-            R.id.navigation_home -> {
-                supportFragmentManager.beginTransaction()
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .replace(R.id.navigation_frame, homeFragment)
-                        .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_dashboard -> {
-                supportFragmentManager.beginTransaction()
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .replace(R.id.navigation_frame, dashboardFragment)
-                        .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_profile -> {
-                supportFragmentManager.beginTransaction()
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .replace(R.id.navigation_frame, profileFragment)
-                        .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_map -> {
-                supportFragmentManager.beginTransaction()
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .replace(R.id.navigation_frame, mapsFragment)
-                        .commit()
-                return@OnNavigationItemSelectedListener true
-            }
-        }
-        false
     }
 
     private var doubleBackToExitPressedOnce = false
@@ -109,10 +67,9 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         shouldDisplayHomeUp()
         if (supportFragmentManager.backStackEntryCount == 0) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.navigation_frame, mapsFragment)
+                    .replace(R.id.navigation_frame, ContainerFragment())
                     .commit()
         }
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
 
     override fun onInject(activityComponent: ActivityComponent) {
