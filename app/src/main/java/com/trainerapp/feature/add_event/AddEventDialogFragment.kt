@@ -10,21 +10,24 @@ import android.content.Context
 import android.content.Intent
 import android.location.Geocoder
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputFilter
 import android.text.SpannableStringBuilder
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException
-import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
+import com.trainerapp.extension.nonNullObserve
 import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
@@ -46,6 +49,12 @@ class AddEventDialogFragment : BaseDialogFragment() {
     lateinit var eventWebService: EventWebService
 
     lateinit var eventDetailsViewModel: EventDetailsViewModel
+
+    lateinit var addEventViewModel: AddEventViewModel
+
+    private val addEventLocationAutocompleteAdapter: AddEventLocationAutocompleteAdapter by lazy {
+        AddEventLocationAutocompleteAdapter(context!!)
+    }
 
     private val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
     private var date_time = ""
@@ -81,6 +90,8 @@ class AddEventDialogFragment : BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         eventDetailsViewModel = getViewModel(viewModelFactory)
+        addEventViewModel = getViewModel(viewModelFactory)
+        addEventViewModel.initialize()
         event_date_time_text_view.setOnClickListener {
             datePicker()
         }
@@ -89,18 +100,26 @@ class AddEventDialogFragment : BaseDialogFragment() {
         event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
         event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
 
-        event_location_edit_text.onFocusChangeListener = View.OnFocusChangeListener { view: View, b: Boolean ->
-            if (b) {
-                try {
-                    val intent = PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                            .build(activity)
-                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE)
-                } catch (e: GooglePlayServicesRepairableException) {
-                    // TODO: Handle the error.
-                } catch (e: GooglePlayServicesNotAvailableException) {
-                    // TODO: Handle the error.
-                }
+        event_location_edit_text.setAdapter(addEventLocationAutocompleteAdapter)
+        event_location_edit_text.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
             }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                p0 ?: return
+                addEventViewModel.onLocationTextChanged(p0)
+            }
+        })
+
+        addEventViewModel.addresses.nonNullObserve(this) {
+            addEventLocationAutocompleteAdapter.setAddresses(it)
+        }
+
+        addEventViewModel.error.nonNullObserve(this) {
+            Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
         }
 
         event_fab.setOnClickListener { view ->
@@ -114,7 +133,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
     }
 
     private fun setupEditEvent() {
-        eventDetailsViewModel.detailsOneEvent.observe(this, androidx.lifecycle.Observer {
+        eventDetailsViewModel.detailsOneEvent.observe(this, Observer {
             event_name_edit_text.text = SpannableStringBuilder(it.eventName)
             event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
             event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)

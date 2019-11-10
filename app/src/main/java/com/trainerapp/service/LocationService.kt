@@ -8,7 +8,7 @@ interface LocationService {
 
     fun getDeviceLocation(): Single<Location>
 
-    fun getAddressByCoordinates(latitude: Double, longitude: Double): List<Address>
+    fun getAddressByCoordinates(latitude: Double, longitude: Double): Single<List<Address>>
 
-    fun getAddressByText(text: String): List<Address>
+    fun getAddressByText(text: String): Single<List<Address>>
 }

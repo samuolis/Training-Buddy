@@ -43,7 +43,8 @@ abstract class BaseViewModel : ViewModel(), CoroutineScope {
         }
     }
 
-    fun Disposable.bind() {
+    fun Disposable.bind(): Disposable {
         compositeDisposable.add(this)
+        return this
     }
 }

@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import io.reactivex.Single
+import java.io.IOException
 
 class LocationServiceImpl(
         private val activity: Activity
@@ -17,12 +18,24 @@ class LocationServiceImpl(
 
     private val geocoder = Geocoder(activity.applicationContext)
 
-    override fun getAddressByCoordinates(latitude: Double, longitude: Double): List<Address> {
-        return geocoder.getFromLocation(latitude, longitude, MAX_GEOCODER_RESULT)
+    override fun getAddressByCoordinates(latitude: Double, longitude: Double): Single<List<Address>> {
+        return Single.create {
+            try {
+                it.onSuccess(geocoder.getFromLocation(latitude, longitude, MAX_GEOCODER_RESULT))
+            } catch (e: IOException) {
+                it.tryOnError(IllegalStateException(e.message))
+            }
+        }
     }
 
-    override fun getAddressByText(text: String): List<Address> {
-        return geocoder.getFromLocationName(text, MAX_GEOCODER_RESULT)
+    override fun getAddressByText(text: String): Single<List<Address>> {
+        return Single.create {
+            try {
+                it.onSuccess(geocoder.getFromLocationName(text, MAX_GEOCODER_RESULT))
+            } catch (e: IOException) {
+                it.tryOnError(IllegalStateException(e.message))
+            }
+        }
     }
 
     override fun getDeviceLocation(): Single<Location> {

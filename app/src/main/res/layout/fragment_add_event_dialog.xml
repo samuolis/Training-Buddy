@@ -57,7 +57,7 @@
                 android:hint="@string/set_event_location_hint"
                 app:hintAnimationEnabled="true">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                     android:id="@+id/event_location_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
