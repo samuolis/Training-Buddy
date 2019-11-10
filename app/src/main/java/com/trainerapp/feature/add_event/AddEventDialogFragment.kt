@@ -1,27 +1,18 @@
 package com.trainerapp.feature.add_event
 
 
-import android.app.Activity.RESULT_CANCELED
-import android.app.Activity.RESULT_OK
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent
-import android.location.Geocoder
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
@@ -53,10 +44,12 @@ class AddEventDialogFragment : BaseDialogFragment() {
     lateinit var addEventViewModel: AddEventViewModel
 
     private val addEventLocationAutocompleteAdapter: AddEventLocationAutocompleteAdapter by lazy {
-        AddEventLocationAutocompleteAdapter(context!!)
+        AddEventLocationAutocompleteAdapter(context!!) {
+            event_location_edit_text.setText(it.getAddressLine(0))
+            event_location_edit_text.dismissDropDown()
+        }
     }
 
-    private val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
     private var date_time = ""
     private var mYear: Int = 0
     private var mMonth: Int = 0
@@ -73,10 +66,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
     private var eventSignedPlayers: List<User>? = null
     private var eventCommentMessage: List<CommentMessage>? = null
 
-    private var mHour: Int = 0
-    private var mMinute: Int = 0
-    private val c = Calendar.getInstance()
-
     private val eventId: Long by lazy {
         arguments!!.getLong(EventDetailsDialogFragment.ARG_EVENT_ID, -1)
     }
@@ -92,13 +81,12 @@ class AddEventDialogFragment : BaseDialogFragment() {
         eventDetailsViewModel = getViewModel(viewModelFactory)
         addEventViewModel = getViewModel(viewModelFactory)
         addEventViewModel.initialize()
-        event_date_time_text_view.setOnClickListener {
-            datePicker()
-        }
 
         event_players_edit_text.filters = arrayOf<InputFilter>(InputFilterMinMax("1", "1000"))
         event_name_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(30))
         event_description_edit_text.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(500))
+        add_event_time_picker.setIs24HourView(true)
+        add_event_date_picker.minDate = System.currentTimeMillis()
 
         event_location_edit_text.setAdapter(addEventLocationAutocompleteAdapter)
         event_location_edit_text.addTextChangedListener(object : TextWatcher {
@@ -144,7 +132,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
             event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
             val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
             timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
-            event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
             selectedDateAndTime = it.eventDate
             eventSignedPlayers = it.eventSignedPlayers
             eventCommentMessage = it.eventComments
@@ -196,64 +183,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
                 eventComments = eventCommentMessage
         )
         eventDetailsViewModel.createEvent(event)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                val place = PlaceAutocomplete.getPlace(context, data)
-                selectedLocationLatitude = place.latLng.latitude
-                selectedLocationLongitude = place.latLng.longitude
-                selectedLocationName = place.name.toString()
-
-                val geocoder = Geocoder(context, Locale.getDefault())
-                val adresses = geocoder.getFromLocation(place.latLng.latitude,
-                        place.latLng.longitude, 1)
-                val address = adresses[0]
-                selectedLocationCountryCode = address.getCountryCode()
-                event_location_edit_text.text = SpannableStringBuilder(place.address)
-                Log.i(TAG, "Place: " + place.name)
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                val status = PlaceAutocomplete.getStatus(context, data)
-                // TODO: Handle the error.
-                Log.i(TAG, status.statusMessage)
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-        }
-    }
-
-    private fun datePicker() {
-        mYear = c.get(Calendar.YEAR)
-        mMonth = c.get(Calendar.MONTH)
-        mDay = c.get(Calendar.DAY_OF_MONTH)
-
-        val datePickerDialog = DatePickerDialog(context!!,
-                DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-                    date_time = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
-                    c.set(year, monthOfYear, dayOfMonth)
-                    timePicker()
-                }, mYear, mMonth, mDay)
-        datePickerDialog.show()
-    }
-
-    private fun timePicker() {
-        // Get Current Time
-
-        mHour = c.get(Calendar.HOUR_OF_DAY)
-        mMinute = c.get(Calendar.MINUTE)
-
-        // Launch Time Picker Dialog
-        val timePickerDialog = TimePickerDialog(context,
-                TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
-                    c.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    c.set(Calendar.MINUTE, minute)
-                    selectedDateAndTime = c.time
-                    val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-                    event_date_time_text_view.text = timeStampFormat.format(selectedDateAndTime)
-                }, mHour, mMinute, true)
-        timePickerDialog.show()
     }
 
     companion object {

@@ -9,7 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 
 class AddEventLocationAutocompleteAdapter(
-        context: Context
+        context: Context,
+        private val onclick: (Address) -> Unit
 ) : ArrayAdapter<Address>(context, android.R.layout.simple_list_item_1) {
 
     private val addresses = mutableListOf<Address>()
@@ -28,8 +29,10 @@ class AddEventLocationAutocompleteAdapter(
         val address = getItem(position)
 
         val view = layout.findViewById<TextView>(android.R.id.text1)
-
         view.text = address.getAddressLine(0)
+        view.setOnClickListener {
+            onclick(address)
+        }
 
         return view
     }
