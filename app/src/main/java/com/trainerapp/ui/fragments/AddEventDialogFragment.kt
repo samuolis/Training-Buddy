@@ -21,7 +21,6 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.FirebaseAuth
 import com.trainerapp.R
 import com.trainerapp.base.BaseDialogFragment
 import com.trainerapp.di.component.ActivityComponent
@@ -43,32 +42,29 @@ class AddEventDialogFragment : BaseDialogFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
-    var date_time = ""
-    var mYear: Int = 0
-    var mMonth: Int = 0
-    var mDay: Int = 0
-    var selectedLocationName: String? = null
-    var selectedLocationLatitude: Double? = null
-    var selectedLocationLongitude: Double? = null
-    var selectedLocationCountryCode: String? = null
-    var userId: String? = null
-    lateinit var eventViewModel: EventViewModel
-    var selectedDateAndTime: Date? = null
-    var eventSignedPlayers: List<User>? = null
-    var eventCommentMessage: List<CommentMessage>? = null
-
-    var mHour: Int = 0
-    var mMinute: Int = 0
-    val c = Calendar.getInstance()
-    private val auth: FirebaseAuth by lazy {
-        FirebaseAuth.getInstance()
-    }
     @Inject
     lateinit var eventWebService: EventWebService
 
     lateinit var eventDetailsViewModel: EventDetailsViewModel
+
+    private val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1
+    private var date_time = ""
+    private var mYear: Int = 0
+    private var mMonth: Int = 0
+    private var mDay: Int = 0
+    private var selectedLocationName: String? = null
+    private var selectedLocationLatitude: Double? = null
+    private var selectedLocationLongitude: Double? = null
+    private var selectedLocationCountryCode: String? = null
+    var userId: String? = null
+    lateinit var eventViewModel: EventViewModel
+    private var selectedDateAndTime: Date? = null
+    private var eventSignedPlayers: List<User>? = null
+    private var eventCommentMessage: List<CommentMessage>? = null
+
+    private var mHour: Int = 0
+    private var mMinute: Int = 0
+    private val c = Calendar.getInstance()
 
     private val eventId: Long by lazy {
         arguments!!.getLong(EventDetailsDialogFragment.ARG_EVENT_ID, -1)
@@ -77,12 +73,9 @@ class AddEventDialogFragment : BaseDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
-
         val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
-
         return rootView
     }
 
@@ -251,7 +244,7 @@ class AddEventDialogFragment : BaseDialogFragment() {
     }
 
     companion object {
-        val ARG_EVENT_ID = "EVENT_ID"
+        private const val ARG_EVENT_ID = "EVENT_ID"
 
         fun newInstance(
                 eventId: Long? = null

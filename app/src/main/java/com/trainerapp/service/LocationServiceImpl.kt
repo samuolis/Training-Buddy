@@ -3,6 +3,8 @@ package com.trainerapp.service
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -13,7 +15,15 @@ class LocationServiceImpl(
         private val activity: Activity
 ) : LocationService {
 
-    private val TAG = LocationServiceImpl::class.simpleName
+    private val geocoder = Geocoder(activity.applicationContext)
+
+    override fun getAddressByCoordinates(latitude: Double, longitude: Double): List<Address> {
+        return geocoder.getFromLocation(latitude, longitude, MAX_GEOCODER_RESULT)
+    }
+
+    override fun getAddressByText(text: String): List<Address> {
+        return geocoder.getFromLocationName(text, MAX_GEOCODER_RESULT)
+    }
 
     override fun getDeviceLocation(): Single<Location> {
         return Single.create { emitter ->
@@ -37,5 +47,11 @@ class LocationServiceImpl(
                 emitter.onError(IllegalAccessException())
             }
         }
+    }
+
+    companion object {
+
+        private val TAG = LocationServiceImpl::class.toString()
+        private const val MAX_GEOCODER_RESULT = 5
     }
 }
