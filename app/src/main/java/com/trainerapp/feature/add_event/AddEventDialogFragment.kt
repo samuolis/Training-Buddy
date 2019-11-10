@@ -1,4 +1,4 @@
-package com.trainerapp.ui.fragments
+package com.trainerapp.feature.add_event
 
 
 import android.app.Activity.RESULT_CANCELED
@@ -29,8 +29,8 @@ import com.trainerapp.models.CommentMessage
 import com.trainerapp.models.Event
 import com.trainerapp.models.User
 import com.trainerapp.ui.customui.InputFilterMinMax
+import com.trainerapp.ui.fragments.EventDetailsDialogFragment
 import com.trainerapp.ui.viewmodel.EventDetailsViewModel
-import com.trainerapp.ui.viewmodel.EventViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
 import java.text.SimpleDateFormat
@@ -56,8 +56,10 @@ class AddEventDialogFragment : BaseDialogFragment() {
     private var selectedLocationLatitude: Double? = null
     private var selectedLocationLongitude: Double? = null
     private var selectedLocationCountryCode: String? = null
-    var userId: String? = null
-    lateinit var eventViewModel: EventViewModel
+    private val userId: String? by lazy {
+        val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
+        userSharedPref?.getString(getString(R.string.user_id_key), "0")
+    }
     private var selectedDateAndTime: Date? = null
     private var eventSignedPlayers: List<User>? = null
     private var eventCommentMessage: List<CommentMessage>? = null
@@ -73,15 +75,11 @@ class AddEventDialogFragment : BaseDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
-        val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
-        userId = userSharedPref?.getString(getString(R.string.user_id_key), "0")
-        return rootView
+        return inflater.inflate(R.layout.fragment_add_event_dialog, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        eventViewModel = getViewModel(viewModelFactory)
         eventDetailsViewModel = getViewModel(viewModelFactory)
         event_date_time_text_view.setOnClickListener {
             datePicker()
@@ -125,7 +123,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
             selectedLocationLatitude = it.eventLocationLatitude
             selectedLocationName = it.eventLocationName
             event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
-            userId = it.userId
             val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
             timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
             event_date_time_text_view.text = timeStampFormat.format(it.eventDate)
@@ -209,8 +206,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
     }
 
     private fun datePicker() {
-
-        // Get Current Date
         mYear = c.get(Calendar.YEAR)
         mMonth = c.get(Calendar.MONTH)
         mDay = c.get(Calendar.DAY_OF_MONTH)
@@ -219,7 +214,6 @@ class AddEventDialogFragment : BaseDialogFragment() {
                 DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                     date_time = dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year
                     c.set(year, monthOfYear, dayOfMonth)
-                    //*************Call Time Picker Here ********************
                     timePicker()
                 }, mYear, mMonth, mDay)
         datePickerDialog.show()

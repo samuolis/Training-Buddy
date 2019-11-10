@@ -8,6 +8,7 @@ import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 abstract class BaseViewModel : ViewModel(), CoroutineScope {
@@ -29,6 +30,17 @@ abstract class BaseViewModel : ViewModel(), CoroutineScope {
         compositeDisposable.clear()
         viewModelJob.cancel()
         super.onCleared()
+    }
+
+    fun CoroutineScope.launchWithProgress(block: suspend CoroutineScope.() -> Unit) {
+        launch {
+            try {
+                _loadingStatus.postValue(true)
+                block()
+            } finally {
+                _loadingStatus.postValue(false)
+            }
+        }
     }
 
     fun Disposable.bind() {

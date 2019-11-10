@@ -5,6 +5,7 @@ import com.trainerapp.di.module.ActivityModule
 import com.trainerapp.di.module.LocationModule
 import com.trainerapp.di.module.NavigationModule
 import com.trainerapp.di.module.ViewModelModule
+import com.trainerapp.feature.add_event.AddEventDialogFragment
 import com.trainerapp.ui.LoginActivity
 import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.fragments.*

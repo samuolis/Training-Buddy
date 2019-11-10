@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.trainerapp.enums.EventDetailScreen
+import com.trainerapp.feature.add_event.AddEventDialogFragment
 import com.trainerapp.ui.fragments.*
 import java.util.*
 
@@ -19,6 +20,10 @@ class NavigationControllerImpl(
                 .addToBackStack(fragment::class.toString() + UUID.randomUUID())
                 .commit()
         fragmentManager.executePendingTransactions()
+    }
+
+    override fun goBack() {
+        fragmentManager.popBackStack()
     }
 
     override fun showAccountEditDialogFragment() {

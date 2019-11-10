@@ -152,8 +152,7 @@ class EventDetailsViewModel @Inject constructor(
         currentUser.getIdToken(true).toSingle()
                 .subscribeOn(schedulerIO)
                 .flatMap { task ->
-                    val token = task.token
-                    eventWebService.createEvent(event, token)
+                    eventWebService.createEvent(event)
                 }
                 .subscribeBy(
                         onSuccess = {

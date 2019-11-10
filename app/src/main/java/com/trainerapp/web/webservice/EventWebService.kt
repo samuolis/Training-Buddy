@@ -8,8 +8,7 @@ import retrofit2.http.*
 interface EventWebService {
 
     @POST("/event")
-    fun createEvent(@Body event: Event,
-                    @Header("authorization-code") authorizationCode: String?): Single<Event>
+    fun createEvent(@Body event: Event): Single<Event>
 
     @GET("/event/{userId}")
     fun getEventsByUserId(@Path("userId") userId: String?): Single<List<Event>>

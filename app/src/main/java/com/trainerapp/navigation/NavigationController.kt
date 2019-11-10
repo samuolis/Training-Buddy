@@ -4,6 +4,8 @@ import com.trainerapp.enums.EventDetailScreen
 
 interface NavigationController {
 
+    fun goBack()
+
     fun showAccountEditDialogFragment()
 
     fun showEventCreateDialogFragment()
