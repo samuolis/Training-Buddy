@@ -2,6 +2,8 @@ package com.trainerapp.feature.add_event
 
 
 import android.content.Context
+import android.icu.util.Calendar
+import android.location.Address
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -15,7 +17,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.trainerapp.R
-import com.trainerapp.base.BaseDialogFragment
+import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.component.ActivityComponent
 import com.trainerapp.extension.getViewModel
 import com.trainerapp.extension.nonNullObserve
@@ -27,12 +29,10 @@ import com.trainerapp.ui.fragments.EventDetailsDialogFragment
 import com.trainerapp.ui.viewmodel.EventDetailsViewModel
 import com.trainerapp.web.webservice.EventWebService
 import kotlinx.android.synthetic.main.fragment_add_event_dialog.*
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 
 
-class AddEventDialogFragment : BaseDialogFragment() {
+class AddEventDialogFragment : BaseFragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -47,22 +47,15 @@ class AddEventDialogFragment : BaseDialogFragment() {
         AddEventLocationAutocompleteAdapter(context!!) {
             event_location_edit_text.setText(it.getAddressLine(0))
             event_location_edit_text.dismissDropDown()
+            selectedAddress = it
         }
     }
 
-    private var date_time = ""
-    private var mYear: Int = 0
-    private var mMonth: Int = 0
-    private var mDay: Int = 0
-    private var selectedLocationName: String? = null
-    private var selectedLocationLatitude: Double? = null
-    private var selectedLocationLongitude: Double? = null
-    private var selectedLocationCountryCode: String? = null
+    private var selectedAddress: Address? = null
     private val userId: String? by lazy {
         val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userSharedPref?.getString(getString(R.string.user_id_key), "0")
     }
-    private var selectedDateAndTime: Date? = null
     private var eventSignedPlayers: List<User>? = null
     private var eventCommentMessage: List<CommentMessage>? = null
 
@@ -70,6 +63,11 @@ class AddEventDialogFragment : BaseDialogFragment() {
         arguments!!.getLong(EventDetailsDialogFragment.ARG_EVENT_ID, -1)
     }
 
+
+    override fun onInject(activityComponent: ActivityComponent) {
+        super.onInject(activityComponent)
+        activityComponent.inject(this)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -110,6 +108,10 @@ class AddEventDialogFragment : BaseDialogFragment() {
             Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
         }
 
+        addEventViewModel.loadingStatus.nonNullObserve(this) {
+            changeLoadingStatus(it)
+        }
+
         event_fab.setOnClickListener { view ->
             saveEvent(view)
         }
@@ -125,32 +127,44 @@ class AddEventDialogFragment : BaseDialogFragment() {
             event_name_edit_text.text = SpannableStringBuilder(it.eventName)
             event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
             event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
-            selectedLocationCountryCode = it.eventLocationCountryCode
-            selectedLocationLongitude = it.eventLocationLongitude
-            selectedLocationLatitude = it.eventLocationLatitude
-            selectedLocationName = it.eventLocationName
             event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
-            val timeStampFormat = SimpleDateFormat("dd-MM-yyyy HH:mm")
-            timeStampFormat.timeZone = TimeZone.getTimeZone("UTC")
-            selectedDateAndTime = it.eventDate
+            val calendar = Calendar.getInstance()
+            calendar.time = it.eventDate
+            add_event_date_picker.updateDate(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            add_event_time_picker.hour = calendar.get(Calendar.HOUR_OF_DAY)
+            add_event_time_picker.minute = calendar.get(Calendar.MINUTE)
             eventSignedPlayers = it.eventSignedPlayers
             eventCommentMessage = it.eventComments
         })
     }
 
-    override fun onInject(activityComponent: ActivityComponent) {
-        super.onInject(activityComponent)
-        activityComponent.inject(this)
-    }
-
     private fun saveEvent(view: View) {
-        if (selectedLocationName == null || event_name_edit_text.text == null || selectedDateAndTime == null) {
-            Snackbar.make(view, "Some fields are missing", Snackbar.LENGTH_LONG)
+        val address = selectedAddress
+        if (address == null || event_name_edit_text.text == null) {
+            Snackbar.make(view, "Some fields are missing", Snackbar.LENGTH_SHORT)
                     .show()
             return
         }
         if (event_players_edit_text.text.toString().toInt() < 1) {
-            Snackbar.make(view, "Some fields are incorrect", Snackbar.LENGTH_LONG)
+            Snackbar.make(view, "Some fields are incorrect", Snackbar.LENGTH_SHORT)
+                    .show()
+            return
+        }
+
+        val calendar = Calendar.getInstance()
+        calendar.set(
+                add_event_date_picker.year,
+                add_event_date_picker.month,
+                add_event_date_picker.dayOfMonth,
+                add_event_time_picker.hour,
+                add_event_time_picker.minute
+        )
+        if (calendar.timeInMillis <= System.currentTimeMillis()) {
+            Snackbar.make(view, "Please select date in future", Snackbar.LENGTH_SHORT)
                     .show()
             return
         }
@@ -172,17 +186,17 @@ class AddEventDialogFragment : BaseDialogFragment() {
                 userId = userId,
                 eventName = event_name_edit_text.text?.toString(),
                 eventDescription = event_description_edit_text.text?.toString(),
-                eventLocationName = selectedLocationName,
-                eventLocationLatitude = selectedLocationLatitude,
-                eventLocationLongitude = selectedLocationLongitude,
-                eventLocationCountryCode = selectedLocationCountryCode,
-                eventDate = selectedDateAndTime,
+                eventLocationName = address.getAddressLine(0),
+                eventLocationLatitude = address.latitude,
+                eventLocationLongitude = address.longitude,
+                eventLocationCountryCode = address.countryCode,
+                eventDate = calendar.time,
                 eventPlayers = eventPlayersNumber,
                 eventDistance = null,
                 eventSignedPlayers = eventSignedPlayers,
                 eventComments = eventCommentMessage
         )
-        eventDetailsViewModel.createEvent(event)
+        addEventViewModel.createEvent(event)
     }
 
     companion object {

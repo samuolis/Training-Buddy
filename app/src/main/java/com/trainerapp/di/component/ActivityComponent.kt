@@ -1,6 +1,7 @@
 package com.trainerapp.di.component
 
 import com.trainerapp.base.BaseActivity
+import com.trainerapp.base.BaseFragment
 import com.trainerapp.di.module.ActivityModule
 import com.trainerapp.di.module.LocationModule
 import com.trainerapp.di.module.NavigationModule
@@ -46,4 +47,6 @@ interface ActivityComponent {
     fun inject(searchFragment: SearchFragment)
 
     fun inject(eventSignedUsersListDialogFragment: EventSignedUsersListDialogFragment)
+
+    fun inject(baseFragment: BaseFragment)
 }

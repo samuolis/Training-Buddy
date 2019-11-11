@@ -5,11 +5,13 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.trainerapp.enums.EventDetailScreen
 import com.trainerapp.feature.add_event.AddEventDialogFragment
+import com.trainerapp.manager.LoadingManager
 import com.trainerapp.ui.fragments.*
 import java.util.*
 
 class NavigationControllerImpl(
-        private val fragmentManager: FragmentManager
+        private val fragmentManager: FragmentManager,
+        private val loadingManager: LoadingManager
 ) : NavigationController {
 
     private fun goToFragment(fragment: Fragment) {
@@ -23,6 +25,7 @@ class NavigationControllerImpl(
     }
 
     override fun goBack() {
+        loadingManager.dismissEveryLoader()
         fragmentManager.popBackStack()
     }
 

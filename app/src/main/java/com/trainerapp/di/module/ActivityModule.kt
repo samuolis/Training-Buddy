@@ -10,6 +10,8 @@ import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
+import com.trainerapp.manager.LoadingManager
+import com.trainerapp.manager.LoadingManagerImpl
 import com.trainerapp.service.PermissionService
 import com.trainerapp.service.PermissionServiceImpl
 import com.trainerapp.web.api.WebServiceTokenInterceptor
@@ -53,6 +55,11 @@ class ActivityModule(private var activity: BaseActivity) {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
+    }
+
+    @Provides
+    fun provideLoadingManager(activity: BaseActivity): LoadingManager {
+        return LoadingManagerImpl(activity)
     }
 
     @Provides
