@@ -2,6 +2,7 @@ package com.trainerapp.di.component
 
 import com.trainerapp.base.BaseActivity
 import com.trainerapp.base.BaseFragment
+import com.trainerapp.di.PerActivityScope
 import com.trainerapp.di.module.ActivityModule
 import com.trainerapp.di.module.LocationModule
 import com.trainerapp.di.module.NavigationModule
@@ -12,6 +13,7 @@ import com.trainerapp.ui.NavigationActivity
 import com.trainerapp.ui.fragments.*
 import dagger.Component
 
+@PerActivityScope
 @Component(modules = [
     ActivityModule::class,
     ViewModelModule::class,

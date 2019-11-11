@@ -65,9 +65,7 @@ class AddEventViewModel @Inject constructor(
     fun createEvent(event: Event) {
         launchWithProgress {
             try {
-                eventWebService.createEvent(event)
-                        .subscribeOn(Schedulers.io())
-                        .await()
+                eventWebService.createEvent(event).await()
                 FirebaseMessaging
                         .getInstance()
                         .subscribeToTopic(event.eventId.toString())

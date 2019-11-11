@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.trainerapp.R
 import com.trainerapp.base.BaseActivity
+import com.trainerapp.di.PerActivityScope
 import com.trainerapp.manager.LoadingManager
 import com.trainerapp.manager.LoadingManagerImpl
 import com.trainerapp.service.PermissionService
@@ -19,6 +20,7 @@ import com.trainerapp.web.webservice.EventWebService
 import com.trainerapp.web.webservice.UserWebService
 import dagger.Module
 import dagger.Provides
+import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -53,11 +55,12 @@ class ActivityModule(private var activity: BaseActivity) {
                 .client(okHttpClient)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
                 .build()
     }
 
     @Provides
+    @PerActivityScope
     fun provideLoadingManager(activity: BaseActivity): LoadingManager {
         return LoadingManagerImpl(activity)
     }

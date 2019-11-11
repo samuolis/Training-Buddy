@@ -24,7 +24,6 @@ import com.trainerapp.ui.viewmodel.EventViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
 
 
@@ -42,7 +41,6 @@ class NavigationActivity : BaseActivity(), FragmentManager.OnBackStackChangedLis
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
         eventViewModel = getViewModel(viewModelFactory)
-        EventBus.getDefault().register(this)
 
         supportActionBar?.title = getString(R.string.app_name)
         supportFragmentManager.addOnBackStackChangedListener(this)
