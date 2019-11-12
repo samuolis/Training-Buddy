@@ -207,9 +207,9 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
 
     private fun updateUI(event: Event){
         event_location_layout.setOnClickListener {
-            val gmmIntentUri = Uri.parse("geo:" + event.eventLocationLatitude + "," +
-                    event.eventLocationLongitude + "?q=" + event.eventLocationLatitude +"," +
-                    event.eventLocationLongitude + "(" + event.eventName + ")")
+            val gmmIntentUri = Uri.parse("geo:" + event.eventLocation?.eventLocationLatitude + "," +
+                    event.eventLocation?.eventLocationLongitude + "?q=" + event.eventLocation?.eventLocationLatitude + "," +
+                    event.eventLocation?.eventLocationLongitude + "(" + event.eventName + ")")
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapIntent.setPackage("com.google.android.apps.maps")
             startActivity(mapIntent)
@@ -236,7 +236,7 @@ class EventDetailsDialogFragment : BaseDialogFragment() {
             event.eventPlayers ?: 0
         }
         event_details_players_spot_left.text = SpannableStringBuilder(spotsLeft.toString())
-        event_details_location.text = SpannableStringBuilder(event.eventLocationName)
+        event_details_location.text = SpannableStringBuilder(event.eventLocation?.eventLocationName)
         event_details_submit_button.text = getString(R.string.event_description_negative_button)
     }
 

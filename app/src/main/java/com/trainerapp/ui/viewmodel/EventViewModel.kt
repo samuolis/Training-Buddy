@@ -139,8 +139,8 @@ class EventViewModel @Inject constructor(
         eventsList.forEach {
             val newEvent = it
             val eventLoacation = Location("Event")
-            eventLoacation.longitude = newEvent.eventLocationLongitude!!
-            eventLoacation.latitude = newEvent.eventLocationLatitude!!
+            eventLoacation.longitude = newEvent.eventLocation?.eventLocationLongitude!!
+            eventLoacation.latitude = newEvent.eventLocation.eventLocationLatitude!!
             val distance = eventLoacation.distanceTo(location) / 1000
             newEvent.eventDistance = distance
             newUserEventList.add(newEvent)

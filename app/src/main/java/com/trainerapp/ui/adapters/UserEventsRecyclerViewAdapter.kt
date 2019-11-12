@@ -37,7 +37,7 @@ class UserEventsRecyclerViewAdapter(
             timeStampFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
             val dateStr = timeStampFormat.format(eventList[position].eventDate)
             holder.eventDate.text = dateStr
-            holder.eventPlaceName.text = eventList[position].eventLocationName
+            holder.eventPlaceName.text = eventList[position].eventLocation?.eventLocationName
             val signedUsersCount = eventList[position].eventSignedPlayers?.size ?: 0
             val eventUsage = signedUsersCount.toString() + " of " + eventList!![position].eventPlayers.toString()
             holder.eventPlayersCount.text = eventUsage

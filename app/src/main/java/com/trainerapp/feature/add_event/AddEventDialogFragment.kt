@@ -3,7 +3,6 @@ package com.trainerapp.feature.add_event
 
 import android.content.Context
 import android.icu.util.Calendar
-import android.location.Address
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -47,11 +46,16 @@ class AddEventDialogFragment : BaseFragment() {
         AddEventLocationAutocompleteAdapter(context!!) {
             event_location_edit_text.setText(it.getAddressLine(0))
             event_location_edit_text.dismissDropDown()
-            selectedAddress = it
+            selectedAddress = EventLocation(
+                    eventLocationName = it.getAddressLine(0),
+                    eventLocationCountryCode = it.countryCode,
+                    eventLocationLatitude = it.latitude,
+                    eventLocationLongitude = it.longitude
+            )
         }
     }
 
-    private var selectedAddress: Address? = null
+    private var selectedAddress: EventLocation? = null
     private val userId: String? by lazy {
         val userSharedPref = context!!.getSharedPreferences(getString(R.string.user_id_preferences), Context.MODE_PRIVATE)
         userSharedPref?.getString(getString(R.string.user_id_key), "0")
@@ -126,7 +130,8 @@ class AddEventDialogFragment : BaseFragment() {
         eventDetailsViewModel.detailsOneEvent.observe(this, Observer {
             event_name_edit_text.text = SpannableStringBuilder(it.eventName)
             event_description_edit_text.text = SpannableStringBuilder(it.eventDescription)
-            event_location_edit_text.text = SpannableStringBuilder(it.eventLocationName)
+            selectedAddress = it.eventLocation
+            event_location_edit_text.text = SpannableStringBuilder(it.eventLocation?.eventLocationName)
             event_players_edit_text.text = SpannableStringBuilder(it.eventPlayers.toString())
             val calendar = Calendar.getInstance()
             calendar.time = it.eventDate
@@ -186,10 +191,7 @@ class AddEventDialogFragment : BaseFragment() {
                 userId = userId,
                 eventName = event_name_edit_text.text?.toString(),
                 eventDescription = event_description_edit_text.text?.toString(),
-                eventLocationName = address.getAddressLine(0),
-                eventLocationLatitude = address.latitude,
-                eventLocationLongitude = address.longitude,
-                eventLocationCountryCode = address.countryCode,
+                eventLocation = selectedAddress,
                 eventDate = calendar.time,
                 eventPlayers = eventPlayersNumber,
                 eventDistance = null,
